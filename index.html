@@ -54,6 +54,7 @@ $(":checkbox").click(function() {
 	var socket = io.connect();
 	var ctx = $("#canvas")[0].getContext("2d");
     var showDisconnected = 0;
+
 	
 	//get id
 	socket.emit("ID", {id:""})
@@ -146,7 +147,6 @@ $(":checkbox").click(function() {
 		ctx.lineTo(mouseX,mouseY)
 		ctx.stroke()
 		ctx.closePath();
-
 	}
 
 	$(document).mousemove(function(e){

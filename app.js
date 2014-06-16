@@ -25,6 +25,9 @@ var server = http.createServer(function(req, res) {
 
 var players = [];
 var player_id = 0;
+var canvasHeight = 600;
+var canvasWidth = 1000;
+var monsterSpeed = 0.55;
 
 var io = socketio.listen(server);
 
@@ -73,8 +76,14 @@ function resetGame()
     }
     for(p=0;p<players.length;p++)
     {
-        players[p].monster = 0;
-        io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 0, connected: players[p].connected});
+        // if player is a bot, keep them as a monster
+        if(players[p].bot == 1) {
+            players[p].monster = 1;
+            io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 1, bot: players[p].bot, connected: players[p].connected});
+        } else {
+            players[p].monster = 0;
+            io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 0, bot: players[p].bot, connected: players[p].connected});
+        }
     }
     zombieSelected = 0;
     setTimeout(function(){ infectRandomPlayer(); }, 15 * 1000);
@@ -95,7 +104,7 @@ function infectRandomPlayer()
         }
 
         players[p].monster = 1;
-        io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 1, connected: players[p].connected});
+        io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 1, bot: players[p].bot, connected: players[p].connected});
         console.log('infected random player ' + players[p].id);
         zombieSelected = 1;
         break;
@@ -106,6 +115,67 @@ function startGame()
     infectRandomPlayer();
     startTime = Math.round(+new Date()/1000);
     setTimeout(function() { resetGame(); }, 60 * 1000);
+    spawnBots();
+}
+
+// Copied mostly from "socket.on('ID', function(msg) {})" block
+function spawnBots() {
+    for(i = 0; i < randomInt(10, 20); i++) {
+        player_id++;
+        var pid = player_id;
+
+        var randX = randomInt(0, 98);
+        var randY = randomInt(0, 58);
+
+        // Should bots get a fake iosock and ip?
+        players.push({id: pid, x: (randX * 10), y: (randY * 10), monster: 1, bot: 1, connected: 1})
+        io.sockets.emit('ID', { ID: pid });
+        io.sockets.emit('newPlayer', {id: pid, x: (randX * 10), y: (randY * 10), monster: 1, bot: 1, connected: 1});
+
+        for(p = 0; p < players.length; p++) {
+            io.sockets.emit('newPlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
+        }
+    }
+}
+
+// Generate new positions for all player bots, then emit 'position', pretending as if a player has just clicked their mouse
+function updateBots() {
+    for(i = 0; i < players.length; i++) {
+        if(players[i].bot == 1) {
+            var direction = randomInt(0, 4);
+            var newX = players[i].x;
+            var newY = players[i].y;
+
+            // Move bots in a random direction (not towards players yet)
+            if(direction == 0) {
+                newX += monsterSpeed;
+            } else if(direction == 1) {
+                newX -= monsterSpeed;
+            } else if(direction == 2) {
+                newY += monsterSpeed;
+            } else if(direction == 3) {
+                newY -= monsterSpeed;
+            }
+
+            // Keep bots within the canvas
+            if(newX > canvasWidth) {
+                newX = canvasWidth;
+            }
+            if(newX < 0) {
+                newX = 0;
+            }
+            if(newY > canvasHeight) {
+                newY = canvasHeight;
+            }
+            if(newY < 0) {
+                newY = 0;
+            }
+
+            players[i].x = newX;
+            players[i].y = newY;
+            io.sockets.emit('position', {id: players[i].id, x: newX, y: newY})
+        }
+    }
 }
 
 setTimeout(function(){ startGame(); }, 60 * 1000);
@@ -123,17 +193,19 @@ io.on('connection', function (socket) {
         var randX = randomInt(0, 98);
         var randY = randomInt(0, 58);
         
-        players.push({id:pid,ip:socket.handshake.address,x:(randX*10),y:(randY*10),monster:0,connected:1,iosock:socket});
+        players.push({id:pid, ip:socket.handshake.address, x:(randX*10), y:(randY*10), monster:0, bot:0, connected:1, iosock:socket});
         socket.emit('ID', { ID: pid });
-        socket.broadcast.emit('newPlayer', {id: pid, x:(randX*10),y:(randY*10),monster:0,connected:1});
+        socket.broadcast.emit('newPlayer', {id: pid, x:(randX*10), y:(randY*10), monster:0, bot:0, connected:1});
         
         for(p=0;p<players.length;p++)
         {
-            socket.emit('newPlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
+            socket.emit('newPlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
         }
     });
     
     socket.on('position', function (msg) {
+        // I think it's safe to update the bot's positions serverside here
+        updateBots();
         if(msg.id > player_id)
         {
             socket.emit('refresh', {time:'now'});
@@ -148,12 +220,14 @@ io.on('connection', function (socket) {
                     continue;
                 if(players[p].ip !== socket.handshake.address)
                     break;
+                // if(players[p].bot == 1) // Not sure if this is necessary here, uncomment this if things don't work
+                //     break;
                 players[p].x = msg.x;
                 players[p].y = msg.y;
                 if(players[p] !== undefined)
-                    socket.broadcast.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, connected: players[p].connected});
+                    socket.broadcast.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
                 if(players[p] !== undefined)
-                    socket.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, connected: players[p].connected});
+                    socket.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
                     
                 if(zombieSelected == 1)
                 {
@@ -188,11 +262,12 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function() {
         for(p=0;p<players.length;p++)
         {
-            if(players[p].iosock !== socket)
+            // I think we should be continuing the function if the player's a bot, remove the bot check otherwise
+            if(players[p].iosock !== socket || players[p].bot == 1)
                 continue;
             console.log('player ' + players[p].id + ' disconnected');
             players[p].connected = 0;
-            io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
+            io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
             break;
         }
     });
@@ -223,9 +298,9 @@ io.on('connection', function (socket) {
                 continue;
             players[p].monster = 1;
             if(players[p] !== undefined)
-                socket.broadcast.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
+                socket.broadcast.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
             if(players[p] !== undefined)
-                socket.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
+                socket.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, bot: players[p].bot, connected: players[p].connected});
             if(getInfectedPlayerCount() >= getConnectedPlayerCount())
             {
                 console.log('round ended, player ' + msg.id + ' infected player ' + msg.victimid);
