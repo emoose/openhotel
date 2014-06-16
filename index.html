@@ -1,7 +1,7 @@
 <script type='text/javascript' src='jquery.js'></script>
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 
-<canvas id='canvas' height=500 width=500 style='border: 1px solid #000'></canvas>
+<canvas id='canvas' height='1000' width='1000' style='border: 1px solid #000'></canvas>
 <br /><br /><a href="https://github.com/emoose/openhotel">Fork my repo on github</a>
 <script type='text/javascript'>
 
@@ -12,7 +12,8 @@
 	var newY = 0;
 	var mouseX = 0;
 	var mouseY = 0;
-	var speed = 0.5;
+	var defaultSpeed = 0.5;
+    var monsterSpeed = 0.7;
 	var players = [];
 	var blockSize=10;
 	var socket = io.connect();
@@ -25,7 +26,7 @@
 	})
 	//add new player to our list
 	socket.on("newPlayer", function(data){
-		players.push({id:data.id,x:data.x,y:data.y,newX:data.x,newY:data.y})
+		players.push({id:data.id,x:data.x,y:data.y,newX:data.x,newY:data.y,monster:data.monster,connected:data.connected})
 	})
 	//update our player list with updated player pos
 	socket.on("updatePlayer", function(data){
@@ -33,16 +34,25 @@
 			if(players[p].id==data.id){
 				players[p].newX = data.x;
 				players[p].newY = data.y;
+                players[p].monster = data.monster;
+                players[p].connected = data.connected;
 				break;
 			}
 		}
-	})
+	});
+    
+    socket.on("refresh", function(data){
+        setTimeout(function(){ window.location.reload(1); }, 1000);
+    });
 
 	function draw(){
-		ctx.clearRect(0,0,500,500);
+		ctx.clearRect(0,0,1000,1000);
 
 		for(p=0;p<players.length;p++){
-
+                if(players[p].connected == 0)
+                    continue;
+                var speed = (players[p].monster == 1 ? monsterSpeed : defaultSpeed);
+                    
 				if(players[p].x<players[p].newX){
 					players[p].x+=speed;
 				}
@@ -57,7 +67,30 @@
 				}
 				
 				ctx.beginPath();
-				if(players[p].id==id){
+				if(players[p].monster == 1)
+                {
+					ctx.fillStyle="#00FF00";
+                    if(players[p].id == id)
+                    {
+                        // player is monster and player is us
+                        var ourX = Math.floor(players[p].x / 10);
+                        var ourY = Math.floor(players[p].y / 10);
+                        for(py=0;py<players.length;py++)
+                        {
+                            if(players[py].monster == 1 || players[py].id == players[p].id)
+                                continue;
+                            var vX = Math.floor(players[py].x / 10);
+                            var vY = Math.floor(players[py].y / 10);
+                            
+                            if((vX == ourX && (vY == (ourY - 1) || vY == (ourY + 1))) || (vY == ourY && (vX == (ourX - 1) || vX == (ourX + 1))))
+                            //if(vX 
+                            {
+                                socket.emit("infect", {id:id, victimid: players[py].id});
+                                players[py].monster = 1;
+                            }
+                        }
+                    }
+                }else if(players[p].id==id){
 					ctx.fillStyle="#FF0000";
 				}else{
 					ctx.fillStyle="#000";
