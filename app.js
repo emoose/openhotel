@@ -74,7 +74,7 @@ function resetGame()
     for(p=0;p<players.length;p++)
     {
         players[p].monster = 0;
-        io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 0});
+        io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 0, connected: players[p].connected});
     }
     zombieSelected = 0;
     setTimeout(function(){ infectRandomPlayer(); }, 15 * 1000);
@@ -145,9 +145,9 @@ io.on('connection', function (socket) {
                 players[p].x = msg.x;
                 players[p].y = msg.y;
                 if(players[p] !== undefined)
-                    socket.broadcast.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster});
+                    socket.broadcast.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, connected: players[p].connected});
                 if(players[p] !== undefined)
-                    socket.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster});
+                    socket.emit('updatePlayer', {id: msg.id, x: msg.x, y: msg.y, monster: players[p].monster, connected: players[p].connected});
                     
                 if(zombieSelected == 1)
                 {
@@ -217,9 +217,9 @@ io.on('connection', function (socket) {
                 continue;
             players[p].monster = 1;
             if(players[p] !== undefined)
-                socket.broadcast.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster});
+                socket.broadcast.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
             if(players[p] !== undefined)
-                socket.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster});
+                socket.emit('updatePlayer', {id: msg.victimid, x: players[p].x, y: players[p].y, monster: players[p].monster, connected: players[p].connected});
             if(getInfectedPlayerCount() >= getConnectedPlayerCount())
             {
                 console.log('round ended, player ' + msg.id + ' infected player ' + msg.victimid);
