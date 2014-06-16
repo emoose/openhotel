@@ -1,0 +1,9 @@
+#chat_sidebar
+{
+display:block;
+position:absolute;
+top:document.width < 600 ? "20px" : '30%';
+bottom:0;
+right:0;
+width:400px;
+}
