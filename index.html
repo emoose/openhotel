@@ -1,7 +1,7 @@
 <script type='text/javascript' src='http://code.jquery.com/jquery-2.1.1.min.js'></script>
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 
-<canvas id='canvas' height='1000' width='1000' style='border: 1px solid #000'></canvas>
+<canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas>
 <br /><br /><a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br />
 
 <script type='text/javascript'>
@@ -14,7 +14,7 @@
 	var mouseX = 0;
 	var mouseY = 0;
 	var defaultSpeed = 0.5;
-    var monsterSpeed = 0.7;
+    var monsterSpeed = 0.55;
 	var players = [];
 	var blockSize=10;
 	var socket = io.connect();
@@ -47,7 +47,7 @@
     });
 
 	function draw(){
-		ctx.clearRect(0,0,1000,1000);
+		ctx.clearRect(0,0,1000,600);
 
 		for(p=0;p<players.length;p++){
                 if(players[p].connected == 0)
@@ -137,7 +137,7 @@
 
 var chat_open = false;
 var chat_loaded = false;
-var chat_channel = 'g';
+var chat_channel = 'r';
 function toggle_chat(){
 	if (chat_open === false && chat_loaded == false) {
     	var chat_sidebar = document.createElement("div");
