@@ -1,0 +1,26 @@
+{
+  "name": "OpenHotel",
+  "version": "0.0.1",
+  "description": "tiles n stuff.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emoose/openhotel.git"
+  },
+  "keywords": [
+    "hotel"
+  ],
+  "author": "emoose",
+  "dependencies": {
+    "socket.io": "*"
+  },
+  "engine": "node >= 0.10.0",
+  "bugs": {
+    "url": "https://github.com/emoose/openhotel/issues"
+  },
+  "homepage": "https://github.com/emoose/openhotel/"
+}

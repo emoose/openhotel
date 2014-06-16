@@ -1,0 +1,104 @@
+<script type='text/javascript' src='jquery.js'></script>
+<script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
+
+<canvas id='canvas' height=500 width=500 style='border: 1px solid #000'></canvas>
+<br /><br /><a href="https://github.com/emoose/openhotel">Fork my repo on github</a>
+<script type='text/javascript'>
+
+	var id = ""
+	var x = 0;
+	var y = 0;
+	var newX = 0;
+	var newY = 0;
+	var mouseX = 0;
+	var mouseY = 0;
+	var speed = 0.5;
+	var players = [];
+	var blockSize=10;
+	var socket = io.connect();
+	var ctx = $("#canvas")[0].getContext("2d");
+	
+	//get id
+	socket.emit("ID", {id:""})
+	socket.on("ID", function(data){
+		id=data.ID
+	})
+	//add new player to our list
+	socket.on("newPlayer", function(data){
+		players.push({id:data.id,x:data.x,y:data.y,newX:data.x,newY:data.y})
+	})
+	//update our player list with updated player pos
+	socket.on("updatePlayer", function(data){
+		for(p=0;p<players.length;p++){
+			if(players[p].id==data.id){
+				players[p].newX = data.x;
+				players[p].newY = data.y;
+				break;
+			}
+		}
+	})
+
+	function draw(){
+		ctx.clearRect(0,0,500,500);
+
+		for(p=0;p<players.length;p++){
+
+				if(players[p].x<players[p].newX){
+					players[p].x+=speed;
+				}
+				if(players[p].x>players[p].newX){
+					players[p].x-=speed;
+				}
+				if(players[p].y<players[p].newY){
+					players[p].y+=speed;
+				}
+				if(players[p].y>players[p].newY){
+					players[p].y-=speed;
+				}
+				
+				ctx.beginPath();
+				if(players[p].id==id){
+					ctx.fillStyle="#FF0000";
+				}else{
+					ctx.fillStyle="#000";
+				}
+				ctx.fillRect(players[p].x,players[p].y,10,10)
+				ctx.closePath();
+		}
+
+		ctx.beginPath();
+		ctx.moveTo(mouseX,mouseY)
+		ctx.lineTo(mouseX+blockSize,mouseY)
+		ctx.moveTo(mouseX+blockSize,mouseY)
+		ctx.lineTo(mouseX+blockSize,mouseY+blockSize)
+		ctx.moveTo(mouseX+blockSize,mouseY+blockSize)
+		ctx.lineTo(mouseX,mouseY+blockSize)
+		ctx.moveTo(mouseX,mouseY+blockSize)
+		ctx.lineTo(mouseX,mouseY)
+		ctx.stroke()
+		ctx.closePath();
+
+	}
+
+	$(document).mousemove(function(e){
+		var x,y
+		for(x=e.pageX-8;x>=0;x--){
+			if(x%blockSize==0){
+				mouseX = x
+				break;
+			}
+		}
+		for(y=e.pageY-8;y>=0;y--){
+			if(y%blockSize==0){
+				mouseY = y
+				break;
+			}
+		}
+	})
+	$(document).mousedown(function(e){
+		socket.emit("position", {id:id,x:mouseX,y:mouseY})
+	})
+	
+	setInterval(draw,10);
+
+</script>
