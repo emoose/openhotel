@@ -11,6 +11,11 @@
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas><br><br>
 <input type="checkbox">Show disconnected players' last positions</input><br>
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
+Username: <input type="text" name="username_changer" id="username_changer" /> 
+<input type="button" name="username_button" id="username_button" value="Set"/><br>
+Background: <input type="text" name="bg_changer" id="bg_changer" /> 
+<input type="button" name="bg_button" id="bg_button" value="Set"/>
+<br>
 <div id='chat_sidebar'>
 	<div style='margin-top:-20px;'>
 		<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px; 
@@ -52,59 +57,99 @@ function handleVisibilityChange() {
 
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
-var showDisconnected = 0;
-$(":checkbox").click(function() {
-    showDisconnected = $(this).is(":checked") ? 1 : 0;
-});
 
-	var id = ""
+	var id = "";
+    var sessionID = 0;
+    var gameSizeX = 0;
+    var gameSizeY = 0;
 	var x = 0;
 	var y = 0;
 	var newX = 0;
 	var newY = 0;
 	var mouseX = 0;
 	var mouseY = 0;
-	var defaultSpeed = 0.5;
-    var monsterSpeed = 0.55;
+	var speedPlayer = 0.5;
+    var speedMonster = 0.55;
 	var players = [];
 	var blockSize=10;
 	var socket = io.connect();
 	var ctx = $("#canvas")[0].getContext("2d");
     var showDisconnected = 0;
+    var img = new Image;
+    var imgLoaded = 0;
+    img.src = "";
+    img.onload = function(){ imgLoaded = 1; }
+    
+$(":checkbox").click(function() {
+    showDisconnected = $(this).is(":checked") ? 1 : 0;
+});
+
+$("#username_button").click(function() {
+    socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
+});
+
+$("#bg_button").click(function() {
+    socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
+});
+
 	
 	//get id
-	socket.emit("ID", {id:""})
-	socket.on("ID", function(data){
-		id=data.ID
-	})
+	socket.emit("ID", {id:""});
+    
+	socket.on("ID", function(data)
+    {
+		id=data.id;
+        sessionID = data.session;
+        gameSizeX = data.x;
+        gameSizeY = data.y;
+        img.src = data.image;
+        imgLoaded = 0;
+        img.onload = function(){ imgLoaded = 1; }
+        console.log('connected, id ' + id + ' session ' + sessionID);
+	});
+    
 	//add new player to our list
-	socket.on("newPlayer", function(data){
-		players.push({id:data.id,x:data.x,y:data.y,newX:data.x,newY:data.y,monster:data.monster,connected:data.connected})
-	})
+	socket.on("newPlayer", function(data)
+    {
+		players.push({id: data.id, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
+	});
+    
 	//update our player list with updated player pos
-	socket.on("updatePlayer", function(data){
+	socket.on("updatePlayer", function(data)
+    {
 		for(p=0;p<players.length;p++){
 			if(players[p].id==data.id){
 				players[p].newX = data.x;
 				players[p].newY = data.y;
                 players[p].monster = data.monster;
                 players[p].connected = data.connected;
+                players[p].username = data.username;
 				break;
 			}
 		}
 	});
     
-    socket.on("refresh", function(data){
+    socket.on("refresh", function(data)
+    {
         setTimeout(function(){ window.location.reload(1); }, 1000);
     });
+    
+    socket.on("updateImage", function(data)
+    {
+        img.src = data.src;
+        img.onload = function(){ imgLoaded = 1; }
+        imgLoaded = 0;
+    });
 
-	function draw(){
+	function draw()
+    {
 		ctx.clearRect(0,0,1000,600);
-
+        if(imgLoaded === 1)
+            ctx.drawImage(img,0,0);
 		for(p=0;p<players.length;p++){
                 if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0)
                     continue;
-                var speed = (players[p].monster == 1 ? monsterSpeed : defaultSpeed);
+                var speed = speedPlayer;
                     
 				if(players[p].x<players[p].newX){
 					players[p].x+=speed;
@@ -120,10 +165,13 @@ $(":checkbox").click(function() {
 				}
 				
 				ctx.beginPath();
-				if(players[p].monster == 1)
+                if(players[p].id==id)
+                {
+					ctx.fillStyle="#FF0000";
+                } else if(players[p].monster == 1)
                 {
 					ctx.fillStyle="#00FF00";
-                    if(players[p].id == id)
+                    /*if(players[p].id == id)
                     {
                         // player is monster and player is us
                         var ourX = Math.floor(players[p].x / 10);
@@ -142,13 +190,24 @@ $(":checkbox").click(function() {
                                 players[py].monster = 1;
                             }
                         }
-                    }
-                }else if(players[p].id==id){
-					ctx.fillStyle="#FF0000";
+                    }*/
 				}else{
 					ctx.fillStyle="#000";
 				}
-				ctx.fillRect(players[p].x,players[p].y,10,10)
+				ctx.fillRect(players[p].x,players[p].y,10,10);
+                if(players[p].id == id && players[p].monster == 1)
+                {
+                    ctx.fillStyle = "#00FF00";
+                    ctx.fillRect(players[p].x + 1, players[p].y + 1, 8, 8);
+                }
+                var name = players[p].id;
+                if(players[p].username != '' && players[p].username !== undefined)
+                    name = name + '. ' + players[p].username;
+                    
+                ctx.font = "12px Arial";
+                ctx.textAlign = 'center';
+                ctx.fillText(name, players[p].x+blockSize/2, players[p].y+blockSize+12);
+                
 				ctx.closePath();
 		}
 
@@ -180,10 +239,10 @@ $(":checkbox").click(function() {
 				break;
 			}
 		}
-	})
+	});
 	$(document).mousedown(function(e){
-		socket.emit("position", {id:id,x:mouseX,y:mouseY})
-	})
+		socket.emit("position", {id:id,x:mouseX,y:mouseY,session:sessionID});
+	});
 	
 	setInterval(draw,10);
 
