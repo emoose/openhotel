@@ -81,6 +81,8 @@ function resetGame()
 }
 function infectRandomPlayer()
 {
+    if(getInfectedPlayerCount() >= getConnectedPlayerCount())
+        return;
     var playeridx = randomInt(1, player_id);
     for(p=0;p<players.length;p++)
     {
