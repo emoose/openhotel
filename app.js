@@ -96,15 +96,19 @@ function infectRandomPlayer()
 
         players[p].monster = 1;
         io.sockets.emit('updatePlayer', {id: players[p].id, x: players[p].x, y: players[p].y, monster: 1, connected: players[p].connected});
-        console.log('round begins with player ' + players[p].id);
+        console.log('infected random player ' + players[p].id);
         zombieSelected = 1;
         break;
     }
+}
+function startGame()
+{
+    infectRandomPlayer();
     startTime = Math.round(+new Date()/1000);
     setTimeout(function() { resetGame(); }, 60 * 1000);
 }
 
-setTimeout(function(){ infectRandomPlayer(); }, 60 * 1000);
+setTimeout(function(){ startGame(); }, 60 * 1000);
 
 var allClients = [];
 
@@ -171,8 +175,8 @@ io.on('connection', function (socket) {
                         var toinfect = Math.ceil(getConnectedPlayerCount() * 0.30);
                         if(getConnectedPlayerCount() > toinfect)
                         {
-                            for(var y = 0; y < toinfect; y++)
-                                infectRandomPlayer();
+                           // for(var y = 0; y < toinfect; y++)
+                            //    infectRandomPlayer();
                         }
                     }
                 }

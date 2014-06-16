@@ -2,9 +2,43 @@
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas>
-<br /><br /><a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br />
+<br /><br /><input type="checkbox">Show all dots</input><br /><a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br />
 
 <script type='text/javascript'>
+var hidden, visibilityChange; 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.mozHidden !== "undefined") {
+  hidden = "mozHidden";
+  visibilityChange = "mozvisibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+ 
+var videoElement = document.getElementById("videoElement");
+
+// If the page is hidden, pause the video;
+// if the page is shown, play the video
+function handleVisibilityChange() {
+  if (document[hidden]) {
+    for(p=0;p<players.length;p++){
+        players[p].x = players[p].newX;
+        players[p].y = players[p].newY;
+    }
+  }
+}
+
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
+
+var showDisconnected = 0;
+$(":checkbox").click(function() {
+    showDisconnected = $(this).is(":checked") ? 1 : 0;
+});
 
 	var id = ""
 	var x = 0;
@@ -19,6 +53,7 @@
 	var blockSize=10;
 	var socket = io.connect();
 	var ctx = $("#canvas")[0].getContext("2d");
+    var showDisconnected = 0;
 	
 	//get id
 	socket.emit("ID", {id:""})
@@ -50,7 +85,7 @@
 		ctx.clearRect(0,0,1000,600);
 
 		for(p=0;p<players.length;p++){
-                if(players[p].connected == 0)
+                if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0)
                     continue;
                 var speed = (players[p].monster == 1 ? monsterSpeed : defaultSpeed);
                     
