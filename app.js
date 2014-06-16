@@ -3,7 +3,6 @@ var fs = require('fs')
     , socketio = require('socket.io');
  
 var indexdata = fs.readFileSync(__dirname + '/index.html');
-var jsdata = fs.readFileSync(__dirname + '/jquery.js');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
 
 var server = http.createServer(function(req, res) {
@@ -11,16 +10,13 @@ var server = http.createServer(function(req, res) {
     {
         res.writeHead(200, { 'Content-type': 'text/html'});
         res.end(fs.readFileSync(__dirname + '/index.html'));
-    } else if(req.url !== '/jquery.js' && req.url !== '/app.js')
+    } else if(req.url !== '/app.js')
     {
         res.writeHead(200, { 'Content-type': 'text/html'});
         res.end(indexdata);
     } else {
         res.writeHead(200, { 'Content-type': 'application/javascript'});
-        if(req.url === '/app.js')
-            res.end(sourcedata);
-        else
-            res.end(jsdata);
+        res.end(sourcedata);
     }
     console.log('conn to ' + req.url);
 }).listen(8080, function() {
@@ -43,6 +39,18 @@ function getConnectedPlayerCount()
     for(p=0;p<players.length;p++)
     {
         if(players[p].connected !== 1)
+            continue;
+        count++;
+    }
+    return count;
+}
+
+function getInfectedPlayerCount()
+{
+    var count = 0;
+    for(p=0;p<players.length;p++)
+    {
+        if(players[p].monster !== 1)
             continue;
         count++;
     }
