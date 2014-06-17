@@ -79,7 +79,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     var img = new Image;
     var imgLoaded = 0;
     img.src = "";
-    img.onload = function(){ imgLoaded = 1; }
+    img.onload = function() { imgLoaded = 1; }
     
     $(":checkbox").click(function() {
         showDisconnected = $(this).is(":checked") ? 1 : 0;
@@ -96,8 +96,10 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     function updateUsername()
     {
         var name = $("#username_changer").val();
-        if(name.length > 256) { alert('s-sempai, your name is too big for me...'); return; }
-        socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
+        if(name.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
+        socket.emit("username", {id: id, username: name, session: sessionID});
+        if(localStorage !== undefined)
+            localStorage.username = name;
     }
 
     function updateBackground()
@@ -122,7 +124,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         {
             if(players[p].id!==playerid) continue;
             if(players[p].username !== undefined && players[p].username !== '')
-                return 'Player ' + playerid + ' "' + players[p].username + '"';
+                return 'Player ' + playerid + ' (' + players[p].username + ')';
             return 'Player ' + playerid;
         }
         return 'Unknown player';
@@ -137,16 +139,22 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         sessionID = data.session;
         gameSizeX = data.x;
         gameSizeY = data.y;
+        $("#canvas")[0].width = gameSizeX;
+        $("#canvas")[0].height = gameSizeY;
         img.src = data.image;
         imgLoaded = 0;
-        img.onload = function(){ imgLoaded = 1; }
         console.log('connected, id ' + id + ' session ' + sessionID);
+        if(localStorage !== undefined && localStorage.username !== undefined)
+        {
+            $("#username_changer").val(localStorage.username);
+            updateUsername();
+        }
 	});
     
 	//add new player to our list
 	socket.on("newPlayer", function(data)
     {
-		players.push({id: data.id, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
+		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
         addToLog('New player (ID ' + data.id + ') connected!');
 	});
     
@@ -187,17 +195,65 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     socket.on("updateImage", function(data)
     {
         img.src = data.src;
-        img.onload = function(){ imgLoaded = 1; }
         imgLoaded = 0;
     });
+    
+    /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
+    function ScaleImage(srcwidth, srcheight, targetwidth, targetheight, fLetterBox)
+    {
+        var result = { width: 0, height: 0, fScaleToTargetWidth: true };
+
+        if ((srcwidth <= 0) || (srcheight <= 0) || (targetwidth <= 0) || (targetheight <= 0)) {
+            return result;
+        }
+
+        // scale to the target width
+        var scaleX1 = targetwidth;
+        var scaleY1 = (srcheight * targetwidth) / srcwidth;
+
+        // scale to the target height
+        var scaleX2 = (srcwidth * targetheight) / srcheight;
+        var scaleY2 = targetheight;
+
+        // now figure out which one we should use
+        var fScaleOnWidth = (scaleX2 > targetwidth);
+        if (fScaleOnWidth) {
+            fScaleOnWidth = fLetterBox;
+        }
+        else {
+           fScaleOnWidth = !fLetterBox;
+        }
+
+        if (fScaleOnWidth) {
+            result.width = Math.floor(scaleX1);
+            result.height = Math.floor(scaleY1);
+            result.fScaleToTargetWidth = true;
+        }
+        else {
+            result.width = Math.floor(scaleX2);
+            result.height = Math.floor(scaleY2);
+            result.fScaleToTargetWidth = false;
+        }
+        result.targetleft = Math.floor((targetwidth - result.width) / 2);
+        result.targettop = Math.floor((targetheight - result.height) / 2);
+
+        return result;
+    }
 
 	function draw()
     {
-		ctx.clearRect(0,0,1000,600);
+        if(gameSizeX <= 0 || gameSizeY <= 0) return;
+        
+		ctx.clearRect(0,0,gameSizeX,gameSizeY);
         
         if(imgLoaded == 1)
-            ctx.drawImage(img,0,0);
-            
+        {
+            var result = ScaleImage(img.width, img.height, gameSizeX, gameSizeY, true);
+            var dimensions = {width: img.width, height: img.height};
+            if(dimensions.width > gameSizeX || dimensions.height > gameSizeY)
+                dimensions = result;
+            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, dimensions.width, dimensions.height);
+        }
 		for(p=0;p<players.length;p++)
         {
             if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
