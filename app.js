@@ -9,6 +9,21 @@ function randomInt (low, high)
     return Math.floor(Math.random() * (high - low) + low);
 }
 
+function vectorLength(x, y)
+{
+    return Math.sqrt(x*x + y*y);
+}
+
+function normalize(x, y)
+{
+    var len = vectorLength(x, y);
+    if (len > 0) {
+        return [x/len, y/len];
+    } else {
+        return [x, y]
+    }
+}
+
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
 
@@ -45,6 +60,7 @@ var nameSizeLimit = 256;
 var imageChangeCooldown = 30;
 
 var players = [];
+var bullets = [];
 
 var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
@@ -277,6 +293,25 @@ function updateWorld()
         }
         
     }
+
+    // update bullets
+    // io.sockets.broadcast.emit("updateBullets", {});
+    for(i = 0; i < bullets.length; i++)
+    {
+        // TODO
+        bullets[i].x += bullets[i].velocity[0];
+        bullets[i].y += bullets[i].velocity[1];
+        // kill bullet if it is outside of canvas
+        if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
+        {
+            bullets[i].alive = 0;
+        }
+        io.sockets.emit("updateBullet", {index: i, x: bullets[i].x, y: bullets[i].y, alive: bullets[i].alive});
+        if(bullets[i].alive == 0)
+        {
+            bullets.splice(i, 1);
+        }
+    }
 }
 
 setInterval(updateWorld,10);
@@ -312,9 +347,51 @@ io.on('connection', function (socket)
                 socket.emit('newPlayer', upd);
         }
     });
+
+    // some stuff copied from socket.on('position')
+    socket.on('fireBullet', function (msg)
+    {
+        console.log('Bullet fired');
+        if(msg.session !== sessionID || msg.id > players.length)
+        {
+            socket.emit('refresh', {time:'now'});
+            return;
+        }
+
+        if(msg.x >= gameSizeX || msg.y >= gameSizeY)
+            return;
+
+        for(p = 0; p < players.length; p++)
+        {
+            if(players[p].id !== msg.id)
+                continue;
+            if(players[p].ip !== remoteAddress)
+            {
+                console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
+                break;
+            }
+
+            var originX = players[p].x + 5;
+            var originY = players[p].y + 5;
+            var velocity = normalize(msg.x - originX, msg.y - originY);
+
+            bullets.push({id: msg.id, x: originX, y: originY, velocity: velocity, alive: 1});
+            socket.broadcast.emit('newBullet', {id: msg.id, x: originX, y: originY, velocity: velocity, alive: 1});
+
+            // send bullet list to client
+            for(p = 0; p < players.length; p++)
+            {
+                var upd = getPlayerUpdate(players[p]);
+                if(upd !== undefined)
+                    socket.emit('newBullet', {id: msg.id, x: originX, y: originY, velocity: velocity, alive: 1});
+            }
+            break;
+        }
+    });
     
     socket.on('position', function (msg)
     {
+        console.log('Player moved');
         // if session is different or player id is invalid
         if(msg.session !== sessionID || msg.id > players.length)
         {   

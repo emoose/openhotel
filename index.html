@@ -72,9 +72,11 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	var speedPlayer = 0.5;
     var speedMonster = 0.55;
 	var players = [];
+    var bullets = [];
 	var blockSize=10;
 	var socket = io.connect();
 	var ctx = $("#canvas")[0].getContext("2d");
+    var canvas = document.getElementById("canvas");
     var showDisconnected = 0;
     var img = new Image;
     var imgLoaded = 0;
@@ -160,6 +162,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
         addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
 	});
+
+    //add new bullet to bullet list
+    socket.on("newBullet", function(data)
+    {
+        bullets.push({id: data.id, x: data.x, y: data.y, velocity: data.velocity, alive: data.alive});
+        addToLog('New bullet from player ' + data.id + '!');
+    });
     
 	//update our player list with updated player pos
 	socket.on("updatePlayer", function(data)
@@ -189,6 +198,16 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
             break;
 		}
 	});
+
+    socket.on("updateBullet", function(data)
+    {
+        if(data.alive == 0) {
+            bullets.splice(data.index, 1);
+        } else {
+            bullets[data.index].x = data.x;
+            bullets[data.index].y = data.y;
+        }
+    });
     
     socket.on("refresh", function(data)
     {
@@ -197,13 +216,21 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     
     socket.on("updateImage", function(data)
     {
+<<<<<<< HEAD
         addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + data.src + '">' + data.src + '</a>');
+=======
+        addToLog(getPlayerName(data.id) + " changed the background to " + data.src);
+>>>>>>> 5cab790... add background changes and round end to event log, fix background stuff to always check for http
         img.src = data.src;
         imgLoaded = 0;
     });
     socket.on("roundEnd", function(data)
     {
+<<<<<<< HEAD
         addToLog("<b>Round ended!</b> The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
+=======
+        addToLog("Round ended! The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
+>>>>>>> 5cab790... add background changes and round end to event log, fix background stuff to always check for http
     });
     
     /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
@@ -262,6 +289,16 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
                 dimensions = result;
             ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, dimensions.width, dimensions.height);
         }
+
+        // draw bullets
+        for(i = 0; i < bullets.length; i++)
+        {
+            ctx.beginPath();
+            ctx.fillStyle = "#FF3399";
+            ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
+            ctx.closePath();
+        }
+
 		for(p=0;p<players.length;p++)
         {
             if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
@@ -341,13 +378,21 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 		}
 	});
     
-	$(document).mousedown(function(event)
+    $(document).mousedown(function(event)
     {
-        if(event.which != 1) return;
-		socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
-	});
+        if(event.which == 1) {
+            socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
+        } else if (event.which == 3) {
+            socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID})
+        }
+    });
 	
 	setInterval(draw,10);
+
+    // Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
+    canvas.oncontextmenu = function() {
+        return false;
+    }
 
 var chat_open = false;
 var chat_loaded = false;
