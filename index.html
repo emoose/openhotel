@@ -14,6 +14,8 @@
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
 Username: <input type="text" name="username_changer" id="username_changer" /> 
 <input type="button" name="username_button" id="username_button" value="Set"/><br>
+Room: <input type="text" name="room_changer" id="room_changer" /> 
+<input type="button" name="room_button" id="room_button" value="Set"/><br>
 Background: <input type="text" name="bg_changer" id="bg_changer" /> 
 <input type="button" name="bg_button" id="bg_button" value="Set"/>
 <br>
@@ -109,16 +111,26 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     {
         socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
     }
+    
+    function changeRoom()
+    {
+        joinRoom($("#room_changer").val());
+    }
 
     $("#username_button").click(updateUsername);
-    $("#bg_button").click(updateBackground);
     $("#username_changer").keypress(function(event)
     {
         if(event.which == 13 || event.keyCode == 13) updateUsername();
     });
+    $("#bg_button").click(updateBackground);
     $("#bg_changer").keypress(function(event)
     {
         if(event.which == 13 || event.keyCode == 13) updateBackground();
+    });
+    $("#room_button").click(changeRoom);
+    $("#room_changer").keypress(function(event)
+    {
+        if(event.which == 13 || event.keyCode == 13) changeRoom();
     });
 
     function getPlayerName(playerid)
@@ -134,9 +146,15 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     }
 	
 	//get id
-	socket.emit("ID", {id:""});
+    function joinRoom(room)
+    {
+        socket.emit("joinRoom", {room: room});
+        players = [];
+    }
     
-	socket.on("ID", function(data)
+    joinRoom('public');
+    
+	socket.on("gameState", function(data)
     {
 		id=data.id;
         sessionID = data.session;

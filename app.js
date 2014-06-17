@@ -45,18 +45,20 @@ var nameSizeLimit = 256;
 var imageChangeCooldown = 30;
 
 var players = [];
+var rooms = [];
+var bots = [];
 
 var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
 
 var speedPlayer = 0.5;
 
-var gameStart = 0;
-var infectStart = 0;
-var infectEnd = 0;
+var gameStart = [];
+var infectStart = [];
+var infectEnd = [];
+var lastImageChange = [];
 
-var lastImageChange = 0;
-var lastImage = "http://www.tisuddevalla.se/~antonlahtinen/wp-content/uploads/2013/10/Worpress-walpepr-1024x640.jpg";
+var lastImage = [];
 
 var lastStateUpdate = 0;
 
@@ -74,24 +76,24 @@ function getPlayerUpdateAbsolute(player)
     return undefined;
 }
 
-function getConnCount()
+function getConnCount(room)
 {
     var count = 0;
     for(p = 0; p < players.length; p++)
     {
-        if(players[p].connected !== 1)
+        if(players[p].connected !== 1 || players[p].room !== room)
             continue;
         count++;
     }
     return count;
 }
 
-function getMonsterCount()
+function getMonsterCount(room)
 {
     var count = 0;
     for(p = 0; p < players.length; p++)
     {
-        if(players[p].connected !== 1 || players[p].monster !== 1)
+        if(players[p].connected !== 1 || players[p].monster !== 1 || players[p].room !== room)
             continue;
         count++;
     }
@@ -109,19 +111,19 @@ function getIdxForID(playerid)
     return -1;
 }
 
-function playerSocketExists(socket)
+function getPlayerForSocket(socket)
 {
     for(p = 0; p < players.length; p++)
     {
         if(players[p].iosock !== socket) continue;
-        return true;
+        return players[p];
     }
-    return false;
+    return undefined;
 }
 
-function infectRandomPlayer()
+function infectRandomPlayer(room)
 {
-    if(players.length <= 0 || getConnCount() <= 0)
+    if(players.length <= 0 || getConnCount(room) <= 0)
         return;
         
     var trycount = 0;
@@ -133,7 +135,7 @@ function infectRandomPlayer()
         var infectidx = getIdxForID(infectid);
         
         // if player ID is invalid, player is disconnected or player is already a monster we'll try again
-        if(infectidx < 0 || players[infectidx].connected !== 1 || players[infectidx].monster !== 0) continue;
+        if(infectidx < 0 || players[infectidx].connected !== 1 || players[infectidx].monster !== 0 || players[infectidx].room !== room) continue;
         
         players[infectidx].monster = 1;
         console.log('infecting player ' + infectid);
@@ -141,141 +143,259 @@ function infectRandomPlayer()
         
         var upd = getPlayerUpdate(players[infectidx]);
         if(upd !== undefined)
-            io.sockets.emit("updatePlayer", upd);
+            io.sockets.in(room).emit("updatePlayer", upd);
             
         // break out because we've infected someone
         break;
     }
 }
 
-function updateWorld()
+function getBotsForRoom(room)
 {
-    var connCount = getConnCount();
-    var monsterCount = getMonsterCount();
-    
-    if(players.length <= 0 || connCount <= 0)
-        return;
-    var time = Math.round(+new Date()/1000);
-    
-    /*if((time - lastStateUpdate) >= 10)
-    //{
-        console.log('sending state update');
-        for(p = 0; p < players.length; p++)
-        {
-            if(players[p].connected !== 1)
-                continue;
-            var upd = getPlayerUpdateAbsolute(players[p]);
-            if(upd !== undefined)
-                io.sockets.emit("updatePlayerAbsolute", upd);
-        }
-        lastStateUpdate = time;
-    }*/
-    
-    if(monsterCount >= connCount && infectEnd <= 0) // monsters win
+    var roombots = [];
+    for(b=0; b<bots.length; b++)
     {
-        infectEnd = time;
-        console.log('game over @ ' + time);
-        console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-    }
-    if(monsterCount >= connCount && (time - infectEnd) >= 5)
-    {
-        for(p = 0; p < players.length; p++)
-        {
-            if(players[p].connected !== 1 || players[p].monster !== 1)
-                continue;
-            players[p].monster = 0;
-            var upd = getPlayerUpdate(players[p]);
-            if(upd !== undefined)
-                io.sockets.emit("updatePlayer", upd);
-        }
-        gameStart = 0;
-        infectStart = 0;
-        infectEnd = 0;
-        monsterCount = 0;
-        console.log('game reset @ ' + time);
-        console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-    }
-    if(connCount >= 2 && gameStart <= 0)
-    {
-        gameStart = time;
-        console.log('game start @ ' + time);
-        console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-    }
-    if(connCount >= 2 && gameStart > 0 && infectStart <= 0 && (time - gameStart) >= 30)
-    {
-        // we have 2 or more players and 30 seconds has passed
-        // infect one of them randomly
-        infectStart = time;
-        console.log('infect start = ' + time);
-        console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+        if(players[bots[b].playeridx].room !== room) continue;
         
-        var toinfect = Math.ceil(connCount * 0.3);
-        if(toinfect == connCount)
-            toinfect--;
-        if(toinfect <= 0)
-            toinfect = 1;
-            
-            
-        console.log('infecting ' + toinfect + ' random players out of ' + connCount + ' players');
-        console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-            
-        for(y = 0; y < toinfect; y++)
-            infectRandomPlayer();
+        roombots.push(bots[b]);
     }
-    
-    for(p = 0; p < players.length; p++)
-    {
-        var player = players[p];
-        if(player.connected !== 1)
-            continue;
-            
-        var speed = speedPlayer;
-        
-        if(player.x<player.newX)
-            player.x+=speed;
-            
-        if(player.x>player.newX)
-            player.x-=speed;
-            
-        if(player.y<player.newY)
-            player.y+=speed;
-            
-        if(player.y>player.newY)
-            player.y-=speed;
-    }
-    for(p = 0; p < players.length; p++)
-    {
-        var player = players[p];
-        if(player.monster !== 1) continue;
+    return roombots;
+}
 
-        var zombie_box = aabb([player.x - 10, player.y - 10], [30, 30]);
+function updateBots(room)
+{
+    var roombots = getBotsForRoom(room);
+    if(roombots.length <= 0)
+    {
+        // spawn some bots
         
-        for(py = 0; py < players.length; py++)
+        for(b=0; b<10;b++)
         {
-            if(players[py].monster == 1 || players[py].id == player.id)
-                continue;
-            
-            var player_box = aabb([players[py].x, players[py].y], [10, 10]);
-            //var intersecting = (player.x - 10 <= (players[py].x + 30)) && (players[py].x <= player.x + 10) && (player.y <= players[py].y + 10) && (players[py].y <= player.y + 10);
-            
-            //if((vX == ourX && (vY == (ourY - 1) || vY == (ourY + 1))) || (vY == ourY && (vX == (ourX - 1) || vX == (ourX + 1))))
-            if(zombie_box.intersects(player_box))
+            var randX = randomInt(0, (gameSizeX / 10)) * 10;
+            var randY = randomInt(0, (gameSizeY / 10)) * 10;
+            var pid = players.length + 1;
+            var botplayer = {id: pid, ip: "127.0.0.1", room: room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: 0, connected: 1, iosock: undefined};
+            players.push(botplayer);
+            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think'});
+            io.sockets.in(room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: 0, connected: 1});
+            console.log('bot spawned, stats: ', botplayer, bots[bots.length - 1]);
+        }
+        roombots = getBotsForRoom(room);
+    }
+    for(b=0; b<roombots.length; b++)
+    {
+        var bot = roombots[b];
+        var player = players[bot.playeridx];
+        if(player.monster !== 1)
+        {
+            if(bot.status === 'think')
             {
-                players[py].monster = 1;
-                var upd = getPlayerUpdate(players[py]);
-                //monsterCount++;
-                console.log('player ' + player.id + ' infected player ' + players[py].id);
-                console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-                if(upd !== undefined)
+                if(player.newX == player.x && player.newY == player.y)
                 {
-                    upd.attackerid = player.id;
-                    io.sockets.emit("updatePlayer", upd);
+                    // fuck, go somewhere random
+                    var randX = randomInt(0, (gameSizeX / 10)) * 10;
+                    var randY = randomInt(0, (gameSizeY / 10)) * 10;
+                    
+                    player.newX = randX;
+                    player.newY = randY;
+                    var upd = getPlayerUpdate(player);
+                    if(upd !== undefined)
+                        io.sockets.in(room).emit('updatePlayer', upd);
+                    //bot.status = 'attack';
                 }
-                if(getMonsterCount() >= connCount && infectEnd <= 0)
-                    io.sockets.emit("roundEnd", {id: player.id, victimid: upd.id});
             }
         }
+        else
+        {
+            if(bot.status === 'think')
+            {
+                // lets choose a target
+                var targetdistance = 9999999999;
+                var targetidx = -1;
+                var targetplayer = undefined;
+                for(p=0; p<players.length; p++)
+                {
+                    if(players[p].monster === 1 || players[p].room !== room) continue;
+                    var xd = player.x-players[p].x;
+                    var yd = player.y-players[p].y;
+                    var dist = Math.abs(Math.sqrt(xd*xd + yd*yd));
+                    if(targetdistance > dist)
+                    {
+                        targetidx = p;
+                        targetdistance = dist;
+                        targetplayer = players[p];
+                        console.log('bot ', bot, ' chose player ', targetplayer.id);
+                    }
+                }
+                if(targetidx < 0) continue;
+                
+                bot.targetidx = targetidx;
+                player.newX = targetplayer.x;
+                player.newY = targetplayer.y;
+                var upd = getPlayerUpdate(player);
+                if(upd !== undefined)
+                    io.sockets.in(room).emit('updatePlayer', upd);
+                bot.status = 'attack';
+            }
+            else if(bot.status === 'attack' && bot.targetidx >= 0)
+            {
+                var targetplayer = players[bot.targetidx];
+                if(targetplayer.connected !== 1 || targetplayer.monster === 1)
+                {
+                    bot.status = 'think';
+                    bot.targetidx = -1;
+                    player.newX = player.x;
+                    player.newY = player.y;
+                    console.log('bot ', bot, ' is going to sit and think');
+                }
+                else
+                {
+                    if(player.newX != targetplayer.x || player.newY != targetplayer.y)
+                    {
+                        player.newX = targetplayer.x;
+                        player.newY = targetplayer.y;
+                        var upd = getPlayerUpdate(player);
+                        if(upd !== undefined)
+                            io.sockets.in(room).emit('updatePlayer', upd);
+                            
+                       // break;
+                    }
+                }
+            }
+        }
+    }
+}
+function updateWorld()
+{
+    for(r=0; r<rooms.length; r++)
+    {
+        var room = rooms[r];
+        var connCount = getConnCount(room);
+        var monsterCount = getMonsterCount(room);
         
+        if(players.length <= 0 || connCount <= 0)
+            return;
+            
+        var time = Math.round(+new Date()/1000);
+        
+        updateBots(room);
+        /*if((time - lastStateUpdate) >= 10)
+        //{
+            console.log('sending state update');
+            for(p = 0; p < players.length; p++)
+            {
+                if(players[p].connected !== 1)
+                    continue;
+                var upd = getPlayerUpdateAbsolute(players[p]);
+                if(upd !== undefined)
+                    io.sockets.emit("updatePlayerAbsolute", upd);
+            }
+            lastStateUpdate = time;
+        }*/
+        
+        if(monsterCount >= connCount && infectEnd[r] <= 0) // monsters win
+        {
+            infectEnd[r] = time;
+            console.log('game over @ ' + time);
+            console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+        }
+        if(monsterCount >= connCount && (time - infectEnd[r]) >= 5)
+        {
+            for(p = 0; p < players.length; p++)
+            {
+                if(players[p].connected !== 1 || players[p].monster !== 1 || players[p].room !== room)
+                    continue;
+                players[p].monster = 0;
+                var upd = getPlayerUpdate(players[p]);
+                if(upd !== undefined)
+                    io.sockets.in(room).emit("updatePlayer", upd);
+            }
+            gameStart[r] = 0;
+            infectStart[r] = 0;
+            infectEnd[r] = 0;
+            console.log('game reset @ ' + time);
+            console.log('conns: ' + connCount + ' monsters: ' + getMonsterCount(room));
+        }
+        if(connCount >= 2 && gameStart[r] <= 0)
+        {
+            gameStart[r] = time;
+            console.log('game start @ ' + time);
+            console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+        }
+        if(connCount >= 2 && gameStart[r] > 0 && infectStart[r] <= 0 && (time - gameStart[r]) >= 5)
+        {
+            // we have 2 or more players and 30 seconds has passed
+            // infect one of them randomly
+            infectStart[r] = time;
+            console.log('infect start = ' + time);
+            console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+            
+            var toinfect = Math.ceil(connCount * 0.3);
+            if(toinfect == connCount)
+                toinfect--;
+            if(toinfect <= 0)
+                toinfect = 1;
+                
+                
+            console.log('infecting ' + toinfect + ' random players out of ' + connCount + ' players');
+            console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+                
+            for(y = 0; y < toinfect; y++)
+                infectRandomPlayer(room);
+        }
+        
+        for(p = 0; p < players.length; p++)
+        {
+            var player = players[p];
+            if(player.connected !== 1 || player.room !== room) continue;
+                
+            var speed = speedPlayer;
+            
+            if(player.x<player.newX)
+                player.x+=speed;
+                
+            if(player.x>player.newX)
+                player.x-=speed;
+                
+            if(player.y<player.newY)
+                player.y+=speed;
+                
+            if(player.y>player.newY)
+                player.y-=speed;
+        }
+        for(p = 0; p < players.length; p++)
+        {
+            var player = players[p];
+            if(player.monster !== 1 || player.room !== room) continue;
+
+            var zombie_box = aabb([player.x - 10, player.y - 10], [30, 30]);
+            
+            for(py = 0; py < players.length; py++)
+            {
+                if(players[py].monster == 1 || players[py].id == player.id || players[py].room !== room)
+                    continue;
+                
+                var player_box = aabb([players[py].x, players[py].y], [10, 10]);
+                //var intersecting = (player.x - 10 <= (players[py].x + 30)) && (players[py].x <= player.x + 10) && (player.y <= players[py].y + 10) && (players[py].y <= player.y + 10);
+                
+                //if((vX == ourX && (vY == (ourY - 1) || vY == (ourY + 1))) || (vY == ourY && (vX == (ourX - 1) || vX == (ourX + 1))))
+                if(zombie_box.intersects(player_box))
+                {
+                    players[py].monster = 1;
+                    var upd = getPlayerUpdate(players[py]);
+                    //monsterCount++;
+                    console.log('player ' + player.id + ' infected player ' + players[py].id);
+                    console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+                    if(upd !== undefined)
+                    {
+                        upd.attackerid = player.id;
+                        io.sockets.to(player.room).emit("updatePlayer", upd);
+                    }
+                    if(getMonsterCount() >= connCount && infectEnd[r] <= 0)
+                        io.sockets.in(room).emit("roundEnd", {id: player.id, victimid: upd.id});
+                }
+            }
+        }
     }
 }
 
@@ -285,28 +405,49 @@ io.on('connection', function (socket)
 {    
     var remoteAddress = socket.request.connection.remoteAddress;
     
-    socket.on('ID', function (msg)
+    socket.on('joinRoom', function (msg)
     {
-        if(playerSocketExists(socket)) return;
+        var player = getPlayerForSocket(socket);
         
-        var pid = players.length + 1;
-        console.log('new player at ID ' + pid + ', IP ' + remoteAddress);
-        
-        var randX = randomInt(0, (gameSizeX / 10)) * 10;
-        var randY = randomInt(0, (gameSizeY / 10)) * 10;
-        
-        var monst = 0;
-       // if(pid == 1) monst = 1;
-        
-        players.push({id: pid, ip: remoteAddress, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, connected: 1, iosock: socket});
-        socket.emit('ID', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage});
-        socket.broadcast.emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
-        
-        console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
-        
+        if(!(rooms.indexOf(msg.room) > -1))
+        {
+            rooms.push(msg.room);
+            gameStart.push(0);
+            infectStart.push(0);
+            infectEnd.push(0);
+            lastImageChange.push(0);
+            lastImage.push("");
+        }
+            
+        if(player !== undefined)
+        {
+            socket.leave(player.room);
+            socket.join(msg.room);
+            player.room = msg.room;
+        }
+        else
+        {
+            socket.join(msg.room);
+            
+            var pid = players.length + 1;
+            console.log('new player at ID ' + pid + ', IP ' + remoteAddress + ', room ' + msg.room);
+            
+            var randX = randomInt(0, (gameSizeX / 10)) * 10;
+            var randY = randomInt(0, (gameSizeY / 10)) * 10;
+            
+            var monst = 0;
+           // if(pid == 1) monst = 1;
+            
+            players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, connected: 1, iosock: socket});
+            socket.emit('gameState', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(msg.room)]});
+            socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
+            
+            console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
+        }
         // send player list to client
         for(p = 0; p < players.length; p++)
         {
+            if(players[p].room !== msg.room) continue;
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
                 socket.emit('newPlayer', upd);
@@ -341,7 +482,7 @@ io.on('connection', function (socket)
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
             {
-                socket.broadcast.emit('updatePlayer', upd);
+                socket.broadcast.to(players[p].room).emit('updatePlayer', upd);
                 socket.emit('updatePlayer', upd);
             }
             break;
@@ -356,15 +497,19 @@ io.on('connection', function (socket)
             socket.emit('refresh', {time:'now'});
             return;
         }
+        var player = getPlayerForSocket(socket);
+        if(player === undefined) return;
         
         var time = Math.round(+new Date()/1000);
-        var validImage = (time - lastImageChange >= imageChangeCooldown)
+        var roomidx = rooms.indexOf(player.room);
+        var validImage = (time - lastImageChange[roomidx] >= imageChangeCooldown);
+        
         if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
         {
-            socket.broadcast.emit('updateImage', msg);
+            socket.broadcast.to(player.room).emit('updateImage', msg);
             socket.emit('updateImage', msg);
-            lastImageChange = time;
-            lastImage = msg.src;
+            lastImageChange[roomidx] = time;
+            lastImage[roomidx] = msg.src;
             console.log('image changed by player ' + msg.id + ' to ' + msg.src);
         }
     });
@@ -408,7 +553,7 @@ io.on('connection', function (socket)
             if(upd !== undefined)
             {
                 console.log('updating player ' + players[p].id + ' username to ' + players[p].username);
-                socket.broadcast.emit('updatePlayer', upd);
+                socket.broadcast.to(players[p].room).emit('updatePlayer', upd);
                 socket.emit('updatePlayer', upd);
             }
             break;
@@ -428,7 +573,8 @@ io.on('connection', function (socket)
         {
             var player = players[p];
             if(player.connected !== 1) continue;
-            player.iosock.emit('ID', {id: player.id, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage});
+            
+            player.iosock.emit('ID', {id: player.id, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(player.room)]});
             // todo: fix this
             /*var updated = false;
             if(player.x >= gameSizeX)
@@ -460,16 +606,17 @@ io.on('connection', function (socket)
             if(players[p].iosock !== socket)
                 continue;
             players[p].connected = 0;
-            var upd = getPlayerUpdate(players[p]);
+            var player = players[p];
+            var upd = getPlayerUpdate(player);
             //connCount--;
             //if(players[p].monster === 1)
             //    monsterCount--;
-            console.log('player ' + players[p].id + ' disconnected');
+            console.log('player ' + player.id + ' disconnected');
             console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
             
             if(upd !== undefined)
             {
-                socket.broadcast.emit('updatePlayer', upd);
+                socket.broadcast.to(player.room).emit('updatePlayer', upd);
                 //io.sockets.emit('updatePlayer', upd);
                 console.log('sent disconnected player update');
             }
