@@ -11,9 +11,9 @@
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas><br><br>
 <input type="checkbox">Show disconnected players' last positions</input><br>
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
-Username: <input type="text" name="username_changer" id="username_changer" /> 
+Username: <input type="text" name="username_changer" id="username_changer" onkeypress="usernamekeypress(event)" /> 
 <input type="button" name="username_button" id="username_button" value="Set"/><br>
-Background: <input type="text" name="bg_changer" id="bg_changer" /> 
+Background: <input type="text" name="bg_changer" id="bg_changer" onkeypress="bgkeypress(event)" /> 
 <input type="button" name="bg_button" id="bg_button" value="Set"/>
 <br>
 <div id='chat_sidebar'>
@@ -284,6 +284,23 @@ function toggle_chat(){
 }
 
 toggle_chat();
+function bgkeypress(event)
+{
+if (event.which == 13 || event.keyCode == 13) {
+            socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
+            return false;
+        }
+        return true;
+}
+function usernamekeypress(event)
+{
+if (event.which == 13 || event.keyCode == 13) {
+            socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
+            return false;
+        }
+        return true;
+}
+
 </script>
 </body>
 </html>
