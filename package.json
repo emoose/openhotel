@@ -16,7 +16,9 @@
   ],
   "author": "emoose",
   "dependencies": {
-    "socket.io": "*"
+    "aabb-2d": "*",
+    "socket.io": "*",
+    "tripcode": "*"
   },
   "engine": "node >= 0.10.0",
   "bugs": {

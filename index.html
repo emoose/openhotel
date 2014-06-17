@@ -11,11 +11,12 @@
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas><br><br>
 <input type="checkbox">Show disconnected players' last positions</input><br>
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
-Username: <input type="text" name="username_changer" id="username_changer" onkeypress="usernamekeypress(event)" /> 
+Username: <input type="text" name="username_changer" id="username_changer" /> 
 <input type="button" name="username_button" id="username_button" value="Set"/><br>
-Background: <input type="text" name="bg_changer" id="bg_changer" onkeypress="bgkeypress(event)" /> 
+Background: <input type="text" name="bg_changer" id="bg_changer" /> 
 <input type="button" name="bg_button" id="bg_button" value="Set"/>
 <br>
+<p>With thanks to BeetRoot for initial idea + code</p>
 <div id='chat_sidebar'>
 	<div style='margin-top:-20px;'>
 		<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px; 
@@ -84,12 +85,27 @@ $(":checkbox").click(function() {
     showDisconnected = $(this).is(":checked") ? 1 : 0;
 });
 
-$("#username_button").click(function() {
+function update_username()
+{
+    var name = $("#username_changer").val();
+    if(name.length > 256) { alert('s-sempai, your name is too big for me...'); return; }
     socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
-});
+}
 
-$("#bg_button").click(function() {
+function update_bg()
+{
     socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
+}
+
+$("#username_button").click(update_username);
+$("#bg_button").click(update_bg);
+$("#username_changer").keypress(function(event)
+{
+    if(event.which == 13 || event.keyCode == 13) update_username();
+});
+$("#bg_changer").keypress(function(event)
+{
+    if(event.which == 13 || event.keyCode == 13) update_bg();
 });
 
 	
@@ -253,9 +269,10 @@ function toggle_chat(){
 	if (chat_open === false && chat_loaded == false) {
     	var chat_sidebar = document.getElementById("chat_sidebar");
 		chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
-		//document.getElementById('chat_button').innerHTML = 'hide chat (powered by livechan)';
+		document.getElementById('chat_frame').style.display = 'block';
+		document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
+		document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
 		chat_open = true;
-    	document.body.appendChild(chat_sidebar);
 		chat_loaded = true;
 		if (document.width < 600) {
     		toggle_chat();
@@ -284,23 +301,6 @@ function toggle_chat(){
 }
 
 toggle_chat();
-function bgkeypress(event)
-{
-if (event.which == 13 || event.keyCode == 13) {
-            socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
-            return false;
-        }
-        return true;
-}
-function usernamekeypress(event)
-{
-if (event.which == 13 || event.keyCode == 13) {
-            socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
-            return false;
-        }
-        return true;
-}
-
 </script>
 </body>
 </html>
