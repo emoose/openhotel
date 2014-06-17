@@ -69,7 +69,7 @@ var bulletId = 0;
 var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
 
-var speedPlayer = 0.5;
+var speedPlayer = 5;
 
 var gameStart = [];
 var infectStart = [];
@@ -393,7 +393,7 @@ function updateWorld()
             console.log('game start @ ' + time);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
-        if(connCount >= 2 && gameStart[r] > 0 && infectStart[r] <= 0 && (time - gameStart[r]) >= 5)
+        if(connCount >= 2 && gameStart[r] > 0 && infectStart[r] <= 0 && (time - gameStart[r]) >= 15)
         {
             // we have 2 or more players and 30 seconds has passed
             // infect one of them randomly
@@ -437,7 +437,7 @@ function updateWorld()
         for(p = 0; p < players.length; p++)
         {
             var player = players[p];
-            if(player.monster !== 1 || player.room !== room) continue;
+            if(player.monster !== 1 || player.connected !== 1 || player.room !== room) continue;
 
             var zombie_box = aabb([player.x - 10, player.y - 10], [30, 30]);
             
@@ -479,8 +479,9 @@ function updateWorld()
         if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
         {
             bullets[i].alive = 0;
+            io.sockets.in(bullets[i].room).emit("updateBullet", {id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, alive: bullets[i].alive});
         }
-        io.sockets.in(bullets[i].room).emit("updateBullet", {id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, alive: bullets[i].alive});
+
         if(bullets[i].alive == 0)
         {
             bullets.splice(i, 1);
@@ -488,7 +489,7 @@ function updateWorld()
     }
 }
 
-setInterval(updateWorld,10);
+setInterval(updateWorld,100);
 
 io.on('connection', function (socket)
 {    
