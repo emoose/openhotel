@@ -281,12 +281,14 @@ setInterval(updateWorld,10);
 
 io.on('connection', function (socket)
 {    
+    var remoteAddress = socket.request.connection.remoteAddress;
+    
     socket.on('ID', function (msg)
     {
         if(playerSocketExists(socket)) return;
         
         var pid = players.length + 1;
-        console.log('new player at ID ' + pid + ', IP ' + socket.request.connection.remoteAddress);
+        console.log('new player at ID ' + pid + ', IP ' + remoteAddress);
         
         var randX = randomInt(0, (gameSizeX / 10)) * 10;
         var randY = randomInt(0, (gameSizeY / 10)) * 10;
@@ -294,7 +296,7 @@ io.on('connection', function (socket)
         var monst = 0;
        // if(pid == 1) monst = 1;
         
-        players.push({id: pid, ip: socket.request.connection.remoteAddress, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, connected: 1, iosock: socket});
+        players.push({id: pid, ip: remoteAddress, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, connected: 1, iosock: socket});
         socket.emit('ID', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage});
         socket.broadcast.emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
         
@@ -326,8 +328,11 @@ io.on('connection', function (socket)
         {
             if(players[p].id !== msg.id)
                 continue;
-            if(players[p].ip !== socket.request.connection.remoteAddress)
+            if(players[p].ip !== remoteAddress)
+            {
+                console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
+            }
                 
             players[p].newX = msg.x;
             players[p].newY = msg.y;
@@ -352,7 +357,7 @@ io.on('connection', function (socket)
         
         var time = Math.round(+new Date()/1000);
         var validImage = (time - lastImageChange >= imageChangeCooldown && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
-        if(validImage || socket.request.connection.remoteAddress == "127.0.0.1" || socket.request.connection.remoteAddress == "localhost")
+        if(validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost")
         {
             socket.broadcast.emit('updateImage', msg);
             socket.emit('updateImage', msg);
@@ -391,8 +396,11 @@ io.on('connection', function (socket)
         {
             if(players[p].id !== msg.id)
                 continue;
-            if(players[p].ip !== socket.request.connection.remoteAddress)
+            if(players[p].ip !== remoteAddress)
+            {
+                console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
+            }
             players[p].username = name;
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
@@ -407,7 +415,11 @@ io.on('connection', function (socket)
     
     socket.on('changeSize', function(msg)
     {
-        if(socket.request.connection.remoteAddress !== "127.0.0.1" && socket.request.connection.remoteAddress !== "localhost") return;
+        if(socket.request.connection.remoteAddress !== "127.0.0.1" && socket.request.connection.remoteAddress !== "localhost")
+        {
+            console.log('attempted hack into admin command, ip: ' + remoteAddress);
+            return;
+        }
         gameSizeX = msg.x;
         gameSizeY = msg.y;
         for(p = 0; p < players.length; p++)
@@ -435,7 +447,7 @@ io.on('connection', function (socket)
                     socket.broadcast.emit('updatePlayer', upd);
                     socket.emit('updatePlayer', upd);
                 }
-            }*/
+            }
         }
     });
     
