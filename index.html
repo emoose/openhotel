@@ -10,7 +10,8 @@
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas><br><br>
 <div id='event_log' style='width:1000px;height:100px;overflow:scroll;background-color:#EBEBEB'></div>
-<input type="checkbox">Show disconnected players' last positions</input><br>
+<input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
+<input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
 Username: <input type="text" name="username_changer" id="username_changer" /> 
 <input type="button" name="username_button" id="username_button" value="Set"/><br>
@@ -80,13 +81,18 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	var ctx = $("#canvas")[0].getContext("2d");
     var canvas = document.getElementById("canvas");
     var showDisconnected = 0;
+    var disableZombies = 0;
     var img = new Image;
     var imgLoaded = 0;
     img.src = "";
     img.onload = function() { imgLoaded = 1; }
     
-    $(":checkbox").click(function() {
+    $("#dc_toggle").click(function() {
         showDisconnected = $(this).is(":checked") ? 1 : 0;
+    });
+
+    $("#zombie_toggle").click(function() {
+        disableZombies = $(this).is(":checked") ? 1 : 0;
     });
 
     function makeTextSafe(text)
@@ -336,7 +342,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
                 
             ctx.fillRect(players[p].x, players[p].y, 10, 10);
             
-            if(players[p].monster == 1)
+            if(players[p].monster == 1 && disableZombies === 0)
                 ctx.fillStyle = "#00FF00";
             else
                 ctx.fillStyle = "#000";

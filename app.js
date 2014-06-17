@@ -574,7 +574,7 @@ io.on('connection', function (socket)
             var monst = 0;
            // if(pid == 1) monst = 1;
             
-            players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, connected: 1, iosock: socket});
+            players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, firstFire: 0, fireCount: 0, connected: 1, iosock: socket});
             socket.emit('gameState', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(msg.room)]});
             socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
             
@@ -604,6 +604,7 @@ io.on('connection', function (socket)
             return;
 
         // Search through the players array for the player that fired the bullet
+        var time = Math.round(+new Date()/1000);
         for(p = 0; p < players.length; p++)
         {
             if(players[p].id !== msg.id)
@@ -613,6 +614,17 @@ io.on('connection', function (socket)
                 console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
             }
+            if(players[p].firstFire === undefined || players[p].firstFire === 0)
+                players[p].firstFire = time;
+            else if(time - players[p].firstFire >= 5)
+            {
+                players[p].firstFire = 0;
+                players[p].fireCount = 0;
+            }
+            if(players[p].fireCount !== undefined && players[p].fireCount > 15)
+                break;
+
+            players[p].fireCount++;
 
             var originX = players[p].x + 5;
             var originY = players[p].y + 5;
