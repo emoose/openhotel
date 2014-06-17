@@ -164,6 +164,7 @@ function getBotsForRoom(room)
 
 function updateBots(room)
 {
+    var time = Math.round(+new Date()/1000);
     var roombots = getBotsForRoom(room);
     if(roombots.length <= 0)
     {
@@ -176,7 +177,7 @@ function updateBots(room)
             var pid = players.length + 1;
             var botplayer = {id: pid, ip: "127.0.0.1", room: room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: 0, connected: 1, iosock: undefined};
             players.push(botplayer);
-            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think'});
+            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think', timer: 0, lastType: 'human'});
             io.sockets.in(room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: 0, connected: 1});
             console.log('bot spawned, stats: ', botplayer, bots[bots.length - 1]);
         }
@@ -188,6 +189,7 @@ function updateBots(room)
         var player = players[bot.playeridx];
         if(player.monster !== 1)
         {
+            bot.lastType = 'human';
             if(bot.status === 'think')
             {
                 if(player.newX == player.x && player.newY == player.y)
@@ -207,6 +209,28 @@ function updateBots(room)
         }
         else
         {
+            if(bot.lastType === 'human')
+            {                
+                if(bot.timer !== 0 && time - bot.timer >= randomInt(2, 7))
+                {
+                    bot.lastType = 'infected';
+                    bot.timer = 0;
+                }
+                else
+                {
+                    if(bot.timer === 0)
+                    {
+                        bot.timer = time;
+                        player.newX = player.x;
+                        player.newY = player.y;
+                        var upd = getPlayerUpdate(player);
+                        if(upd !== undefined)
+                            io.sockets.in(room).emit('updatePlayer', upd);
+                    }
+                        
+                    continue;
+                }
+            }
             if(bot.status === 'think')
             {
                 // lets choose a target
@@ -227,15 +251,35 @@ function updateBots(room)
                         console.log('bot ', bot, ' chose player ', targetplayer.id);
                     }
                 }
-                if(targetidx < 0) continue;
                 
+                //if(targetidx < 0) continue;
+                
+                var randX = player.newX;
+                var randY = player.newY;
+                if(targetidx >= 0)
+                {
+                    randX = targetplayer.x;
+                    randY = targetplayer.y;
+                }
+                else
+                {
+                    if(randX == player.x && randY == player.y)
+                    {
+                        randX = randomInt(0, (gameSizeX / 10)) * 10;
+                        randY = randomInt(0, (gameSizeY / 10)) * 10
+                    }
+                }
                 bot.targetidx = targetidx;
-                player.newX = targetplayer.x;
-                player.newY = targetplayer.y;
-                var upd = getPlayerUpdate(player);
-                if(upd !== undefined)
-                    io.sockets.in(room).emit('updatePlayer', upd);
-                bot.status = 'attack';
+                if(randX != player.newX || randY != player.newY)
+                {
+                    player.newX = randX;
+                    player.newY = randY;
+                    var upd = getPlayerUpdate(player);
+                    if(upd !== undefined)
+                        io.sockets.in(room).emit('updatePlayer', upd);
+                }
+                if(targetidx >= 0)
+                    bot.status = 'attack';
             }
             else if(bot.status === 'attack' && bot.targetidx >= 0)
             {
@@ -246,17 +290,26 @@ function updateBots(room)
                     bot.targetidx = -1;
                     player.newX = player.x;
                     player.newY = player.y;
+                    var upd = getPlayerUpdate(player);
+                    if(upd !== undefined)
+                        io.sockets.in(room).emit('updatePlayer', upd);
                     console.log('bot ', bot, ' is going to sit and think');
                 }
                 else
                 {
                     if(player.newX != targetplayer.x || player.newY != targetplayer.y)
                     {
-                        player.newX = targetplayer.x;
-                        player.newY = targetplayer.y;
-                        var upd = getPlayerUpdate(player);
-                        if(upd !== undefined)
-                            io.sockets.in(room).emit('updatePlayer', upd);
+                        if(bot.timer === 0)
+                            bot.timer = time;
+                        else if(time - bot.timer >= randomInt(2, 7))
+                        {
+                            player.newX = targetplayer.x;
+                            player.newY = targetplayer.y;
+                            var upd = getPlayerUpdate(player);
+                            if(upd !== undefined)
+                                io.sockets.in(room).emit('updatePlayer', upd);
+                            bot.timer = 0;
+                        }
                             
                        // break;
                     }
@@ -391,7 +444,7 @@ function updateWorld()
                         upd.attackerid = player.id;
                         io.sockets.to(player.room).emit("updatePlayer", upd);
                     }
-                    if(getMonsterCount() >= connCount && infectEnd[r] <= 0)
+                    if(getMonsterCount(room) >= connCount && infectEnd[r] <= 0)
                         io.sockets.in(room).emit("roundEnd", {id: player.id, victimid: upd.id});
                 }
             }
