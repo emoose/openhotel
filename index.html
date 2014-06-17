@@ -483,17 +483,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         if(code == 32) {
             keySpace = true;
             return false; // Prevent the Page from scrolling down when Space Key is pressed
-        }
-        if(code == 87) {
+        } else if(code == 87) {
             keyW = true;
-        }
-        if(code == 65) {
+        } else if(code == 65) {
             keyA = false;
-        }
-        if(code == 83) {
+        } else if(code == 83) {
             keyS = false;
-        }
-        if(code == 68) {
+        } else if(code == 68) {
             keyD = false;
         }
     });
@@ -503,17 +499,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         var code = event.keyCode || e.which;
         if(code == 32) {
             keySpace = false;
-        }
-        if(code == 87) {
+        } else if(code == 87) {
             keyW = false;
-        }
-        if(code == 65) {
+        } else if(code == 65) {
             keyA = false;
-        }
-        if(code == 83) {
+        } else if(code == 83) {
             keyS = false;
-        }
-        if(code == 68) {
+        } else if(code == 68) {
             keyD = false;
         }
     });
