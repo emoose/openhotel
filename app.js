@@ -447,7 +447,7 @@ io.on('connection', function (socket)
                     socket.broadcast.emit('updatePlayer', upd);
                     socket.emit('updatePlayer', upd);
                 }
-            }
+            }*/
         }
     });
     
