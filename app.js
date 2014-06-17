@@ -215,7 +215,7 @@ function updateBots(room)
                     // fuck, go somewhere random
                     var randX = randomInt(0, (gameSizeX / 10)) * 10;
                     var randY = randomInt(0, (gameSizeY / 10)) * 10;
-                    
+                    //return;
                     player.newX = randX;
                     player.newY = randY;
                     var upd = getPlayerUpdate(player);
@@ -266,7 +266,7 @@ function updateBots(room)
                         targetidx = p;
                         targetdistance = dist;
                         targetplayer = players[p];
-                        console.log('bot ', bot, ' chose player ', targetplayer.id);
+                        //console.log('bot ', bot, ' chose player ', targetplayer.id);
                     }
                 }
                 
@@ -311,7 +311,7 @@ function updateBots(room)
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
                         io.sockets.in(room).emit('updatePlayer', upd);
-                    console.log('bot ', bot, ' is going to sit and think');
+                    //console.log('bot ', bot, ' is going to sit and think');
                 }
                 else
                 {
@@ -468,12 +468,17 @@ function updateWorld()
             }
         }
     }
+    
+    updateBullets();
+}
 
+function updateBullets()
+{
     // update bullets
     for(i = 0; i < bullets.length; i++)
     {
-        bullets[i].x += bullets[i].velocity[0];
-        bullets[i].y += bullets[i].velocity[1];
+        bullets[i].x += bullets[i].velocity[0] * 10;
+        bullets[i].y += bullets[i].velocity[1] * 10;
 
         // kill bullet if it is outside of canvas
         if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
@@ -485,11 +490,52 @@ function updateWorld()
         if(bullets[i].alive == 0)
         {
             bullets.splice(i, 1);
+            continue;
+        }
+        
+        var idx = getIdxForID(bullets[i].playerId);
+        if(idx >= 0 && players.length > idx && players[idx].monster !== 1)
+        {
+            var bullet_box = aabb([bullets[i].x, bullets[i].y], [5, 5]);
+            for(p = 0; p < players.length; p++)
+            {
+                if(players[p].id === bullets[i].playerId || players[p].monster !== 1) continue;
+                var player = players[p];
+                var player_box = aabb([players[p].x, players[p].y], [10, 10]);
+                if(bullet_box.intersects(player_box))
+                {
+                    console.log('player hit ' + player.id);
+                    // player hit!
+                    player.x += (bullets[i].velocity[0] * 100);
+                    player.y += (bullets[i].velocity[1] * 100);
+                    if(player.x < 0) player.x = 0;
+                    if(player.y < 0) player.y = 0;
+                    if(player.x >= gameSizeX) player.x = gameSizeX - 10;
+                    if(player.y >= gameSizeY) player.y = gameSizeY - 10;
+                    player.newX = player.x;
+                    player.newY = player.y;
+                    var upd = getPlayerUpdate(players[p]);
+                    if(upd !== undefined)
+                    {
+                        //upd.attackerid = player.id;
+                        io.sockets.emit("updatePlayer", upd);
+                    }
+                    bullets[i].alive = 0;
+                    break;
+                }
+            }
+        }
+        
+        if(bullets[i].alive == 0)
+        {
+            bullets.splice(i, 1);
+            continue;
         }
     }
 }
 
 setInterval(updateWorld,100);
+//setInterval(updateBullets, 10);
 
 io.on('connection', function (socket)
 {    
@@ -547,7 +593,7 @@ io.on('connection', function (socket)
     // some stuff copied from socket.on('position') and socket.on('joinRoom')
     socket.on('fireBullet', function (msg)
     {
-        console.log('Bullet fired by Player: ' + msg.id);
+        //console.log('Bullet fired by Player: ' + msg.id);
         if(msg.session !== sessionID || msg.id > players.length)
         {
             socket.emit('refresh', {time:'now'});
