@@ -29,36 +29,35 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	<iframe id='chat_frame' style='position:absolute;width:100%;height:100%;border:none;right:0;'></iframe>
 </div>
 <script type='text/javascript'>
-var hidden, visibilityChange; 
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
-  hidden = "hidden";
-  visibilityChange = "visibilitychange";
-} else if (typeof document.mozHidden !== "undefined") {
-  hidden = "mozHidden";
-  visibilityChange = "mozvisibilitychange";
-} else if (typeof document.msHidden !== "undefined") {
-  hidden = "msHidden";
-  visibilityChange = "msvisibilitychange";
-} else if (typeof document.webkitHidden !== "undefined") {
-  hidden = "webkitHidden";
-  visibilityChange = "webkitvisibilitychange";
-}
- 
-var videoElement = document.getElementById("videoElement");
-
-// If the page is hidden, pause the video;
-// if the page is shown, play the video
-function handleVisibilityChange() {
-  if (document[hidden]) {
-    for(p=0;p<players.length;p++){
-        players[p].x = players[p].newX;
-        players[p].y = players[p].newY;
+    var hidden, visibilityChange; 
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+      hidden = "hidden";
+      visibilityChange = "visibilitychange";
+    } else if (typeof document.mozHidden !== "undefined") {
+      hidden = "mozHidden";
+      visibilityChange = "mozvisibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+      hidden = "msHidden";
+      visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+      hidden = "webkitHidden";
+      visibilityChange = "webkitvisibilitychange";
     }
-  }
-}
+     
+    var videoElement = document.getElementById("videoElement");
 
-document.addEventListener(visibilityChange, handleVisibilityChange, false);
+    // If the page is hidden, pause the video;
+    // if the page is shown, play the video
+    function handleVisibilityChange() {
+      if (document[hidden]) {
+        for(p=0;p<players.length;p++){
+            players[p].x = players[p].newX;
+            players[p].y = players[p].newY;
+        }
+      }
+    }
 
+    document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 	var id = "";
     var sessionID = 0;
@@ -82,52 +81,52 @@ document.addEventListener(visibilityChange, handleVisibilityChange, false);
     img.src = "";
     img.onload = function(){ imgLoaded = 1; }
     
-$(":checkbox").click(function() {
-    showDisconnected = $(this).is(":checked") ? 1 : 0;
-});
+    $(":checkbox").click(function() {
+        showDisconnected = $(this).is(":checked") ? 1 : 0;
+    });
 
-function addToLog(entry)
-{
-    var log = $("#event_log").html();
-    var safeent = $("<div/>").html(entry).text();
-    log = safeent + "<br />" + log;
-    $("#event_log").html(log);
-}
-
-function updateUsername()
-{
-    var name = $("#username_changer").val();
-    if(name.length > 256) { alert('s-sempai, your name is too big for me...'); return; }
-    socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
-}
-
-function updateBackground()
-{
-    socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
-}
-
-$("#username_button").click(updateUsername);
-$("#bg_button").click(updateBackground);
-$("#username_changer").keypress(function(event)
-{
-    if(event.which == 13 || event.keyCode == 13) updateUsername();
-});
-$("#bg_changer").keypress(function(event)
-{
-    if(event.which == 13 || event.keyCode == 13) updateBackground();
-});
-
-function getPlayerName(playerid)
-{
-    for(p=0;p<players.length;p++)
+    function addToLog(entry)
     {
-        if(players[p].id!==playerid) continue;
-        if(players[p].username !== undefined && players[p].username !== '')
-            return 'Player ' + playerid + ' "' + players[p].username + '"';
-        return 'Player ' + playerid;
+        var log = $("#event_log").html();
+        var safeent = $("<div/>").html(entry).text();
+        log = safeent + "<br />" + log;
+        $("#event_log").html(log);
     }
-    return 'Unknown player';
-}
+
+    function updateUsername()
+    {
+        var name = $("#username_changer").val();
+        if(name.length > 256) { alert('s-sempai, your name is too big for me...'); return; }
+        socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
+    }
+
+    function updateBackground()
+    {
+        socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
+    }
+
+    $("#username_button").click(updateUsername);
+    $("#bg_button").click(updateBackground);
+    $("#username_changer").keypress(function(event)
+    {
+        if(event.which == 13 || event.keyCode == 13) updateUsername();
+    });
+    $("#bg_changer").keypress(function(event)
+    {
+        if(event.which == 13 || event.keyCode == 13) updateBackground();
+    });
+
+    function getPlayerName(playerid)
+    {
+        for(p=0;p<players.length;p++)
+        {
+            if(players[p].id!==playerid) continue;
+            if(players[p].username !== undefined && players[p].username !== '')
+                return 'Player ' + playerid + ' "' + players[p].username + '"';
+            return 'Player ' + playerid;
+        }
+        return 'Unknown player';
+    }
 	
 	//get id
 	socket.emit("ID", {id:""});
@@ -195,104 +194,93 @@ function getPlayerName(playerid)
 	function draw()
     {
 		ctx.clearRect(0,0,1000,600);
-        if(imgLoaded === 1)
+        
+        if(imgLoaded == 1)
             ctx.drawImage(img,0,0);
-		for(p=0;p<players.length;p++){
-                if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0)
-                    continue;
-                var speed = speedPlayer;
-                    
-				if(players[p].x<players[p].newX){
-					players[p].x+=speed;
-				}
-				if(players[p].x>players[p].newX){
-					players[p].x-=speed;
-				}
-				if(players[p].y<players[p].newY){
-					players[p].y+=speed;
-				}
-				if(players[p].y>players[p].newY){
-					players[p].y-=speed;
-				}
-				
-				ctx.beginPath();
-                if(players[p].id==id)
-                {
-					ctx.fillStyle="#FF0000";
-                } else if(players[p].monster == 1)
-                {
-					ctx.fillStyle="#00FF00";
-                    /*if(players[p].id == id)
-                    {
-                        // player is monster and player is us
-                        var ourX = Math.floor(players[p].x / 10);
-                        var ourY = Math.floor(players[p].y / 10);
-                        for(py=0;py<players.length;py++)
-                        {
-                            if(players[py].monster == 1 || players[py].id == players[p].id)
-                                continue;
-                            var vX = Math.floor(players[py].x / 10);
-                            var vY = Math.floor(players[py].y / 10);
-                            
-                            if((vX == ourX && (vY == (ourY - 1) || vY == (ourY + 1))) || (vY == ourY && (vX == (ourX - 1) || vX == (ourX + 1))))
-                            //if(vX 
-                            {
-                                socket.emit("infect", {id:id, victimid: players[py].id});
-                                players[py].monster = 1;
-                            }
-                        }
-                    }*/
-				}else{
-					ctx.fillStyle="#000";
-				}
-				ctx.fillRect(players[p].x,players[p].y,10,10);
-                if(players[p].id == id && players[p].monster == 1)
-                {
-                    ctx.fillStyle = "#00FF00";
-                    ctx.fillRect(players[p].x + 1, players[p].y + 1, 8, 8);
-                }
-                var name = players[p].id;
-                if(players[p].username != '' && players[p].username !== undefined)
-                    name = name + '. ' + players[p].username;
-                    
-                ctx.font = "12px Arial";
-                ctx.textAlign = 'center';
-                ctx.fillText(name, players[p].x+blockSize/2, players[p].y+blockSize+12);
+            
+		for(p=0;p<players.length;p++)
+        {
+            if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
+                continue;
                 
-				ctx.closePath();
+            var speed = speedPlayer;
+                
+            if(players[p].x<players[p].newX){
+                players[p].x+=speed;
+            }
+            if(players[p].x>players[p].newX){
+                players[p].x-=speed;
+            }
+            if(players[p].y<players[p].newY){
+                players[p].y+=speed;
+            }
+            if(players[p].y>players[p].newY){
+                players[p].y-=speed;
+            }
+            
+            ctx.beginPath();
+            ctx.fillStyle = "#FFFFFF";
+            if(players[p].id == id) // change border to red if its us
+                ctx.fillStyle = "#FF0000";
+                
+            ctx.fillRect(players[p].x, players[p].y, 10, 10);
+            
+            if(players[p].monster == 1)
+                ctx.fillStyle = "#00FF00";
+            else
+                ctx.fillStyle = "#000";
+                
+            ctx.fillRect(players[p].x + 1,players[p].y + 1,8,8);
+
+            var name = players[p].id;
+            if(players[p].username != '' && players[p].username !== undefined)
+                name = name + '. ' + players[p].username;
+                
+            ctx.font = "12px Arial";
+            ctx.textAlign = 'center';
+            ctx.fillText(name, players[p].x+blockSize/2, players[p].y+blockSize+12);
+            
+            ctx.closePath();
 		}
 
 		ctx.beginPath();
-		ctx.moveTo(mouseX,mouseY)
-		ctx.lineTo(mouseX+blockSize,mouseY)
-		ctx.moveTo(mouseX+blockSize,mouseY)
-		ctx.lineTo(mouseX+blockSize,mouseY+blockSize)
-		ctx.moveTo(mouseX+blockSize,mouseY+blockSize)
-		ctx.lineTo(mouseX,mouseY+blockSize)
-		ctx.moveTo(mouseX,mouseY+blockSize)
-		ctx.lineTo(mouseX,mouseY)
-		ctx.stroke()
+		ctx.moveTo(mouseX,mouseY);
+		ctx.lineTo(mouseX+blockSize,mouseY);
+		ctx.moveTo(mouseX+blockSize,mouseY);
+		ctx.lineTo(mouseX+blockSize,mouseY+blockSize);
+		ctx.moveTo(mouseX+blockSize,mouseY+blockSize);
+		ctx.lineTo(mouseX,mouseY+blockSize);
+		ctx.moveTo(mouseX,mouseY+blockSize);
+		ctx.lineTo(mouseX,mouseY);
+		ctx.stroke();
 		ctx.closePath();
-
 	}
 
-	$(document).mousemove(function(e){
-		var x,y
-		for(x=e.pageX-8;x>=0;x--){
-			if(x%blockSize==0){
-				mouseX = x
+	$(document).mousemove( function(e)
+    {
+		var x,y;
+		for(x=e.pageX-8;x>=0;x--)
+        {
+			if(x%blockSize==0)
+            {
+				mouseX = x;
 				break;
 			}
 		}
-		for(y=e.pageY-8;y>=0;y--){
-			if(y%blockSize==0){
-				mouseY = y
+		for(y=e.pageY-8;y>=0;y--)
+        {
+			if(y%blockSize==0)
+            {
+				mouseY = y;
 				break;
 			}
 		}
 	});
-	$(document).mousedown(function(e){
-		socket.emit("position", {id:id,x:mouseX,y:mouseY,session:sessionID});
+    
+	$(document).mousedown(function(event)
+    {
+        if(event.which != 1) return;
+		socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
 	});
 	
 	setInterval(draw,10);
