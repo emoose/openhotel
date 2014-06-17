@@ -217,18 +217,19 @@ function updateBots(room)
     {
         var bot = roombots[b];
         var player = players[bot.playeridx];
-        if(player.monster !== 1)
+        if(player.monster !== 1 || getMonsterCount(room) >= getConnCount(room))
         {
             bot.lastType = 'human';
-            if(bot.status === 'think')
-            {
-                var curXtile = Math.ceil(player.x / 10) * 10;
-                var curYtile = Math.ceil(player.y / 10) * 10;
-                var destXtile = Math.ceil(player.newX / 10) * 10;
-                var destYtile = Math.ceil(player.newY / 10) * 10;
-                if(curXtile == destXtile && curYtile == destYtile)
+            //if(bot.status === 'think')
+            //{
+                var curXtile = Math.ceil(player.x / 10);
+                var curYtile = Math.ceil(player.y / 10);
+                var destXtile = Math.ceil(player.newX / 10);
+                var destYtile = Math.ceil(player.newY / 10);
+                if((curXtile == destXtile || curXtile + 1 == destXtile || curXtile - 1 == destXtile) && 
+                   (curYtile == destYtile || curYtile + 1 == destYtile || curYtile - 1 == destYtile) )
                 {
-                    // fuck, go somewhere random
+                    // go somewhere random
                     var randX = randomInt(0, Math.floor(gameSizeX / 10)) * 10;
                     var randY = randomInt(0, Math.floor(gameSizeY / 10)) * 10;
 
@@ -242,7 +243,9 @@ function updateBots(room)
                     }
                     //bot.status = 'attack';
                 }
-            }
+                //else
+                //    console.log('bot thinking... ', player.id, curXtile, destXtile, curYtile, destYtile);
+            //}
         }
         else
         {
@@ -302,8 +305,8 @@ function updateBots(room)
                 {
                     if(randX == player.x && randY == player.y)
                     {
-                        randX = randomInt(0, (gameSizeX / 10)) * 10;
-                        randY = randomInt(0, (gameSizeY / 10)) * 10
+                        randX = randomInt(0, Math.floor(gameSizeX / 10)) * 10;
+                        randY = randomInt(0, Math.floor(gameSizeY / 10)) * 10;
                     }
                 }
                 bot.targetidx = targetidx;
