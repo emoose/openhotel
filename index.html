@@ -194,8 +194,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     
     socket.on("updateImage", function(data)
     {
+        addToLog(getPlayerName(data.id) + " changed the background to " + data.src);
         img.src = data.src;
         imgLoaded = 0;
+    });
+    socket.on("roundEnd", function(data)
+    {
+        addToLog("Round ended! The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
     });
     
     /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */

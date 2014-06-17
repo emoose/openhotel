@@ -271,6 +271,8 @@ function updateWorld()
                     upd.attackerid = player.id;
                     io.sockets.emit("updatePlayer", upd);
                 }
+                if(getMonsterCount() >= connCount && infectEnd <= 0)
+                    io.sockets.emit("roundEnd", {id: player.id, victimid: upd.id});
             }
         }
         
@@ -356,8 +358,8 @@ io.on('connection', function (socket)
         }
         
         var time = Math.round(+new Date()/1000);
-        var validImage = (time - lastImageChange >= imageChangeCooldown && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
-        if(validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost")
+        var validImage = (time - lastImageChange >= imageChangeCooldown)
+        if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
         {
             socket.broadcast.emit('updateImage', msg);
             socket.emit('updateImage', msg);
