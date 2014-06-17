@@ -516,26 +516,25 @@ function updateBullets(frametime)
             var bullet_box = aabb([bullets[i].x, bullets[i].y], [5, 5]);
             for(p = 0; p < players.length; p++)
             {
-                if(players[p].id === bullets[i].playerId || players[p].monster !== 1) continue;
                 var player = players[p];
-                var player_box = aabb([players[p].x, players[p].y], [10, 10]);
+                if(player.id === bullets[i].playerId || player.monster !== 1) continue;
+                var player_box = aabb([player.x, player.y], [10, 10]);
                 if(bullet_box.intersects(player_box))
                 {
                     //console.log('player hit ' + player.id);
                     // player hit!
-                    player.x += (bullets[i].velocity[0] * 100);
-                    player.y += (bullets[i].velocity[1] * 100);
-                    if(player.x < 0) player.x = 0;
-                    if(player.y < 0) player.y = 0;
-                    if(player.x >= gameSizeX) player.x = gameSizeX - 10;
-                    if(player.y >= gameSizeY) player.y = gameSizeY - 10;
-                    player.newX = player.x;
-                    player.newY = player.y;
-                    var upd = getPlayerUpdate(players[p]);
+                    player.newX = player.x + (bullets[i].velocity[0] * 100);
+                    player.newY = player.y + (bullets[i].velocity[1] * 100);
+                    
+                    if(player.newX < 0) player.newX = 0;
+                    if(player.newY < 0) player.newY = 0;
+                    if(player.newX >= gameSizeX) player.newX = gameSizeX - 10;
+                    if(player.newY >= gameSizeY) player.newY = gameSizeY - 10;
+                    
+                    var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
                     {
-                        upd.absolute = 1;
-                        //upd.attackerid = player.id;
+                        upd.attackerid = player.id;
                         io.sockets.emit("updatePlayer", upd);
                     }
                     bullets[i].alive = 0;
