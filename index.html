@@ -85,11 +85,14 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         showDisconnected = $(this).is(":checked") ? 1 : 0;
     });
 
+    function makeTextSafe(text)
+    {
+        return $("<div/>").html(text).text();
+    }
     function addToLog(entry)
     {
         var log = $("#event_log").html();
-        var safeent = $("<div/>").html(entry).text();
-        log = safeent + "<br />" + log;
+        log = entry + "<br />" + log;
         $("#event_log").html(log);
     }
 
@@ -124,10 +127,10 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         {
             if(players[p].id!==playerid) continue;
             if(players[p].username !== undefined && players[p].username !== '')
-                return 'Player ' + playerid + ' (' + players[p].username + ')';
-            return 'Player ' + playerid;
+                return '<b>Player ' + playerid + ' (' + makeTextSafe(players[p].username) + ')</b>';
+            return '<b>Player ' + playerid + '</b>';
         }
-        return 'Unknown player';
+        return '<b>Unknown player</b>';
     }
 	
 	//get id
@@ -155,7 +158,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	socket.on("newPlayer", function(data)
     {
 		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
-        addToLog('New player (ID ' + data.id + ') connected!');
+        addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
 	});
     
 	//update our player list with updated player pos
@@ -171,7 +174,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
             player.newY = data.y;
             player.connected = data.connected;
             if(player.username !== data.username && data.username !== undefined && data.username !== '')
-                addToLog(getPlayerName(data.id) + ' changed name to "' + data.username + '"');
+                addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
 
             player.username = data.username;
             
@@ -194,13 +197,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     
     socket.on("updateImage", function(data)
     {
-        addToLog(getPlayerName(data.id) + " changed the background to " + data.src);
+        addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + data.src + '">' + data.src + '</a>');
         img.src = data.src;
         imgLoaded = 0;
     });
     socket.on("roundEnd", function(data)
     {
-        addToLog("Round ended! The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
+        addToLog("<b>Round ended!</b> The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
     });
     
     /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
