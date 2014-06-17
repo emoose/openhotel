@@ -9,6 +9,7 @@
 <script type='text/javascript' src='http://code.jquery.com/jquery-2.1.1.min.js'></script>
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 <canvas id='canvas' height='600' width='1000' style='border: 1px solid #000'></canvas><br><br>
+<div id='event_log' style='width:1000px;height:100px;overflow:scroll;background-color:#EBEBEB'></div>
 <input type="checkbox">Show disconnected players' last positions</input><br>
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
 Username: <input type="text" name="username_changer" id="username_changer" /> 
@@ -85,29 +86,48 @@ $(":checkbox").click(function() {
     showDisconnected = $(this).is(":checked") ? 1 : 0;
 });
 
-function update_username()
+function addToLog(entry)
+{
+    var log = $("#event_log").html();
+    var safeent = $("<div/>").html(entry).text();
+    log = safeent + "<br />" + log;
+    $("#event_log").html(log);
+}
+
+function updateUsername()
 {
     var name = $("#username_changer").val();
     if(name.length > 256) { alert('s-sempai, your name is too big for me...'); return; }
     socket.emit("username", {id: id, username: $("#username_changer").val(), session: sessionID});
 }
 
-function update_bg()
+function updateBackground()
 {
     socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
 }
 
-$("#username_button").click(update_username);
-$("#bg_button").click(update_bg);
+$("#username_button").click(updateUsername);
+$("#bg_button").click(updateBackground);
 $("#username_changer").keypress(function(event)
 {
-    if(event.which == 13 || event.keyCode == 13) update_username();
+    if(event.which == 13 || event.keyCode == 13) updateUsername();
 });
 $("#bg_changer").keypress(function(event)
 {
-    if(event.which == 13 || event.keyCode == 13) update_bg();
+    if(event.which == 13 || event.keyCode == 13) updateBackground();
 });
 
+function getPlayerName(playerid)
+{
+    for(p=0;p<players.length;p++)
+    {
+        if(players[p].id!==playerid) continue;
+        if(players[p].username !== undefined && players[p].username !== '')
+            return 'Player ' + playerid + ' "' + players[p].username + '"';
+        return 'Player ' + playerid;
+    }
+    return 'Unknown player';
+}
 	
 	//get id
 	socket.emit("ID", {id:""});
@@ -128,20 +148,35 @@ $("#bg_changer").keypress(function(event)
 	socket.on("newPlayer", function(data)
     {
 		players.push({id: data.id, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
+        addToLog('New player (ID ' + data.id + ') connected!');
 	});
     
 	//update our player list with updated player pos
 	socket.on("updatePlayer", function(data)
     {
-		for(p=0;p<players.length;p++){
-			if(players[p].id==data.id){
-				players[p].newX = data.x;
-				players[p].newY = data.y;
-                players[p].monster = data.monster;
-                players[p].connected = data.connected;
-                players[p].username = data.username;
-				break;
-			}
+		for(p=0;p<players.length;p++)
+        {
+			if(players[p].id!==data.id) continue;
+            
+            var player = players[p];
+            
+            player.newX = data.x;
+            player.newY = data.y;
+            player.connected = data.connected;
+            if(player.username !== data.username && data.username !== undefined && data.username !== '')
+                addToLog(getPlayerName(data.id) + ' changed name to "' + data.username + '"');
+
+            player.username = data.username;
+            
+            if(player.monster !== data.monster && data.monster == 1)
+            {
+                var attacker = " has become infected!";
+                if(data.attackerid !== undefined && data.attackerid > 0)
+                    attacker = " was bit by " + getPlayerName(data.attackerid) + "!";
+                addToLog(getPlayerName(data.id) + attacker);
+            }
+            player.monster = data.monster;
+            break;
 		}
 	});
     

@@ -257,7 +257,10 @@ function updateWorld()
                 console.log('player ' + player.id + ' infected player ' + players[py].id);
                 console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
                 if(upd !== undefined)
+                {
+                    upd.attackerid = player.id;
                     io.sockets.emit("updatePlayer", upd);
+                }
             }
         }
         
