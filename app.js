@@ -80,6 +80,7 @@ var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
 
 var speedPlayer = 5;
+var speedMonster = 5.5;
 
 var gameStart = [];
 var infectStart = [];
@@ -221,17 +222,24 @@ function updateBots(room)
             bot.lastType = 'human';
             if(bot.status === 'think')
             {
-                if(player.newX == player.x && player.newY == player.y)
+                var curXtile = Math.ceil(player.x / 10) * 10;
+                var curYtile = Math.ceil(player.y / 10) * 10;
+                var destXtile = Math.ceil(player.newX / 10) * 10;
+                var destYtile = Math.ceil(player.newY / 10) * 10;
+                if(curXtile == destXtile && curYtile == destYtile)
                 {
                     // fuck, go somewhere random
-                    var randX = randomInt(0, (gameSizeX / 10)) * 10;
-                    var randY = randomInt(0, (gameSizeY / 10)) * 10;
-                    //return;
+                    var randX = randomInt(0, Math.floor(gameSizeX / 10)) * 10;
+                    var randY = randomInt(0, Math.floor(gameSizeY / 10)) * 10;
+
                     player.newX = randX;
                     player.newY = randY;
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
+                    {
+                        console.log('moving human bot...');
                         io.sockets.in(room).emit('updatePlayer', upd);
+                    }
                     //bot.status = 'attack';
                 }
             }
@@ -525,12 +533,12 @@ function updateBullets(frametime)
                     // player hit!
                     player.newX = player.x + (bullets[i].velocity[0] * 100);
                     player.newY = player.y + (bullets[i].velocity[1] * 100);
-                    
+
                     if(player.newX < 0) player.newX = 0;
                     if(player.newY < 0) player.newY = 0;
                     if(player.newX >= gameSizeX) player.newX = gameSizeX - 10;
                     if(player.newY >= gameSizeY) player.newY = gameSizeY - 10;
-                    
+
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
                     {
@@ -594,7 +602,7 @@ io.on('connection', function (socket)
                // if(pid == 1) monst = 1;
 
                 players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, lastNameChange: 0, firstFire: 0, fireCount: 0, connected: 1, iosock: socket});
-                socket.emit('gameState', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(msg.room)]});
+                socket.emit('gameState', {id: pid, session: sessionID, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(msg.room)]});
                 socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
 
                 console.log('conns: ' + getConnCount(msg.room) + ' monsters: ' + getMonsterCount(msg.room));
@@ -784,21 +792,26 @@ io.on('connection', function (socket)
         }
     });
     
-    socket.on('changeSize', function(msg)
+    socket.on('changeSettings', function(msg)
     {
         if(socket.request.connection.remoteAddress !== "127.0.0.1" && socket.request.connection.remoteAddress !== "localhost")
         {
             console.log('attempted hack into admin command, ip: ' + remoteAddress);
             return;
         }
-        gameSizeX = msg.x;
-        gameSizeY = msg.y;
+        if(msg.x !== undefined)
+            gameSizeX = msg.x;
+        if(msg.y !== undefined)
+            gameSizeY = msg.y;
+        if(msg.speedPlayer !== undefined)
+            speedPlayer = msg.speedPlayer;
+        if(msg.speedMonster !== undefined)
+            speedMonster = msg.speedMonster;
         for(p = 0; p < players.length; p++)
         {
             var player = players[p];
-            if(player.connected !== 1) continue;
-            
-            player.iosock.emit('ID', {id: player.id, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(player.room)]});
+            if(player.connected !== 1 || player.iosock === undefined) continue;
+            player.iosock.emit('gameState', {id: player.id, session: sessionID, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(player.room)]});
             // todo: fix this
             /*var updated = false;
             if(player.x >= gameSizeX)

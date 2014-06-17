@@ -178,6 +178,8 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         sessionID = data.session;
         gameSizeX = data.x;
         gameSizeY = data.y;
+        speedPlayer = data.speedPlayer / 10;
+        speedMonster = data.speedMonster / 10;
         $("#canvas")[0].width = gameSizeX;
         $("#canvas")[0].height = gameSizeY;
         img.src = data.image;
