@@ -9,6 +9,22 @@ function randomInt (low, high)
     return Math.floor(Math.random() * (high - low) + low);
 }
 
+function vectorLength(x, y)
+{
+    return Math.sqrt(x*x + y*y);
+}
+
+function normalize(x, y)
+{
+    var len = vectorLength(x, y);
+    if (len > 0) {
+        return [x/len, y/len];
+    } else {
+        return [x, y]
+    }
+}
+
+
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
 
@@ -47,6 +63,8 @@ var imageChangeCooldown = 30;
 var players = [];
 var rooms = [];
 var bots = [];
+var bullets = [];
+var bulletId = 0;
 
 var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
@@ -450,6 +468,24 @@ function updateWorld()
             }
         }
     }
+
+    // update bullets
+    for(i = 0; i < bullets.length; i++)
+    {
+        bullets[i].x += bullets[i].velocity[0];
+        bullets[i].y += bullets[i].velocity[1];
+
+        // kill bullet if it is outside of canvas
+        if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
+        {
+            bullets[i].alive = 0;
+        }
+        io.sockets.in(bullets[i].room).emit("updateBullet", {id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, alive: bullets[i].alive});
+        if(bullets[i].alive == 0)
+        {
+            bullets.splice(i, 1);
+        }
+    }
 }
 
 setInterval(updateWorld,10);
@@ -504,6 +540,47 @@ io.on('connection', function (socket)
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
                 socket.emit('newPlayer', upd);
+        }
+    });
+
+    // some stuff copied from socket.on('position') and socket.on('joinRoom')
+    socket.on('fireBullet', function (msg)
+    {
+        console.log('Bullet fired by Player: ' + msg.id);
+        if(msg.session !== sessionID || msg.id > players.length)
+        {
+            socket.emit('refresh', {time:'now'});
+            return;
+        }
+
+        if(msg.x >= gameSizeX || msg.y >= gameSizeY)
+            return;
+
+        // Search through the players array for the player that fired the bullet
+        for(p = 0; p < players.length; p++)
+        {
+            if(players[p].id !== msg.id)
+                continue;
+            if(players[p].ip !== remoteAddress)
+            {
+                console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
+                break;
+            }
+
+            var originX = players[p].x + 5;
+            var originY = players[p].y + 5;
+            var velocity = normalize(msg.x - originX, msg.y - originY);
+
+            // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
+            //
+            // At the moment every bullet gets a unique id from a basic incrementing counter, I don't think it'll overflow
+            // but if it ever comes to it, we can just keep an array to store id values that can be recycled and reuse those
+            bullets.push({id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: 1, room: players[p].room});
+            socket.broadcast.to(players[p].room).emit('newBullet', {id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: 1});
+            socket.emit('newBullet', {id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: 1});
+
+            bulletId++;
+            break;
         }
     });
     
