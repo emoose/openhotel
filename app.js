@@ -237,10 +237,7 @@ function updateBots(room)
                     player.newY = randY;
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
-                    {
-                        console.log('moving human bot...');
                         io.sockets.in(room).emit('updatePlayer', upd);
-                    }
                     //bot.status = 'attack';
                 }
                 //else
