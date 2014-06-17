@@ -24,6 +24,16 @@ function normalize(x, y)
     }
 }
 
+function getTime()
+{
+    return Math.round(+new Date()/1000);
+}
+
+function getHighResTime()
+{
+    return (+new Date());
+}
+
 
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
@@ -75,6 +85,7 @@ var gameStart = [];
 var infectStart = [];
 var infectEnd = [];
 var lastImageChange = [];
+var currentTime = [];
 
 var lastImage = [];
 
@@ -157,7 +168,7 @@ function infectRandomPlayer(room)
         
         players[infectidx].monster = 1;
         console.log('infecting player ' + infectid);
-        console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
+        console.log('conns: ' + getConnCount(room) + ' monsters: ' + getMonsterCount(room));
         
         var upd = getPlayerUpdate(players[infectidx]);
         if(upd !== undefined)
@@ -182,7 +193,7 @@ function getBotsForRoom(room)
 
 function updateBots(room)
 {
-    var time = Math.round(+new Date()/1000);
+    var time = getTime();
     var roombots = getBotsForRoom(room);
     if(roombots.length <= 0)
     {
@@ -340,6 +351,11 @@ function updateWorld()
 {
     for(r=0; r<rooms.length; r++)
     {
+        var ct = currentTime[r];
+        var newtime = getHighResTime();
+        var frametime = newtime - ct;
+        currentTime[r] = newtime;
+        
         var room = rooms[r];
         var connCount = getConnCount(room);
         var monsterCount = getMonsterCount(room);
@@ -347,7 +363,7 @@ function updateWorld()
         if(players.length <= 0 || connCount <= 0)
             return;
             
-        var time = Math.round(+new Date()/1000);
+        var time = getTime();
         
         updateBots(room);
         /*if((time - lastStateUpdate) >= 10)
@@ -367,7 +383,7 @@ function updateWorld()
         if(monsterCount >= connCount && infectEnd[r] <= 0) // monsters win
         {
             infectEnd[r] = time;
-            console.log('game over @ ' + time);
+            console.log('game over @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
         if(monsterCount >= connCount && (time - infectEnd[r]) >= 5)
@@ -384,13 +400,13 @@ function updateWorld()
             gameStart[r] = 0;
             infectStart[r] = 0;
             infectEnd[r] = 0;
-            console.log('game reset @ ' + time);
+            console.log('game reset @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + getMonsterCount(room));
         }
         if(connCount >= 2 && gameStart[r] <= 0)
         {
             gameStart[r] = time;
-            console.log('game start @ ' + time);
+            console.log('game start @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
         if(connCount >= 2 && gameStart[r] > 0 && infectStart[r] <= 0 && (time - gameStart[r]) >= 15)
@@ -398,7 +414,7 @@ function updateWorld()
             // we have 2 or more players and 30 seconds has passed
             // infect one of them randomly
             infectStart[r] = time;
-            console.log('infect start = ' + time);
+            console.log('infect start @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
             
             var toinfect = Math.ceil(connCount * 0.3);
@@ -408,7 +424,8 @@ function updateWorld()
                 toinfect = 1;
                 
                 
-            console.log('infecting ' + toinfect + ' random players out of ' + connCount + ' players');
+            console.log('infecting ' + toinfect + ' random players out of ' + connCount + ' players, room ' + room);
+
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
                 
             for(y = 0; y < toinfect; y++)
@@ -420,7 +437,7 @@ function updateWorld()
             var player = players[p];
             if(player.connected !== 1 || player.room !== room) continue;
                 
-            var speed = speedPlayer;
+            var speed = speedPlayer * (frametime / 100);
             
             if(player.x<player.newX)
                 player.x+=speed;
@@ -469,16 +486,16 @@ function updateWorld()
         }
     }
     
-    updateBullets();
+    updateBullets(frametime);
 }
 
-function updateBullets()
+function updateBullets(frametime)
 {
     // update bullets
     for(i = 0; i < bullets.length; i++)
     {
-        bullets[i].x += bullets[i].velocity[0] * 10;
-        bullets[i].y += bullets[i].velocity[1] * 10;
+        bullets[i].x += ((bullets[i].velocity[0] * 10) * (frametime / 100));
+        bullets[i].y += ((bullets[i].velocity[1] * 10) * (frametime / 100));
 
         // kill bullet if it is outside of canvas
         if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
@@ -504,7 +521,7 @@ function updateBullets()
                 var player_box = aabb([players[p].x, players[p].y], [10, 10]);
                 if(bullet_box.intersects(player_box))
                 {
-                    console.log('player hit ' + player.id);
+                    //console.log('player hit ' + player.id);
                     // player hit!
                     player.x += (bullets[i].velocity[0] * 100);
                     player.y += (bullets[i].velocity[1] * 100);
@@ -517,6 +534,7 @@ function updateBullets()
                     var upd = getPlayerUpdate(players[p]);
                     if(upd !== undefined)
                     {
+                        upd.absolute = 1;
                         //upd.attackerid = player.id;
                         io.sockets.emit("updatePlayer", upd);
                     }
@@ -544,7 +562,7 @@ io.on('connection', function (socket)
     socket.on('joinRoom', function (msg)
     {
         var player = getPlayerForSocket(socket);
-        
+        if(msg.room !== 'public') return;
         if(!(rooms.indexOf(msg.room) > -1))
         {
             rooms.push(msg.room);
@@ -552,33 +570,36 @@ io.on('connection', function (socket)
             infectStart.push(0);
             infectEnd.push(0);
             lastImageChange.push(0);
+            currentTime.push(getHighResTime());
             lastImage.push("");
         }
-            
-        if(player !== undefined)
+        if(player === undefined || (player !== undefined && player.room !== msg.room))
         {
-            socket.leave(player.room);
-            socket.join(msg.room);
-            player.room = msg.room;
-        }
-        else
-        {
-            socket.join(msg.room);
-            
-            var pid = players.length + 1;
-            console.log('new player at ID ' + pid + ', IP ' + remoteAddress + ', room ' + msg.room);
-            
-            var randX = randomInt(0, (gameSizeX / 10)) * 10;
-            var randY = randomInt(0, (gameSizeY / 10)) * 10;
-            
-            var monst = 0;
-           // if(pid == 1) monst = 1;
-            
-            players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, firstFire: 0, fireCount: 0, connected: 1, iosock: socket});
-            socket.emit('gameState', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(msg.room)]});
-            socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
-            
-            console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
+            if(player !== undefined)
+            {
+                socket.leave(player.room);
+                socket.join(msg.room);
+                player.room = msg.room;
+            }
+            else
+            {
+                socket.join(msg.room);
+
+                var pid = players.length + 1;
+                console.log('new player at ID ' + pid + ', IP ' + remoteAddress + ', room ' + msg.room);
+
+                var randX = randomInt(0, (gameSizeX / 10)) * 10;
+                var randY = randomInt(0, (gameSizeY / 10)) * 10;
+
+                var monst = 0;
+               // if(pid == 1) monst = 1;
+
+                players.push({id: pid, ip: remoteAddress, room: msg.room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: monst, lastNameChange: 0, firstFire: 0, fireCount: 0, connected: 1, iosock: socket});
+                socket.emit('gameState', {id: pid, x: gameSizeX, y: gameSizeY, session: sessionID, image: lastImage[rooms.indexOf(msg.room)]});
+                socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: 1});
+
+                console.log('conns: ' + getConnCount(msg.room) + ' monsters: ' + getMonsterCount(msg.room));
+            }
         }
         // send player list to client
         for(p = 0; p < players.length; p++)
@@ -586,7 +607,15 @@ io.on('connection', function (socket)
             if(players[p].room !== msg.room) continue;
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
+            {
+                upd.x = players[p].x;
+                upd.y = players[p].y;
+                upd.absolute = 1;
                 socket.emit('newPlayer', upd);
+                upd.x = players[p].newX;
+                upd.y = players[p].newY;
+                socket.emit('updatePlayer', upd);
+            }
         }
     });
 
@@ -604,7 +633,7 @@ io.on('connection', function (socket)
             return;
 
         // Search through the players array for the player that fired the bullet
-        var time = Math.round(+new Date()/1000);
+        var time = getTime();
         for(p = 0; p < players.length; p++)
         {
             if(players[p].id !== msg.id)
@@ -689,7 +718,7 @@ io.on('connection', function (socket)
         var player = getPlayerForSocket(socket);
         if(player === undefined) return;
         
-        var time = Math.round(+new Date()/1000);
+        var time = getTime();
         var roomidx = rooms.indexOf(player.room);
         var validImage = (time - lastImageChange[roomidx] >= imageChangeCooldown);
         
@@ -712,6 +741,7 @@ io.on('connection', function (socket)
             return;
         }
         if(msg.username === undefined) return;
+        var time = getTime();
         var name = msg.username;
         if(name.length > nameSizeLimit)
             name = name.substring(0, nameSizeLimit);
@@ -737,6 +767,12 @@ io.on('connection', function (socket)
                 console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
             }
+            if(players[p].lastNameChange == 0 || time - players[p].lastNameChange >= 30)
+            {
+                players[p].lastNameChange = time;
+            }
+            else
+                break;
             players[p].username = name;
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)
@@ -801,7 +837,7 @@ io.on('connection', function (socket)
             //if(players[p].monster === 1)
             //    monsterCount--;
             console.log('player ' + player.id + ' disconnected');
-            console.log('conns: ' + getConnCount() + ' monsters: ' + getMonsterCount());
+            console.log('conns: ' + getConnCount(player.room) + ' monsters: ' + getMonsterCount(player.room));
             
             if(upd !== undefined)
             {

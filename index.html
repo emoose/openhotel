@@ -15,8 +15,8 @@
 <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
 Username: <input type="text" name="username_changer" id="username_changer" /> 
 <input type="button" name="username_button" id="username_button" value="Set"/><br>
-Room: <input type="text" name="room_changer" id="room_changer" /> 
-<input type="button" name="room_button" id="room_button" value="Set"/><br>
+<!--Room: <input type="text" name="room_changer" id="room_changer" /> 
+<input type="button" name="room_button" id="room_button" value="Set"/><br>-->
 Background: <input type="text" name="bg_changer" id="bg_changer" /> 
 <input type="button" name="bg_button" id="bg_button" value="Set"/>
 <br>
@@ -49,19 +49,6 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
      
     var videoElement = document.getElementById("videoElement");
 
-    // If the page is hidden, pause the video;
-    // if the page is shown, play the video
-    function handleVisibilityChange() {
-      if (document[hidden]) {
-        for(p=0;p<players.length;p++){
-            players[p].x = players[p].newX;
-            players[p].y = players[p].newY;
-        }
-      }
-    }
-
-    document.addEventListener(visibilityChange, handleVisibilityChange, false);
-
 	var id = "";
     var sessionID = 0;
     var gameSizeX = 0;
@@ -84,8 +71,25 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     var disableZombies = 0;
     var img = new Image;
     var imgLoaded = 0;
+    var currentRoom = 'public';
     img.src = "";
     img.onload = function() { imgLoaded = 1; }
+
+    // If the page is hidden, pause the video;
+    // if the page is shown, play the video
+    function handleVisibilityChange()
+    {
+        if (!document[hidden])
+        {
+            players = [];
+            joinRoom(currentRoom);
+            console.log('brought back!');
+        }
+        else
+            console.log('hidden...');
+    }
+
+    document.addEventListener(visibilityChange, handleVisibilityChange, false);
     
     $("#dc_toggle").click(function() {
         showDisconnected = $(this).is(":checked") ? 1 : 0;
@@ -125,6 +129,11 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         joinRoom($("#room_changer").val());
     }
 
+    function getHighResTime()
+    {
+        return (+new Date());
+    }
+
     $("#username_button").click(updateUsername);
     $("#username_changer").keypress(function(event)
     {
@@ -156,11 +165,12 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	//get id
     function joinRoom(room)
     {
+        currentRoom = room;
         socket.emit("joinRoom", {room: room});
         players = [];
     }
     
-    joinRoom('public');
+    joinRoom(currentRoom);
     
 	socket.on("gameState", function(data)
     {
@@ -183,6 +193,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 	//add new player to our list
 	socket.on("newPlayer", function(data)
     {
+        console.log('new player: ', data);
 		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
         addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
 	});
@@ -190,12 +201,14 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     //add new bullet to bullet list
     socket.on("newBullet", function(data)
     {
+        console.log('new bullet: ', data);
         bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, alive: data.alive});
     });
 
 	//update our player list with updated player pos
 	socket.on("updatePlayer", function(data)
     {
+        console.log('player update: ', data);
 		for(p=0;p<players.length;p++)
         {
 			if(players[p].id!==data.id) continue;
@@ -204,6 +217,11 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
             
             player.newX = data.x;
             player.newY = data.y;
+            if(player.absolute !== undefined && player.absolute == 1)
+            {
+                player.x = data.x;
+                player.y = data.y;
+            }
             player.connected = data.connected;
             if(player.username !== data.username && data.username !== undefined && data.username !== '')
                 addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
@@ -301,8 +319,13 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         return result;
     }
 
+    var currentTime = getHighResTime();
 	function draw()
     {
+        var newtime = getHighResTime();
+        var frametime = newtime - currentTime;
+        currentTime = newtime;
+
         if(gameSizeX <= 0 || gameSizeY <= 0) return;
         
 		ctx.clearRect(0,0,gameSizeX,gameSizeY);
@@ -320,7 +343,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
             if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
                 continue;
                 
-            var speed = speedPlayer;
+            var speed = speedPlayer * (frametime / 10);
                 
             if(players[p].x<players[p].newX){
                 players[p].x+=speed;
@@ -361,16 +384,17 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 		}
 
         // draw bullets above players
-        for(i = 0; i < bullets.length; i++)
-        {
-            bullets[i].x += bullets[i].velocity[0];
-            bullets[i].y += bullets[i].velocity[1];
+        if(disableZombies === 0)
+            for(i = 0; i < bullets.length; i++)
+            {
+                bullets[i].x += bullets[i].velocity[0] * (frametime / 10);
+                bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 
-            ctx.beginPath();
-            ctx.fillStyle = "#FF3399";
-            ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
-            ctx.closePath();
-        }
+                ctx.beginPath();
+                ctx.fillStyle = "#FF3399";
+                ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
+                ctx.closePath();
+            }
 
 		ctx.beginPath();
 		ctx.moveTo(mouseX,mouseY);
