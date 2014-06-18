@@ -107,7 +107,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     var keyD = false;
 
     // Keep track of bullet cooldown (stop players from firing a ton of bullets in a small period)
-    var BULLET_FIRE_RATE = 5; // Constant, cooldownTimer resets to this when bullet is fired
+    var BULLET_FIRE_RATE = 20; // Constant, cooldownTimer resets to this when bullet is fired
     var cooldownTimer = 0;
     //==================================================
 
@@ -150,6 +150,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     {
         var name = $("#username_changer").val();
         if(name.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
+        $("#username_changer").val('');
         socket.emit("username", {id: id, username: name, session: sessionID});
         if(localStorage !== undefined)
             localStorage.username = name;
@@ -157,12 +158,22 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 
     function updateBackground()
     {
-        socket.emit("updateImage", {id: id, src: $("#bg_changer").val(), session: sessionID});
+        var url = $("#bg_changer").val();
+        if(url.length < 4 || url.substring(0, 4) !== "http") return;
+        $("#bg_changer").val('');
+        if(url.indexOf("4chan.org") > -1 || url.indexOf("4cdn.org") > -1)
+        {
+            alert("4chan images won't load for other people because of some hotlink protection bs, thanks moot");
+            return;
+        }
+        socket.emit("updateImage", {id: id, src: url, session: sessionID});
     }
     
     function changeRoom()
     {
-        joinRoom($("#room_changer").val());
+        var room = $("#room_changer").val();
+        $("#room_changer").val('');
+        joinRoom(room);
     }
 
     function getHighResTime()
