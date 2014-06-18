@@ -2,7 +2,8 @@ var fs = require('fs')
     , http = require('http')
     , socketio = require('socket.io')
     , aabb = require('aabb-2d')
-    , math = require('./math');
+    , math = require('./math')
+    , utils = require('./utils');
 
 var gameSizeX = 1020;
 var gameSizeY = 640;
@@ -62,7 +63,7 @@ var bots = [];
 var bullets = [];
 var bulletId = 0;
 
-var sessionID = randomInt(0, 65535);
+var sessionID = math.randomInt(0, 65535);
 
 var speedPlayer = 5; // client code should be this / 10 because client updates 10x faster
 var speedMonster = 5.5;
@@ -107,21 +108,6 @@ var server = http.createServer(function(req, res) {
 });
 
 var io = socketio.listen(server);
-
-function randomInt (low, high)
-{
-    return Math.floor(Math.random() * (high - low) + low);
-}
-
-function getTime()
-{
-    return Math.round(+new Date()/1000);
-}
-
-function getHighResTime()
-{
-    return (+new Date());
-}
 
 function getPlayerUpdate(player)
 {
@@ -192,7 +178,7 @@ function infectRandomPlayer(room)
     {
         trycount++;
         if(trycount >= 3) break;
-        var infectid = randomInt(0, players.length);
+        var infectid = math.randomInt(0, players.length);
         var infectidx = getIdxForID(infectid);
 
         // if player ID is invalid, player is disconnected or player is already a monster we'll try again
@@ -225,7 +211,7 @@ function getBotsForRoom(room)
 
 function updateBots(room)
 {
-    var time = getTime();
+    var time = utils.getTime();
     var roombots = getBotsForRoom(room);
     if(roombots.length <= 0)
     {
@@ -233,8 +219,8 @@ function updateBots(room)
 
         for(b=0; b<10;b++)
         {
-            var randX = randomInt(0, (gameSizeX / 10)) * 10;
-            var randY = randomInt(0, (gameSizeY / 10)) * 10;
+            var randX = math.randomInt(0, (gameSizeX / 10)) * 10;
+            var randY = math.randomInt(0, (gameSizeY / 10)) * 10;
             var pid = players.length + 1;
             var botplayer = {id: pid, ip: "127.0.0.1", room: room, username: '', x: randX, y: randY, newX: randX, newY: randY, monster: 0, connected: 1, iosock: undefined};
             players.push(botplayer);
@@ -261,8 +247,8 @@ function updateBots(room)
                    (curYtile == destYtile || curYtile + 1 == destYtile || curYtile - 1 == destYtile) )
                 {
                     // go somewhere random
-                    var randX = randomInt(0, Math.floor(gameSizeX / 10)) * 10;
-                    var randY = randomInt(0, Math.floor(gameSizeY / 10)) * 10;
+                    var randX = math.randomInt(0, Math.floor(gameSizeX / 10)) * 10;
+                    var randY = math.randomInt(0, Math.floor(gameSizeY / 10)) * 10;
 
                     player.newX = randX;
                     player.newY = randY;
@@ -279,7 +265,7 @@ function updateBots(room)
         {
             if(bot.lastType === 'human')
             {
-                if(bot.timer !== 0 && time - bot.timer >= randomInt(2, 7))
+                if(bot.timer !== 0 && time - bot.timer >= math.randomInt(2, 7))
                 {
                     bot.lastType = 'infected';
                     bot.timer = 0;
@@ -333,8 +319,8 @@ function updateBots(room)
                 {
                     if(randX == player.x && randY == player.y)
                     {
-                        randX = randomInt(0, Math.floor(gameSizeX / 10)) * 10;
-                        randY = randomInt(0, Math.floor(gameSizeY / 10)) * 10;
+                        randX = math.randomInt(0, Math.floor(gameSizeX / 10)) * 10;
+                        randY = math.randomInt(0, Math.floor(gameSizeY / 10)) * 10;
                     }
                 }
                 bot.targetidx = targetidx;
@@ -369,7 +355,7 @@ function updateBots(room)
                     {
                         if(bot.timer === 0)
                             bot.timer = time;
-                        else if(time - bot.timer >= randomInt(2, 7))
+                        else if(time - bot.timer >= math.randomInt(2, 7))
                         {
                             player.newX = targetplayer.x;
                             player.newY = targetplayer.y;
@@ -391,7 +377,7 @@ function updateWorld()
     for(r=0; r<rooms.length; r++)
     {
         var ct = currentTime[r];
-        var newtime = getHighResTime();
+        var newtime = utils.getHighResTime();
         var frametime = newtime - ct;
         currentTime[r] = newtime;
 
@@ -402,11 +388,11 @@ function updateWorld()
         if(players.length <= 0 || connCount <= 0)
             return;
 
-        var time = getTime();
+        var time = utils.getTime();
 
         if(time - lastImageChange[r] >= 60 && time - lastImageUserChange[r] >= (3 * 60))
         {
-            lastImage[r] = "http://i.imgur.com/" + defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)] + ".jpg";
+            lastImage[r] = "http://i.imgur.com/" + defaultBackgrounds[math.randomInt(0, defaultBackgrounds.length - 1)] + ".jpg";
             console.log('changing room ' + room + ' image to ' + lastImage[r]);
             var msg = {src: lastImage[r]};
             io.sockets.to(room).emit('updateImage', msg);
@@ -604,10 +590,10 @@ io.on('connection', function (socket)
             gameStart.push(0);
             infectStart.push(0);
             infectEnd.push(0);
-            lastImageChange.push(getTime());
+            lastImageChange.push(utils.getTime());
             lastImageUserChange.push(0);
-            currentTime.push(getHighResTime());
-            var imgurid = defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)];
+            currentTime.push(utils.getHighResTime());
+            var imgurid = defaultBackgrounds[math.randomInt(0, defaultBackgrounds.length - 1)];
             lastImage.push("http://i.imgur.com/" + imgurid + ".jpg");
 
         }
@@ -626,8 +612,8 @@ io.on('connection', function (socket)
                 var pid = players.length + 1;
                 console.log('new player at ID ' + pid + ', IP ' + remoteAddress + ', room ' + msg.room);
 
-                var randX = randomInt(0, (gameSizeX / 10)) * 10;
-                var randY = randomInt(0, (gameSizeY / 10)) * 10;
+                var randX = math.randomInt(0, (gameSizeX / 10)) * 10;
+                var randY = math.randomInt(0, (gameSizeY / 10)) * 10;
 
                 var monst = 0;
                // if(pid == 1) monst = 1;
@@ -672,7 +658,7 @@ io.on('connection', function (socket)
             return;
 
         // Search through the players array for the player that fired the bullet
-        var time = getTime();
+        var time = utils.getTime();
         for(p = 0; p < players.length; p++)
         {
             if(players[p].id !== msg.id)
@@ -757,7 +743,7 @@ io.on('connection', function (socket)
         var player = getPlayerForSocket(socket);
         if(player === undefined) return;
 
-        var time = getTime();
+        var time = utils.getTime();
         var roomidx = rooms.indexOf(player.room);
         var validImage = (time - lastImageUserChange[roomidx] >= imageChangeCooldown);
 
@@ -780,7 +766,7 @@ io.on('connection', function (socket)
             return;
         }
         if(msg.username === undefined) return;
-        var time = getTime();
+        var time = utils.getTime();
         var name = msg.username;
         if(name.length > nameSizeLimit)
             name = name.substring(0, nameSizeLimit);
@@ -798,8 +784,8 @@ io.on('connection', function (socket)
             {
                 players[p].lastNameChange = time;
             }
-            else
-                break;
+            //else
+            //    break;
             players[p].username = name;
             var upd = getPlayerUpdate(players[p]);
             if(upd !== undefined)

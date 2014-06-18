@@ -9,8 +9,8 @@ function radians(degrees)
 }
 
 // vectors are in the form of a 2 element array: [x, y]
-module.exports = {
-
+module.exports =
+{
     magnitude: magnitude,
 
     normalize: function (x, y)
@@ -38,6 +38,10 @@ module.exports = {
         var current = magnitude(vector[0], vector[1]);
         var r = mag / current;
         return [vector[0] * r, vector[1] * r];
+    },
+    
+    randomInt: function(low, high)
+    {
+        return Math.floor(Math.random() * (high - low) + low);
     }
-
 };

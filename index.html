@@ -37,6 +37,7 @@
         <input type="button" name="bg_button" id="bg_button" value="Set"/><br />
         <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
         <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
+        <input type="checkbox" id="theme_toggle">Use dark theme</input><br>
     </div>
     <div style='height:150px;font-size:12px;'>
         Green squares are zombie players, black squares are humans. The square with red around it is you.
@@ -79,7 +80,7 @@
     var videoElement = document.getElementById("videoElement");
 
     var id = "";
-    var sessionID = 0;
+    var sessionID = -1;
     var gameSizeX = 0;
     var gameSizeY = 0;
     var x = 0;
@@ -161,6 +162,20 @@
 
     $("#zombie_toggle").click(function() {
         disableZombies = $(this).is(":checked") ? 1 : 0;
+    });
+    $("#theme_toggle").click(function() {
+        var bgcolor = "#fff";
+        var fontcolor = "#000";
+        var logbgcolor = "#EBEBEB";
+        if($(this).is(":checked"))
+        {
+            bgcolor = "#282A2E";
+            fontcolor = "#fff";
+            logbgcolor = "#282A2E";
+        }
+        $("body").css("background-color",bgcolor);
+        $("body").css("color",fontcolor);
+        $("#event_log").css("background-color",logbgcolor);
     });
 
     function makeTextSafe(text)
@@ -262,7 +277,8 @@
     socket.on("gameState", function(data)
     {
         id=data.id;
-        sessionID = data.session;
+        if(sessionID === -1)
+            sessionID = data.session;
         gameSizeX = data.x;
         gameSizeY = data.y;
         speedPlayer = data.speedPlayer / 10;
