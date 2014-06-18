@@ -165,8 +165,11 @@
 
     function makeTextSafe(text)
     {
-        return $("<div/>").html(text).text();
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
     }
+
     function addToLog(entry)
     {
         if(dontLog) return;
