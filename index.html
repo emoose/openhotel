@@ -511,9 +511,9 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     
     $(document).mousedown(function(event)
     {
-        if(event.which == 1) { // Left click to Move
+        if(event.which == 3) { // Left click to Move
             socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
-        } else if (event.which == 3) { // Right click to Shoot
+        } else if (event.which == 1) { // Right click to Shoot
             socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
         }
     });

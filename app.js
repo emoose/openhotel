@@ -652,12 +652,12 @@ io.on('connection', function (socket)
             }
             if(players[p].firstFire === undefined || players[p].firstFire === 0)
                 players[p].firstFire = time;
-            else if(time - players[p].firstFire >= 5)
+            else if(time - players[p].firstFire >= 2)
             {
                 players[p].firstFire = 0;
                 players[p].fireCount = 0;
             }
-            if(players[p].fireCount !== undefined && players[p].fireCount > 15)
+            if(players[p].fireCount !== undefined && players[p].fireCount > 10)
                 break;
 
             players[p].fireCount++;
