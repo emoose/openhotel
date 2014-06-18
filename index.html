@@ -23,31 +23,33 @@
 </ul>
 
 <!-- tab "panes" -->
-<div class="panes">
-	<div><div id='event_log' style='width:1000px;height:100px;overflow:scroll;background-color:#EBEBEB'></div></div>
-	<div>
-        <p>Current background: <span id='bgimage_src'>http://google.com/</span></p>
-        <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
-        <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
-        <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
+<div class="panes" style='border: 1px solid #000;'>
+	<div style='height:150px;font-size:12px;'>
+        <div id='event_log' style='height:150px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
+    </div>
+	<div style='height:150px;font-size:12px;'>
+        Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
         Username: <input type="text" name="username_changer" id="username_changer" /> 
         <input type="button" name="username_button" id="username_button" value="Set"/><br>
         <!--Room: <input type="text" name="room_changer" id="room_changer" /> 
         <input type="button" name="room_button" id="room_button" value="Set"/><br>-->
         Background: <input type="text" name="bg_changer" id="bg_changer" /> 
-        <input type="button" name="bg_button" id="bg_button" value="Set"/>
+        <input type="button" name="bg_button" id="bg_button" value="Set"/><br />
+        <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
+        <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
     </div>
-	<div>
-        <p>Green squares are zombie players, black squares are humans. The square with red around it is you.
+	<div style='height:150px;font-size:12px;'>
+        Green squares are zombie players, black squares are humans. The square with red around it is you.
         <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
-        <br />The round ends once either all players become zombies (yes) or the humans survive for five minutes (maybe? unimplemented)</p>
-        <p>Controls: <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)</p>
+        <br />The round ends once either all players become zombies (yes) or the humans survive for five minutes (maybe? unimplemented)
+        <br><br>
+        <b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
     </div>
 </div>
 
 </div>
 
-<p>With thanks to BeetRoot for initial idea + code</p>
+<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a>, thanks to BeetRoot for initial idea + code</p>
 <div id='chat_sidebar'>
 	<div style='margin-top:-20px;'>
 		<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px; 
