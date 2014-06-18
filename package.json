@@ -15,6 +15,7 @@
     "hotel"
   ],
   "author": "emoose",
+  "license": "AGPL-3.0",
   "dependencies": {
     "aabb-2d": "*",
     "socket.io": "*",
