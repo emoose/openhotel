@@ -20,7 +20,9 @@
     "socket.io": "*",
     "tripcode": "*"
   },
-  "engine": "node >= 0.10.0",
+  "engines": {
+    "node": ">=0.10.0"
+  },
   "bugs": {
     "url": "https://github.com/emoose/openhotel/issues"
   },
