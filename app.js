@@ -2,7 +2,6 @@ var fs = require('fs')
     , http = require('http')
     , socketio = require('socket.io')
     , aabb = require('aabb-2d')
-    , tripcode = require('tripcode')
     , math = require('./math');
 
 var gameSizeX = 1020;
@@ -785,19 +784,7 @@ io.on('connection', function (socket)
         var name = msg.username;
         if(name.length > nameSizeLimit)
             name = name.substring(0, nameSizeLimit);
-            
-        var trip_index = name.indexOf('#');
-        var trip;
 
-        if (trip_index > -1) {
-            trip = name.substr(trip_index + 1);
-            //var secure = trip.indexOf('#') === 0;
-            //if (secure) {
-            //    trip = crypto.createHash('sha1').update(trip.substr(1) +
-            //           config.securetrip_salt).digest('base64').toString();
-            //}
-            name = name.slice(0, trip_index) + " !" + tripcode(trip);
-        }
         for(p = 0; p < players.length; p++)
         {
             if(players[p].id !== msg.id)

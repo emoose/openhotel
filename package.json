@@ -18,8 +18,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "aabb-2d": "*",
-    "socket.io": "*",
-    "tripcode": "*"
+    "socket.io": "*"
   },
   "engines": {
     "node": ">=0.10.0"
