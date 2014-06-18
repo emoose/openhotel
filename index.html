@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="stylesheet" type="text/css" href="style.css">
@@ -17,28 +17,28 @@
 <div class="box" style="width:1020px" >
 <!-- the tabs -->
 <ul class="tabs">
-	<li><a href="#">Event Log</a></li>
-	<li><a href="#">Settings</a></li>
-	<li><a href="#">Help</a></li>
+    <li><a href="#">Event Log</a></li>
+    <li><a href="#">Settings</a></li>
+    <li><a href="#">Help</a></li>
 </ul>
 
 <!-- tab "panes" -->
 <div class="panes" style='border: 1px solid #000;'>
-	<div style='height:150px;font-size:12px;'>
+    <div style='height:150px;font-size:12px;'>
         <div id='event_log' style='height:150px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
     </div>
-	<div style='height:150px;font-size:12px;'>
+    <div style='height:150px;font-size:12px;'>
         Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
-        Username: <input type="text" name="username_changer" id="username_changer" /> 
+        Username: <input type="text" name="username_changer" id="username_changer" />
         <input type="button" name="username_button" id="username_button" value="Set"/><br>
-        <!--Room: <input type="text" name="room_changer" id="room_changer" /> 
+        <!--Room: <input type="text" name="room_changer" id="room_changer" />
         <input type="button" name="room_button" id="room_button" value="Set"/><br>-->
-        Background: <input type="text" name="bg_changer" id="bg_changer" /> 
+        Background: <input type="text" name="bg_changer" id="bg_changer" />
         <input type="button" name="bg_button" id="bg_button" value="Set"/><br />
         <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
         <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
     </div>
-	<div style='height:150px;font-size:12px;'>
+    <div style='height:150px;font-size:12px;'>
         Green squares are zombie players, black squares are humans. The square with red around it is you.
         <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
         <br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
@@ -51,18 +51,18 @@
 
 <p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a>, thanks to BeetRoot for initial idea + code</p>
 <div id='chat_sidebar'>
-	<div style='margin-top:-20px;'>
-		<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px; 
-		margin-left:0px; border-top-left-radius:3px; margin-right:-1px;'>
-			<div style='float:left;' id='chat_button'>&#x25BC; hide chat - powered by livechan
-			</div><br><br>
-		</div>
-	</div>
-	<iframe id='chat_frame' style='position:absolute;width:100%;height:100%;border:none;right:0;'></iframe>
+    <div style='margin-top:-20px;'>
+        <div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px;
+        margin-left:0px; border-top-left-radius:3px; margin-right:-1px;'>
+            <div style='float:left;' id='chat_button'>&#x25BC; hide chat - powered by livechan
+            </div><br><br>
+        </div>
+    </div>
+    <iframe id='chat_frame' style='position:absolute;width:100%;height:100%;border:none;right:0;'></iframe>
 </div>
 <script type='text/javascript'>
-    var hidden, visibilityChange; 
-    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
       hidden = "hidden";
       visibilityChange = "visibilitychange";
     } else if (typeof document.mozHidden !== "undefined") {
@@ -75,26 +75,26 @@
       hidden = "webkitHidden";
       visibilityChange = "webkitvisibilitychange";
     }
-     
+
     var videoElement = document.getElementById("videoElement");
 
-	var id = "";
+    var id = "";
     var sessionID = 0;
     var gameSizeX = 0;
     var gameSizeY = 0;
-	var x = 0;
-	var y = 0;
-	var newX = 0;
-	var newY = 0;
-	var mouseX = 0;
-	var mouseY = 0;
-	var speedPlayer = 0.5;
+    var x = 0;
+    var y = 0;
+    var newX = 0;
+    var newY = 0;
+    var mouseX = 0;
+    var mouseY = 0;
+    var speedPlayer = 0.5;
     var speedMonster = 0.55;
-	var players = [];
+    var players = [];
     var bullets = [];
-	var blockSize=10;
-	var socket = io.connect();
-	var ctx = $("#canvas")[0].getContext("2d");
+    var blockSize=10;
+    var socket = io.connect();
+    var ctx = $("#canvas")[0].getContext("2d");
     var canvas = document.getElementById("canvas");
     var showDisconnected = 0;
     var disableZombies = 0;
@@ -109,7 +109,7 @@
             dimensions = result;
         else if(gameSizeX > dimensions.width || gameSizeY > dimensions.height)
             dimensions = {width: gameSizeX, height: gameSizeY};
-            
+
         $("#bgimage").attr('src', img.src);
         $("#bgimage").css("height",dimensions.height + "px");
         $("#bgimage").height = dimensions.height;
@@ -123,7 +123,7 @@
     // fix for canvas being unfocusable
     $("#canvas")[0].setAttribute('tabindex','0');
     $("#canvas")[0].focus();
-    
+
     //==================================================
     // Tracking Player State
     //--------------------------------------------------
@@ -137,7 +137,7 @@
     // Keep track of bullet cooldown (stop players from firing a ton of bullets in a small period)
     var BULLET_FIRE_RATE = 20; // Constant, cooldownTimer resets to this when bullet is fired
     var cooldownTimer = 0;
-    
+
     var dontLog = false;
     //==================================================
 
@@ -154,7 +154,7 @@
     }
 
     document.addEventListener(visibilityChange, handleVisibilityChange, false);
-    
+
     $("#dc_toggle").click(function() {
         showDisconnected = $(this).is(":checked") ? 1 : 0;
     });
@@ -174,7 +174,7 @@
         log = entry + "<br />" + log;
         $("#event_log").html(log);
     }
-    
+
     function refreshGame()
     {
         players = [];
@@ -205,7 +205,7 @@
         }
         socket.emit("updateImage", {id: id, src: url, session: sessionID});
     }
-    
+
     function changeRoom()
     {
         var room = $("#room_changer").val();
@@ -245,20 +245,20 @@
         }
         return '<b>Unknown player</b>';
     }
-	
-	//get id
+
+    //get id
     function joinRoom(room)
     {
         currentRoom = room;
         socket.emit("joinRoom", {room: room});
         players = [];
     }
-    
+
     joinRoom(currentRoom);
-    
-	socket.on("gameState", function(data)
+
+    socket.on("gameState", function(data)
     {
-		id=data.id;
+        id=data.id;
         sessionID = data.session;
         gameSizeX = data.x;
         gameSizeY = data.y;
@@ -274,35 +274,35 @@
             $("#username_changer").val(localStorage.username);
             updateUsername();
         }
-	});
-    
-	//add new player to our list
-	socket.on("newPlayer", function(data)
+    });
+
+    //add new player to our list
+    socket.on("newPlayer", function(data)
     {
         //console.log('new player: ', data);
-		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
+        players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
         addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
-	});
-    
+    });
+
     //add new bullet to bullet list
     socket.on("newBullet", function(data)
     {
         //console.log('new bullet: ', data);
         bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, alive: data.alive});
     });
-    
+
     socket.on("endPlayerList", function(data) { dontLog = false; });
 
-	//update our player list with updated player pos
-	socket.on("updatePlayer", function(data)
+    //update our player list with updated player pos
+    socket.on("updatePlayer", function(data)
     {
         //console.log('player update: ', data);
-		for(p=0;p<players.length;p++)
+        for(p=0;p<players.length;p++)
         {
-			if(players[p].id!==data.id) continue;
-            
+            if(players[p].id!==data.id) continue;
+
             var player = players[p];
-            
+
             player.newX = data.x;
             player.newY = data.y;
             if(player.absolute !== undefined && player.absolute === 1)
@@ -315,7 +315,7 @@
                 addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
 
             player.username = data.username;
-            
+
             if(player.monster !== data.monster && data.monster == 1)
             {
                 var attacker = " has become infected!";
@@ -325,9 +325,9 @@
             }
             player.monster = data.monster;
             break;
-		}
-	});
-    
+        }
+    });
+
     // Remove bullet if it's dead, otherwise update its position
     socket.on("updateBullet", function(data)
     {
@@ -355,7 +355,7 @@
         //refreshGame();
         setTimeout(function(){ window.location.reload(1); }, 1000);
     });
-    
+
     socket.on("updateImage", function(data)
     {
         img.src = makeTextSafe(data.src);
@@ -367,7 +367,7 @@
     {
         addToLog("<b>Round ended!</b> The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
     });
-    
+
     /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
     function ScaleImage(srcwidth, srcheight, targetwidth, targetheight, fLetterBox)
     {
@@ -411,25 +411,25 @@
     }
 
     var currentTime = getHighResTime();
-	function draw()
+    function draw()
     {
         var newtime = getHighResTime();
         var frametime = newtime - currentTime;
         currentTime = newtime;
 
         if(gameSizeX <= 0 || gameSizeY <= 0) return;
-        
-		ctx.clearRect(0,0,gameSizeX,gameSizeY);
-        
-		for(p=0;p<players.length;p++)
+
+        ctx.clearRect(0,0,gameSizeX,gameSizeY);
+
+        for(p=0;p<players.length;p++)
         {
             if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
                 continue;
-                
+
             if(players[p].connected !== 0)
             {
                 var speed = speedPlayer * (frametime / 10);
-                    
+
                 if(players[p].x<players[p].newX){
                     players[p].x+=speed;
                 }
@@ -443,31 +443,31 @@
                     players[p].y-=speed;
                 }
             }
-            
+
             ctx.beginPath();
             ctx.fillStyle = "#FFFFFF";
             if(players[p].id == id) // change border to red if its us
                 ctx.fillStyle = "#FF0000";
-                
+
             ctx.fillRect(players[p].x, players[p].y, 10, 10);
-            
+
             if(players[p].monster == 1 && disableZombies === 0)
                 ctx.fillStyle = "#00FF00";
             else
                 ctx.fillStyle = "#000";
-                
+
             ctx.fillRect(players[p].x + 1,players[p].y + 1,8,8);
 
             var name = players[p].id;
             if(players[p].username != '' && players[p].username !== undefined)
                 name = name + '. ' + players[p].username;
-                
+
             ctx.font = "12px Arial";
             ctx.textAlign = 'center';
             ctx.fillText(name, players[p].x+blockSize/2, players[p].y+blockSize+12);
-            
+
             ctx.closePath();
-		}
+        }
 
         // draw bullets above players
         if(disableZombies === 0)
@@ -482,18 +482,18 @@
                 ctx.closePath();
             }
 
-		ctx.beginPath();
-		ctx.moveTo(mouseX,mouseY);
-		ctx.lineTo(mouseX+blockSize,mouseY);
-		ctx.moveTo(mouseX+blockSize,mouseY);
-		ctx.lineTo(mouseX+blockSize,mouseY+blockSize);
-		ctx.moveTo(mouseX+blockSize,mouseY+blockSize);
-		ctx.lineTo(mouseX,mouseY+blockSize);
-		ctx.moveTo(mouseX,mouseY+blockSize);
-		ctx.lineTo(mouseX,mouseY);
-		ctx.stroke();
-		ctx.closePath();
-	}
+        ctx.beginPath();
+        ctx.moveTo(mouseX,mouseY);
+        ctx.lineTo(mouseX+blockSize,mouseY);
+        ctx.moveTo(mouseX+blockSize,mouseY);
+        ctx.lineTo(mouseX+blockSize,mouseY+blockSize);
+        ctx.moveTo(mouseX+blockSize,mouseY+blockSize);
+        ctx.lineTo(mouseX,mouseY+blockSize);
+        ctx.moveTo(mouseX,mouseY+blockSize);
+        ctx.lineTo(mouseX,mouseY);
+        ctx.stroke();
+        ctx.closePath();
+    }
 
     function update()
     {
@@ -508,12 +508,12 @@
             {
                 var player = players[p];
                 if(player.id!==id) continue;
-                
+
                 var curXtile = Math.ceil(player.x / 10);
                 var curYtile = Math.ceil(player.y / 10);
                 var destXtile = Math.ceil(player.newX / 10);
                 var destYtile = Math.ceil(player.newY / 10);
-                if((curXtile == destXtile || curXtile + 1 == destXtile || curXtile - 1 == destXtile) && 
+                if((curXtile == destXtile || curXtile + 1 == destXtile || curXtile - 1 == destXtile) &&
                    (curYtile == destYtile || curYtile + 1 == destYtile || curYtile - 1 == destYtile) )
                 {
                     var moveX = 0;
@@ -526,11 +526,11 @@
                         moveX -= 10;
                     if(keyD)
                         moveX += 10;
-                        
+
                     socket.emit("position", {id: id, x: Math.ceil((player.x + moveX) / 10) * 10, y: Math.ceil((player.y + moveY) / 10) * 10, session: sessionID});
                     // either emit a "position" event or call some move function
                 }
-                
+
                 break;
             }
         }*/
@@ -547,27 +547,27 @@
         }
     }
 
-	$(document).mousemove( function(e)
+    $(document).mousemove( function(e)
     {
-		var x,y;
-		for(x=e.pageX-8;x>=0;x--)
+        var x,y;
+        for(x=e.pageX-8;x>=0;x--)
         {
-			if(x%blockSize==0)
+            if(x%blockSize==0)
             {
-				mouseX = x;
-				break;
-			}
-		}
-		for(y=e.pageY-8;y>=0;y--)
+                mouseX = x;
+                break;
+            }
+        }
+        for(y=e.pageY-8;y>=0;y--)
         {
-			if(y%blockSize==0)
+            if(y%blockSize==0)
             {
-				mouseY = y;
-				break;
-			}
-		}
-	});
-    
+                mouseY = y;
+                break;
+            }
+        }
+    });
+
     $(document).mousedown(function(event)
     {
         if(event.which == 3) { // Left click to Move
@@ -580,10 +580,10 @@
     $("#canvas").keydown(function(event)
     {
         var code = event.keyCode || e.which;
-        
+
         var moveX = 0;
         var moveY = 0;
-        
+
         if(code == 32)
         {
             keySpace = true;
@@ -623,7 +623,7 @@
                 if(moveY >= gameSizeY) moveY = gameSizeY - 10;
                 console.log('moving player...');
                 socket.emit("position", {id: id, x: moveX, y: moveY, session: sessionID});
-                
+
                 break;
             }
         }
@@ -642,7 +642,7 @@
             var player = players[p];
             if(player.id!==id) continue;
             var movementKeyUp = false;
-            //var moveX = 
+            //var moveX =
             if(code == 87 && keyW)
             {
                 keyW = false;
@@ -670,7 +670,7 @@
             break;
         }
     });
-    
+
     setInterval(update,10);
 
     // Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
@@ -682,38 +682,38 @@ var chat_open = false;
 var chat_loaded = false;
 var chat_channel = 'r';
 function toggle_chat(){
-	if (chat_open === false && chat_loaded == false) {
-    	var chat_sidebar = document.getElementById("chat_sidebar");
-		chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
-		document.getElementById('chat_frame').style.display = 'block';
-		document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
-		document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
-		chat_open = true;
-		chat_loaded = true;
-		if (document.width < 600) {
-    		toggle_chat();
-		}
-		
-	} else if (chat_open === true && chat_loaded == true){
-		document.getElementById('chat_frame').style.display = 'none';
-		document.getElementById('chat_sidebar').style.top = '100%';
-		document.getElementById('chat_button').innerHTML = '&#x25B2; chat - powered by livechan';
-		chat_open = false;
-	} else if (chat_open === false && chat_loaded == true){
-		document.getElementById('chat_frame').style.display = 'block';
-		document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
-		document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
-		chat_open = true;
-		scroll_sidebar();
-	}
-	function scroll_sidebar(){
-		var sidebar_check = document.getElementById("chat_frame");
-		if (typeof(sidebar_check) != 'undefined' && sidebar_check != null) {
-			sidebar_check.contentWindow.scroll();
-		} else {
-			console.log("sidebar not found :(");
-		}
-	}
+    if (chat_open === false && chat_loaded == false) {
+        var chat_sidebar = document.getElementById("chat_sidebar");
+        chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
+        document.getElementById('chat_frame').style.display = 'block';
+        document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
+        document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
+        chat_open = true;
+        chat_loaded = true;
+        if (document.width < 600) {
+            toggle_chat();
+        }
+
+    } else if (chat_open === true && chat_loaded == true){
+        document.getElementById('chat_frame').style.display = 'none';
+        document.getElementById('chat_sidebar').style.top = '100%';
+        document.getElementById('chat_button').innerHTML = '&#x25B2; chat - powered by livechan';
+        chat_open = false;
+    } else if (chat_open === false && chat_loaded == true){
+        document.getElementById('chat_frame').style.display = 'block';
+        document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
+        document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
+        chat_open = true;
+        scroll_sidebar();
+    }
+    function scroll_sidebar(){
+        var sidebar_check = document.getElementById("chat_frame");
+        if (typeof(sidebar_check) != 'undefined' && sidebar_check != null) {
+            sidebar_check.contentWindow.scroll();
+        } else {
+            console.log("sidebar not found :(");
+        }
+    }
 }
 
 toggle_chat();
