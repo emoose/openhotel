@@ -624,6 +624,7 @@ io.on('connection', function (socket)
                 socket.emit('updatePlayer', upd);
             }
         }
+        socket.emit('endPlayerList', true);
     });
 
     // some stuff copied from socket.on('position') and socket.on('joinRoom')

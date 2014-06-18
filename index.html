@@ -109,6 +109,8 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     // Keep track of bullet cooldown (stop players from firing a ton of bullets in a small period)
     var BULLET_FIRE_RATE = 20; // Constant, cooldownTimer resets to this when bullet is fired
     var cooldownTimer = 0;
+    
+    var dontLog = false;
     //==================================================
 
     // If the page is hidden, pause the video;
@@ -118,6 +120,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         if (!document[hidden])
         {
             players = [];
+            dontLog = true;
             joinRoom(currentRoom);
             console.log('brought back!');
         }
@@ -141,6 +144,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     }
     function addToLog(entry)
     {
+        if(dontLog) return;
         var log = $("#event_log").html();
         log = entry + "<br />" + log;
         $("#event_log").html(log);
@@ -252,6 +256,8 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         //console.log('new bullet: ', data);
         bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, alive: data.alive});
     });
+    
+    socket.on("endPlayerList", function(data) { dontLog = false; });
 
 	//update our player list with updated player pos
 	socket.on("updatePlayer", function(data)
