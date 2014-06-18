@@ -397,8 +397,12 @@
     socket.on("updateImage", function(data)
     {
         img.src = makeTextSafe(data.src);
+
         if(data.id !== undefined)
             addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + img.src + '">' + img.src + '</a>');
+        else
+            addToLog('Background changed to <a href="' + img.src + '">' + img.src + '</a>');
+
         $("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
     });
     socket.on("roundEnd", function(data)
@@ -712,7 +716,7 @@
 
 var chat_open = false;
 var chat_loaded = false;
-var chat_channel = 'r';
+var chat_channel = 'r#OpenHotel';
 function toggle_chat(){
     if (chat_open === false && chat_loaded == false) {
         var chat_sidebar = document.getElementById("chat_sidebar");
