@@ -15,10 +15,78 @@ function getTime()
     return Math.round(+new Date()/1000);
 }
 
-function getHighResTime()
-{
-    return (+new Date());
-}
+var gameSizeX = 1020;
+var gameSizeY = 640;
+var nameSizeLimit = 256;
+var imageChangeCooldown = 30;
+
+// imgur ids to default backgrounds
+// bg is chosen at random when someone joins an empty room
+var defaultBackgrounds = [
+    // Weeb backgrounds
+    'ZlfgFEd',
+    '4md05F3',
+    'na9C9v2',
+    'PTRI2c3',
+    'eTrf88K',
+    'u6n9Ua5',
+    'mOjgJNz',
+
+    'YC1sfXU', // RMS
+    'Af4V2dw', // XP bliss
+    'DvKUZe6', // watermelon cat
+    'IXhb7gm',
+    'Mo76aW2',
+    'c4LI12K',
+    'aVU460l',
+    '7IiT5Dr',
+    'no6tZ88',
+    'HdiU8si',
+    'QnknX9f',
+    'qa10MHM',
+    'StDQX9J',
+    'a9QLCAQ',
+    'MwmvF7q',
+    'I3vmKcd',
+    'Slvh7PP', // RMS
+    'fWK2UYH',
+    'DRBZ2ID', // carlton
+    
+    // Nintendrone backgrounds
+    'Z99cY9Z',
+    'FCDClZv',
+    'kozAact',
+    '1gNWCfp',
+    'grbfGDF',
+    'HVNO2oU',
+    'KcRYzaS',
+    'wD1e0xu',
+    'SR3GwrL',
+    'KNgH4Z1',
+    'y7OgpcR',
+    'K6FPsql'
+];
+
+var players = [];
+var rooms = [];
+var bots = [];
+var bullets = [];
+var bulletId = 0;
+
+var sessionID = randomInt(0, 65535);
+
+var speedPlayer = 5; // client code should be this / 10 because client updates 10x faster
+var speedMonster = 5.5;
+
+var gameStart = [];
+var infectStart = [];
+var infectEnd = [];
+
+var lastImage = [];
+var lastImageChange = [];
+var lastImageUserChange = [];
+
+var currentTime = [];
 
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
@@ -49,33 +117,37 @@ var server = http.createServer(function(req, res) {
     console.log('Listening at: http://localhost:8080');
 });
 
-
-var gameSizeX = 1020;
-var gameSizeY = 640;
-var nameSizeLimit = 256;
-var imageChangeCooldown = 30;
-
-var players = [];
-var rooms = [];
-var bots = [];
-var bullets = [];
-var bulletId = 0;
-
-var sessionID = randomInt(0, 65535);
 var io = socketio.listen(server);
 
-var speedPlayer = 5;
-var speedMonster = 5.5;
+function randomInt (low, high)
+{
+    return Math.floor(Math.random() * (high - low) + low);
+}
 
-var gameStart = [];
-var infectStart = [];
-var infectEnd = [];
-var lastImageChange = [];
-var currentTime = [];
+function vectorLength(x, y)
+{
+    return Math.sqrt(x*x + y*y);
+}
 
-var lastImage = [];
+function normalize(x, y)
+{
+    var len = vectorLength(x, y);
+    if (len > 0) {
+        return [x/len, y/len];
+    } else {
+        return [x, y]
+    }
+}
 
-var lastStateUpdate = 0;
+function getTime()
+{
+    return Math.round(+new Date()/1000);
+}
+
+function getHighResTime()
+{
+    return (+new Date());
+}
 
 function getPlayerUpdate(player)
 {
@@ -358,20 +430,16 @@ function updateWorld()
             
         var time = getTime();
         
+        if(time - lastImageChange[r] >= 60 && time - lastImageUserChange[r] >= (3 * 60))
+        {
+            lastImage[r] = "http://i.imgur.com/" + defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)] + ".jpg";
+            console.log('changing room ' + room + ' image to ' + lastImage[r]);
+            var msg = {src: lastImage[r]};
+            io.sockets.to(room).emit('updateImage', msg);
+            lastImageChange[r] = time;
+        }
+        
         updateBots(room);
-        /*if((time - lastStateUpdate) >= 10)
-        //{
-            console.log('sending state update');
-            for(p = 0; p < players.length; p++)
-            {
-                if(players[p].connected !== 1)
-                    continue;
-                var upd = getPlayerUpdateAbsolute(players[p]);
-                if(upd !== undefined)
-                    io.sockets.emit("updatePlayerAbsolute", upd);
-            }
-            lastStateUpdate = time;
-        }*/
         
         if(monsterCount >= connCount && infectEnd[r] <= 0) // monsters win
         {
@@ -379,6 +447,7 @@ function updateWorld()
             console.log('game over @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
+        
         if(monsterCount >= connCount && (time - infectEnd[r]) >= 5)
         {
             for(p = 0; p < players.length; p++)
@@ -561,9 +630,12 @@ io.on('connection', function (socket)
             gameStart.push(0);
             infectStart.push(0);
             infectEnd.push(0);
-            lastImageChange.push(0);
+            lastImageChange.push(getTime());
+            lastImageUserChange.push(0);
             currentTime.push(getHighResTime());
-            lastImage.push("");
+            var imgurid = defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)];
+            lastImage.push("http://i.imgur.com/" + imgurid + ".jpg");
+            
         }
         if(player === undefined || (player !== undefined && player.room !== msg.room))
         {
@@ -713,13 +785,13 @@ io.on('connection', function (socket)
         
         var time = getTime();
         var roomidx = rooms.indexOf(player.room);
-        var validImage = (time - lastImageChange[roomidx] >= imageChangeCooldown);
+        var validImage = (time - lastImageUserChange[roomidx] >= imageChangeCooldown);
         
         if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
         {
             socket.broadcast.to(player.room).emit('updateImage', msg);
             socket.emit('updateImage', msg);
-            lastImageChange[roomidx] = time;
+            lastImageUserChange[roomidx] = time;
             lastImage[roomidx] = msg.src;
             console.log('image changed by player ' + msg.id + ' to ' + msg.src);
         }
@@ -840,7 +912,6 @@ io.on('connection', function (socket)
             if(upd !== undefined)
             {
                 socket.broadcast.to(player.room).emit('updatePlayer', upd);
-                //io.sockets.emit('updatePlayer', upd);
                 console.log('sent disconnected player update');
             }
             break;
