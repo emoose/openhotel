@@ -7,7 +7,7 @@
     right:0;
     width:400px;
 }
-canvas {
+canvas, #canvas_wrapper, #bgimage {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -16,4 +16,4 @@ canvas {
     user-select: none;
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
-}   
+}
