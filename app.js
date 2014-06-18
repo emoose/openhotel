@@ -40,7 +40,7 @@ var defaultBackgrounds = [
     'Slvh7PP', // RMS
     'fWK2UYH',
     'DRBZ2ID', // carlton
-    
+
     // Nintendrone backgrounds
     'Z99cY9Z',
     'FCDClZv',
@@ -186,7 +186,7 @@ function infectRandomPlayer(room)
 {
     if(players.length <= 0 || getConnCount(room) <= 0)
         return;
-        
+
     var trycount = 0;
     while(true)
     {
@@ -194,18 +194,18 @@ function infectRandomPlayer(room)
         if(trycount >= 3) break;
         var infectid = randomInt(0, players.length);
         var infectidx = getIdxForID(infectid);
-        
+
         // if player ID is invalid, player is disconnected or player is already a monster we'll try again
         if(infectidx < 0 || players[infectidx].connected !== 1 || players[infectidx].monster !== 0 || players[infectidx].room !== room) continue;
-        
+
         players[infectidx].monster = 1;
         console.log('infecting player ' + infectid);
         console.log('conns: ' + getConnCount(room) + ' monsters: ' + getMonsterCount(room));
-        
+
         var upd = getPlayerUpdate(players[infectidx]);
         if(upd !== undefined)
             io.sockets.in(room).emit("updatePlayer", upd);
-            
+
         // break out because we've infected someone
         break;
     }
@@ -217,7 +217,7 @@ function getBotsForRoom(room)
     for(b=0; b<bots.length; b++)
     {
         if(players[bots[b].playeridx].room !== room) continue;
-        
+
         roombots.push(bots[b]);
     }
     return roombots;
@@ -230,7 +230,7 @@ function updateBots(room)
     if(roombots.length <= 0)
     {
         // spawn some bots
-        
+
         for(b=0; b<10;b++)
         {
             var randX = randomInt(0, (gameSizeX / 10)) * 10;
@@ -257,7 +257,7 @@ function updateBots(room)
                 var curYtile = Math.ceil(player.y / 10);
                 var destXtile = Math.ceil(player.newX / 10);
                 var destYtile = Math.ceil(player.newY / 10);
-                if((curXtile == destXtile || curXtile + 1 == destXtile || curXtile - 1 == destXtile) && 
+                if((curXtile == destXtile || curXtile + 1 == destXtile || curXtile - 1 == destXtile) &&
                    (curYtile == destYtile || curYtile + 1 == destYtile || curYtile - 1 == destYtile) )
                 {
                     // go somewhere random
@@ -278,7 +278,7 @@ function updateBots(room)
         else
         {
             if(bot.lastType === 'human')
-            {                
+            {
                 if(bot.timer !== 0 && time - bot.timer >= randomInt(2, 7))
                 {
                     bot.lastType = 'infected';
@@ -295,7 +295,7 @@ function updateBots(room)
                         if(upd !== undefined)
                             io.sockets.in(room).emit('updatePlayer', upd);
                     }
-                        
+
                     continue;
                 }
             }
@@ -319,9 +319,9 @@ function updateBots(room)
                         //console.log('bot ', bot, ' chose player ', targetplayer.id);
                     }
                 }
-                
+
                 //if(targetidx < 0) continue;
-                
+
                 var randX = player.newX;
                 var randY = player.newY;
                 if(targetidx >= 0)
@@ -378,7 +378,7 @@ function updateBots(room)
                                 io.sockets.in(room).emit('updatePlayer', upd);
                             bot.timer = 0;
                         }
-                            
+
                        // break;
                     }
                 }
@@ -394,16 +394,16 @@ function updateWorld()
         var newtime = getHighResTime();
         var frametime = newtime - ct;
         currentTime[r] = newtime;
-        
+
         var room = rooms[r];
         var connCount = getConnCount(room);
         var monsterCount = getMonsterCount(room);
-        
+
         if(players.length <= 0 || connCount <= 0)
             return;
-            
+
         var time = getTime();
-        
+
         if(time - lastImageChange[r] >= 60 && time - lastImageUserChange[r] >= (3 * 60))
         {
             lastImage[r] = "http://i.imgur.com/" + defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)] + ".jpg";
@@ -412,16 +412,16 @@ function updateWorld()
             io.sockets.to(room).emit('updateImage', msg);
             lastImageChange[r] = time;
         }
-        
+
         updateBots(room);
-        
+
         if(monsterCount >= connCount && infectEnd[r] <= 0) // monsters win
         {
             infectEnd[r] = time;
             console.log('game over @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
-        
+
         if(monsterCount >= connCount && (time - infectEnd[r]) >= 5)
         {
             for(p = 0; p < players.length; p++)
@@ -452,38 +452,38 @@ function updateWorld()
             infectStart[r] = time;
             console.log('infect start @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-            
+
             var toinfect = Math.ceil(connCount * 0.3);
             if(toinfect == connCount)
                 toinfect--;
             if(toinfect <= 0)
                 toinfect = 1;
-                
-                
+
+
             console.log('infecting ' + toinfect + ' random players out of ' + connCount + ' players, room ' + room);
 
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
-                
+
             for(y = 0; y < toinfect; y++)
                 infectRandomPlayer(room);
         }
-        
+
         for(p = 0; p < players.length; p++)
         {
             var player = players[p];
             if(player.connected !== 1 || player.room !== room) continue;
-                
+
             var speed = speedPlayer * (frametime / 100);
-            
+
             if(player.x<player.newX)
                 player.x+=speed;
-                
+
             if(player.x>player.newX)
                 player.x-=speed;
-                
+
             if(player.y<player.newY)
                 player.y+=speed;
-                
+
             if(player.y>player.newY)
                 player.y-=speed;
         }
@@ -493,15 +493,15 @@ function updateWorld()
             if(player.monster !== 1 || player.connected !== 1 || player.room !== room) continue;
 
             var zombie_box = aabb([player.x - 10, player.y - 10], [30, 30]);
-            
+
             for(py = 0; py < players.length; py++)
             {
                 if(players[py].monster == 1 || players[py].id == player.id || players[py].room !== room)
                     continue;
-                
+
                 var player_box = aabb([players[py].x, players[py].y], [10, 10]);
                 //var intersecting = (player.x - 10 <= (players[py].x + 30)) && (players[py].x <= player.x + 10) && (player.y <= players[py].y + 10) && (players[py].y <= player.y + 10);
-                
+
                 //if((vX == ourX && (vY == (ourY - 1) || vY == (ourY + 1))) || (vY == ourY && (vX == (ourX - 1) || vX == (ourX + 1))))
                 if(zombie_box.intersects(player_box))
                 {
@@ -521,7 +521,7 @@ function updateWorld()
             }
         }
     }
-    
+
     updateBullets(frametime);
 }
 
@@ -545,7 +545,7 @@ function updateBullets(frametime)
             bullets.splice(i, 1);
             continue;
         }
-        
+
         var idx = getIdxForID(bullets[i].playerId);
         if(idx >= 0 && players.length > idx && players[idx].monster !== 1)
         {
@@ -578,7 +578,7 @@ function updateBullets(frametime)
                 }
             }
         }
-        
+
         if(bullets[i].alive == 0)
         {
             bullets.splice(i, 1);
@@ -591,9 +591,9 @@ setInterval(updateWorld,100);
 //setInterval(updateBullets, 10);
 
 io.on('connection', function (socket)
-{    
+{
     var remoteAddress = socket.request.connection.remoteAddress;
-    
+
     socket.on('joinRoom', function (msg)
     {
         var player = getPlayerForSocket(socket);
@@ -609,7 +609,7 @@ io.on('connection', function (socket)
             currentTime.push(getHighResTime());
             var imgurid = defaultBackgrounds[randomInt(0, defaultBackgrounds.length - 1)];
             lastImage.push("http://i.imgur.com/" + imgurid + ".jpg");
-            
+
         }
         if(player === undefined || (player !== undefined && player.room !== msg.room))
         {
@@ -710,20 +710,20 @@ io.on('connection', function (socket)
             break;
         }
     });
-    
+
     socket.on('position', function (msg)
     {
         // if session is different or player id is invalid
         if(msg.session !== sessionID || msg.id > players.length)
-        {   
+        {
             socket.emit('refresh', {time:'now'});
             return;
         }
-        
+
         // if position is out of bounds
         if(msg.x >= gameSizeX || msg.y >= gameSizeY)
             return;
-            
+
         for(p = 0; p < players.length; p++)
         {
             if(players[p].id !== msg.id)
@@ -733,7 +733,7 @@ io.on('connection', function (socket)
                 console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
             }
-                
+
             players[p].newX = msg.x;
             players[p].newY = msg.y;
             var upd = getPlayerUpdate(players[p]);
@@ -745,22 +745,22 @@ io.on('connection', function (socket)
             break;
         }
     });
-    
+
     socket.on('updateImage', function(msg)
     {
         // if session is different or player id is invalid
         if(msg.session !== sessionID || msg.id > players.length)
-        {   
+        {
             socket.emit('refresh', {time:'now'});
             return;
         }
         var player = getPlayerForSocket(socket);
         if(player === undefined) return;
-        
+
         var time = getTime();
         var roomidx = rooms.indexOf(player.room);
         var validImage = (time - lastImageUserChange[roomidx] >= imageChangeCooldown);
-        
+
         if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
         {
             socket.broadcast.to(player.room).emit('updateImage', msg);
@@ -770,12 +770,12 @@ io.on('connection', function (socket)
             console.log('image changed by player ' + msg.id + ' to ' + msg.src);
         }
     });
-    
+
     socket.on('username', function(msg)
     {
         // if session is different or player id is invalid
         if(msg.session !== sessionID || msg.id > players.length)
-        {   
+        {
             socket.emit('refresh', {time:'now'});
             return;
         }
@@ -811,7 +811,7 @@ io.on('connection', function (socket)
             break;
         }
     });
-    
+
     socket.on('changeSettings', function(msg)
     {
         if(socket.request.connection.remoteAddress !== "127.0.0.1" && socket.request.connection.remoteAddress !== "localhost")
@@ -855,7 +855,7 @@ io.on('connection', function (socket)
             }*/
         }
     });
-    
+
     socket.on('disconnect', function()
     {
         for(p = 0; p < players.length; p++)
@@ -870,7 +870,7 @@ io.on('connection', function (socket)
             //    monsterCount--;
             console.log('player ' + player.id + ' disconnected');
             console.log('conns: ' + getConnCount(player.room) + ' monsters: ' + getMonsterCount(player.room));
-            
+
             if(upd !== undefined)
             {
                 socket.broadcast.to(player.room).emit('updatePlayer', upd);
