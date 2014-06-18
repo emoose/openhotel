@@ -41,7 +41,7 @@
 	<div style='height:150px;font-size:12px;'>
         Green squares are zombie players, black squares are humans. The square with red around it is you.
         <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
-        <br />The round ends once either all players become zombies (yes) or the humans survive for five minutes (maybe? unimplemented)
+        <br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
         <br><br>
         <b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
     </div>
@@ -426,19 +426,22 @@
             if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
                 continue;
                 
-            var speed = speedPlayer * (frametime / 10);
-                
-            if(players[p].x<players[p].newX){
-                players[p].x+=speed;
-            }
-            if(players[p].x>players[p].newX){
-                players[p].x-=speed;
-            }
-            if(players[p].y<players[p].newY){
-                players[p].y+=speed;
-            }
-            if(players[p].y>players[p].newY){
-                players[p].y-=speed;
+            if(players[p].connected !== 0)
+            {
+                var speed = speedPlayer * (frametime / 10);
+                    
+                if(players[p].x<players[p].newX){
+                    players[p].x+=speed;
+                }
+                if(players[p].x>players[p].newX){
+                    players[p].x-=speed;
+                }
+                if(players[p].y<players[p].newY){
+                    players[p].y+=speed;
+                }
+                if(players[p].y>players[p].newY){
+                    players[p].y-=speed;
+                }
             }
             
             ctx.beginPath();
