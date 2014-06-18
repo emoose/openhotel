@@ -8,9 +8,7 @@
 <body>
 <script type='text/javascript' src='http://code.jquery.com/jquery-2.1.1.min.js'></script>
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
-<div id='canvas_wrapper' style='border: 1px solid #000; width:1020px; height:640px;'>
-<canvas id='canvas' height='640' width='1020' ></canvas>
-</div><br><br>
+<canvas id='canvas' height='640' width='1020' ></canvas><br><br>
 <div id='event_log' style='width:1020px;height:100px;overflow:scroll;background-color:#EBEBEB'></div>
 <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
 <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
@@ -440,7 +438,6 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         }
         if(keyW || keyA || keyS || keyD)
         {
-            console.log('keypress!');
             for(p=0;p<players.length;p++)
             {
                 var player = players[p];
@@ -464,10 +461,11 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
                     if(keyD)
                         moveX += 10;
                         
-                    console.log('moving...');
                     socket.emit("position", {id: id, x: Math.ceil((player.x + moveX) / 10) * 10, y: Math.ceil((player.y + moveY) / 10) * 10, session: sessionID});
                     // either emit a "position" event or call some move function
                 }
+                
+                break;
             }
         }
         // implement other keys here?
