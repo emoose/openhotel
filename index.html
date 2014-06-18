@@ -97,8 +97,8 @@
     var socket = io.connect();
     var ctx = $("#canvas")[0].getContext("2d");
     var canvas = document.getElementById("canvas");
-    var showDisconnected = 0;
-    var disableZombies = 0;
+    var showDisconnected = false;
+    var disableZombies = false;
     var img = new Image;
     var currentRoom = 'public';
     img.src = "";
@@ -157,11 +157,11 @@
     document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
     $("#dc_toggle").click(function() {
-        showDisconnected = $(this).is(":checked") ? 1 : 0;
+        showDisconnected = $(this).is(":checked");
     });
 
     $("#zombie_toggle").click(function() {
-        disableZombies = $(this).is(":checked") ? 1 : 0;
+        disableZombies = $(this).is(":checked");
     });
     $("#theme_toggle").click(function() {
         setTheme($(this).is(":checked") ? "dark" : "light");
@@ -251,11 +251,13 @@
     {
         if(event.which == 13 || event.keyCode == 13) updateUsername();
     });
+    
     $("#bg_button").click(updateBackground);
     $("#bg_changer").keypress(function(event)
     {
         if(event.which == 13 || event.keyCode == 13) updateBackground();
     });
+    
     $("#room_button").click(changeRoom);
     $("#room_changer").keypress(function(event)
     {
@@ -310,7 +312,7 @@
     socket.on("newPlayer", function(data)
     {
         //console.log('new player: ', data);
-        players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected});
+        players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected, moveRight: false, moveLeft: false, moveUp: false, moveDown: false});
         addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
     });
 
@@ -345,8 +347,13 @@
                 addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
 
             player.username = data.username;
+            
+            player.moveRight = data.moveRight;
+            player.moveLeft = data.moveLeft;
+            player.moveUp = data.moveUp;
+            player.moveDown = data.moveDown;
 
-            if(player.monster !== data.monster && data.monster == 1)
+            if(player.monster !== data.monster && data.monster)
             {
                 var attacker = " has become infected!";
                 if(data.attackerid !== undefined && data.attackerid > 0)
@@ -369,9 +376,10 @@
 
             var bullet = bullets[i];
 
-            if(data.alive == 0) {
+            if(!data.alive)
                 bullets.splice(i, 1);
-            } else {
+            else
+            {
                 bullet.x = data.x;
                 bullet.y = data.y;
             }
@@ -453,54 +461,72 @@
 
         for(p=0;p<players.length;p++)
         {
-            if(window.location.pathname !== '/all' && players[p].connected == 0 && showDisconnected == 0) // don't draw disconnected players
+            var player = players[p];
+            if(window.location.pathname !== '/all' && !player.connected && !showDisconnected) // don't draw disconnected players
                 continue;
 
-            if(players[p].connected !== 0)
+            if(player.connected)
             {
                 var speed = speedPlayer * (frametime / 10);
-
-                if(players[p].x<players[p].newX){
-                    players[p].x+=speed;
+                
+                if(player.x<player.newX || player.moveRight)
+                {
+                    player.x+=speed;
+                    if(player.moveRight) { player.newX = player.x; player.newY = player.y }
+                    if(player.x > player.newX) player.x = player.newX;
                 }
-                if(players[p].x>players[p].newX){
-                    players[p].x-=speed;
+                if(player.x>player.newX || player.moveLeft)
+                {
+                    player.x-=speed;
+                    if(player.moveLeft) { player.newX = player.x; player.newY = player.y }
+                    if(player.x < player.newX) player.x = player.newX;
                 }
-                if(players[p].y<players[p].newY){
-                    players[p].y+=speed;
+                if(player.y<player.newY || player.moveDown)
+                {
+                    player.y+=speed;
+                    if(player.moveDown) { player.newX = player.x; player.newY = player.y }
+                    if(player.y > player.newY) player.y = player.newY;
                 }
-                if(players[p].y>players[p].newY){
-                    players[p].y-=speed;
+                if(player.y>player.newY || player.moveUp)
+                {
+                    player.y-=speed;
+                    if(player.moveUp) { player.newX = player.x; player.newY = player.y }
+                    if(player.y < player.newY) player.y = player.newY;
                 }
+                
+                if(player.x < 0) player.x = 0;
+                if(player.y < 0) player.y = 0;
+                if(player.x >= (gameSizeX - 10)) player.x = gameSizeX - 10;
+                if(player.y >= (gameSizeY - 10)) player.y = gameSizeY - 10;           
             }
 
             ctx.beginPath();
             ctx.fillStyle = "#FFFFFF";
-            if(players[p].id == id) // change border to red if its us
+            if(player.id == id) // change border to red if its us
                 ctx.fillStyle = "#FF0000";
 
-            ctx.fillRect(players[p].x, players[p].y, 10, 10);
+            ctx.fillRect(player.x, player.y, 10, 10);
 
-            if(players[p].monster == 1 && disableZombies === 0)
+            if(player.monster && !disableZombies)
                 ctx.fillStyle = "#00FF00";
             else
                 ctx.fillStyle = "#000";
 
-            ctx.fillRect(players[p].x + 1,players[p].y + 1,8,8);
+            ctx.fillRect(player.x + 1,player.y + 1,8,8);
 
-            var name = players[p].id;
-            if(players[p].username != '' && players[p].username !== undefined)
-                name = name + '. ' + players[p].username;
+            var name = player.id;
+            if(player.username != '' && player.username !== undefined)
+                name = name + '. ' + player.username;
 
             ctx.font = "12px Arial";
             ctx.textAlign = 'center';
-            ctx.fillText(name, players[p].x+blockSize/2, players[p].y+blockSize+12);
+            ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+12);
 
             ctx.closePath();
         }
 
         // draw bullets above players
-        if(disableZombies === 0)
+        if(!disableZombies)
             for(i = 0; i < bullets.length; i++)
             {
                 bullets[i].x += bullets[i].velocity[0] * (frametime / 10);
@@ -610,10 +636,9 @@
     $("#canvas").keydown(function(event)
     {
         var code = event.keyCode || e.which;
-
-        var moveX = 0;
-        var moveY = 0;
-
+        
+        var moveChanged = false;
+        
         if(code == 32)
         {
             keySpace = true;
@@ -622,83 +647,60 @@
         else if(code == 87 && !keyW)
         {
             keyW = true;
-            moveY -= 1000;
+            moveChanged = true;
         }
         else if(code == 83 && !keyS)
         {
             keyS = true;
-            moveY += 1000;
+            moveChanged = true;
         }
         else if(code == 65 && !keyA)
         {
             keyA = true;
-            moveX -= 1000;
+            moveChanged = true;
         }
         else if(code == 68 && !keyD)
         {
             keyD = true;
-            moveX += 1000;
+            moveChanged = true;
         }
-        if(moveX !== 0 || moveY !== 0)
-        {
-            for(p=0;p<players.length;p++)
-            {
-                var player = players[p];
-                if(player.id!==id) continue;
-                moveX = player.x + moveX;
-                moveY = player.y + moveY;
-                if(moveX < 0) moveX = 0;
-                if(moveY < 0) moveY = 0;
-                if(moveX >= gameSizeX) moveX = gameSizeX - 10;
-                if(moveY >= gameSizeY) moveY = gameSizeY - 10;
-                console.log('moving player...');
-                socket.emit("position", {id: id, x: moveX, y: moveY, session: sessionID});
-
-                break;
-            }
-        }
+        if(moveChanged)
+            socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
     });
 
     $("#canvas").keyup(function(event)
     {
         var code = event.keyCode || e.which;
+        
+        var moveChanged = false;
+        
         if(code == 32)
         {
             keySpace = false;
             return true;
         }
-        for(p=0;p<players.length;p++)
+        else if(code == 87 && keyW)
         {
-            var player = players[p];
-            if(player.id!==id) continue;
-            var movementKeyUp = false;
-            //var moveX =
-            if(code == 87 && keyW)
-            {
-                keyW = false;
-                movementKeyUp = true;
-            }
-            else if(code == 83 && keyS)
-            {
-                keyS = false;
-                movementKeyUp = true;
-            }
-            else if(code == 65 && keyA)
-            {
-                keyA = false;
-                movementKeyUp = true;
-            }
-            else if(code == 68 && keyD)
-            {
-                keyD = false;
-                movementKeyUp = true;
-            }
-            if(movementKeyUp)
-            {
-                socket.emit("position", {id: id, x: player.x, y: player.y, session: sessionID});
-            }
-            break;
+            keyW = false;
+            moveChanged = true;
         }
+        else if(code == 83 && keyS)
+        {
+            keyS = false;
+            moveChanged = true;
+        }
+        else if(code == 65 && keyA)
+        {
+            keyA = false;
+            moveChanged = true;
+        }
+        else if(code == 68 && keyD)
+        {
+            keyD = false;
+            moveChanged = true;
+        }
+        if(moveChanged)
+            socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
     });
 
     setInterval(update,10);
