@@ -2,7 +2,8 @@ var fs = require('fs')
     , http = require('http')
     , socketio = require('socket.io')
     , aabb = require('aabb-2d')
-    , tripcode = require('tripcode');
+    , tripcode = require('tripcode')
+    , math = require('./math');
 
 var gameSizeX = 1020;
 var gameSizeY = 640;
@@ -111,21 +112,6 @@ var io = socketio.listen(server);
 function randomInt (low, high)
 {
     return Math.floor(Math.random() * (high - low) + low);
-}
-
-function vectorLength(x, y)
-{
-    return Math.sqrt(x*x + y*y);
-}
-
-function normalize(x, y)
-{
-    var len = vectorLength(x, y);
-    if (len > 0) {
-        return [x/len, y/len];
-    } else {
-        return [x, y]
-    }
 }
 
 function getTime()
@@ -711,7 +697,7 @@ io.on('connection', function (socket)
 
             var originX = players[p].x + 5;
             var originY = players[p].y + 5;
-            var velocity = normalize(msg.x - originX, msg.y - originY);
+            var velocity = math.normalize(msg.x - originX, msg.y - originY);
 
             // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
             //
