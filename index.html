@@ -164,19 +164,31 @@
         disableZombies = $(this).is(":checked") ? 1 : 0;
     });
     $("#theme_toggle").click(function() {
+        setTheme($(this).is(":checked") ? "dark" : "light");
+    });
+    
+    function setTheme(themeName)
+    {
         var bgcolor = "#fff";
         var fontcolor = "#000";
         var logbgcolor = "#EBEBEB";
-        if($(this).is(":checked"))
+        if(themeName === "dark")
         {
             bgcolor = "#282A2E";
             fontcolor = "#fff";
             logbgcolor = "#282A2E";
+            $("#theme_toggle").prop('checked', true);
         }
-        $("body").css("background-color",bgcolor);
-        $("body").css("color",fontcolor);
-        $("#event_log").css("background-color",logbgcolor);
-    });
+        $("body").css("background-color", bgcolor);
+        $("body").css("color", fontcolor);
+        $("#event_log").css("background-color", logbgcolor);
+        if(localStorage !== undefined && localStorage.theme !== themeName)
+            localStorage.theme = themeName;
+    }
+    
+    // load saved theme
+    if(localStorage !== undefined && localStorage.theme !== undefined)
+        setTheme(localStorage.theme);
 
     function makeTextSafe(text)
     {
