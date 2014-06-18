@@ -75,6 +75,21 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     img.src = "";
     img.onload = function() { imgLoaded = 1; }
 
+    //==================================================
+    // Tracking Player State
+    //--------------------------------------------------
+    // Keep track of Player's keyboard
+    var keySpace = false;
+    var keyW = false;
+    var keyA = false;
+    var keyS = false;
+    var keyD = false;
+
+    // Keep track of bullet cooldown (stop players from firing a ton of bullets in a small period)
+    var BULLET_FIRE_RATE = 5; // Constant, cooldownTimer resets to this when bullet is fired
+    var cooldownTimer = 0;
+    //==================================================
+
     // If the page is hidden, pause the video;
     // if the page is shown, play the video
     function handleVisibilityChange()
@@ -411,6 +426,27 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
 		ctx.closePath();
 	}
 
+    function update()
+    {
+        if(keySpace) {
+            fireBullet();
+        }
+        if(keyW) {
+            // either emit a "position" event or call some move function
+        }
+        // implement other keys here?
+    }
+
+    function fireBullet()
+    {
+        if(cooldownTimer <= 0) {
+            socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
+            cooldownTimer = BULLET_FIRE_RATE;
+        } else {
+            cooldownTimer--;
+        }
+    }
+
 	$(document).mousemove( function(e)
     {
 		var x,y;
@@ -434,13 +470,47 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     
     $(document).mousedown(function(event)
     {
-        if(event.which == 1) {
+        if(event.which == 1) { // Left click to Move
             socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
-        } else if (event.which == 3) {
-            socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID})
+        } else if (event.which == 3) { // Right click to Shoot
+            socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
         }
     });
-	
+
+    $(document).keydown(function(event)
+    {
+        var code = event.keyCode || e.which;
+        if(code == 32) {
+            keySpace = true;
+            return false; // Prevent the Page from scrolling down when Space Key is pressed
+        } else if(code == 87) {
+            keyW = true;
+        } else if(code == 65) {
+            keyA = false;
+        } else if(code == 83) {
+            keyS = false;
+        } else if(code == 68) {
+            keyD = false;
+        }
+    });
+
+    $(document).keyup(function(event)
+    {
+        var code = event.keyCode || e.which;
+        if(code == 32) {
+            keySpace = false;
+        } else if(code == 87) {
+            keyW = false;
+        } else if(code == 65) {
+            keyA = false;
+        } else if(code == 83) {
+            keyS = false;
+        } else if(code == 68) {
+            keyD = false;
+        }
+    });
+    
+    setInterval(update,10);
 	setInterval(draw,10);
 
     // Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
