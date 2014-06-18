@@ -207,8 +207,6 @@
 
     function refreshGame()
     {
-        players = [];
-        dontLog = true;
         joinRoom(currentRoom);
         console.log('brought back!');
     }
@@ -280,8 +278,9 @@
     function joinRoom(room)
     {
         currentRoom = room;
-        socket.emit("joinRoom", {room: room});
         players = [];
+        dontLog = true;
+        socket.emit("joinRoom", {room: room});
     }
 
     joinRoom(currentRoom);
