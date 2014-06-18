@@ -5,16 +5,6 @@ var fs = require('fs')
     , tripcode = require('tripcode')
     , math = require('./math');
 
-function randomInt(low, high)
-{
-    return Math.floor(Math.random() * (high - low) + low);
-}
-
-function getTime()
-{
-    return Math.round(+new Date()/1000);
-}
-
 var gameSizeX = 1020;
 var gameSizeY = 640;
 var nameSizeLimit = 256;
@@ -122,21 +112,6 @@ var io = socketio.listen(server);
 function randomInt (low, high)
 {
     return Math.floor(Math.random() * (high - low) + low);
-}
-
-function vectorLength(x, y)
-{
-    return Math.sqrt(x*x + y*y);
-}
-
-function normalize(x, y)
-{
-    var len = vectorLength(x, y);
-    if (len > 0) {
-        return [x/len, y/len];
-    } else {
-        return [x, y]
-    }
 }
 
 function getTime()
