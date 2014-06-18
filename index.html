@@ -6,25 +6,47 @@
 <title>OpenHotel</title>
 </head>
 <body>
-<script type='text/javascript' src='http://code.jquery.com/jquery-2.1.1.min.js'></script>
+<!--<script type='text/javascript' src='http://code.jquery.com/jquery-2.1.1.min.js'></script>-->
+<script src="http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js"></script>
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 <div id='canvas_wrapper'>
 <img id='bgimage' style='position:absolute;z-index:1;' />
 <canvas id='canvas' height='640' width='1020' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
 </div>
-<p>Current background: <span id='bgimage_src'>http://google.com/</span></p>
-<p>Controls: <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)</p>
-<div id='event_log' style='width:1020px;height:100px;overflow:scroll;background-color:#EBEBEB'></div>
-<input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
-<input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
-<a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
-Username: <input type="text" name="username_changer" id="username_changer" /> 
-<input type="button" name="username_button" id="username_button" value="Set"/><br>
-<!--Room: <input type="text" name="room_changer" id="room_changer" /> 
-<input type="button" name="room_button" id="room_button" value="Set"/><br>-->
-Background: <input type="text" name="bg_changer" id="bg_changer" /> 
-<input type="button" name="bg_button" id="bg_button" value="Set"/>
-<br>
+
+<div class="box" style="width:1020px" >
+<!-- the tabs -->
+<ul class="tabs">
+	<li><a href="#">Event Log</a></li>
+	<li><a href="#">Settings</a></li>
+	<li><a href="#">Help</a></li>
+</ul>
+
+<!-- tab "panes" -->
+<div class="panes">
+	<div><div id='event_log' style='width:1000px;height:100px;overflow:scroll;background-color:#EBEBEB'></div></div>
+	<div>
+        <p>Current background: <span id='bgimage_src'>http://google.com/</span></p>
+        <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
+        <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
+        <a href="https://github.com/emoose/openhotel">Fork my repo on github</a><br>
+        Username: <input type="text" name="username_changer" id="username_changer" /> 
+        <input type="button" name="username_button" id="username_button" value="Set"/><br>
+        <!--Room: <input type="text" name="room_changer" id="room_changer" /> 
+        <input type="button" name="room_button" id="room_button" value="Set"/><br>-->
+        Background: <input type="text" name="bg_changer" id="bg_changer" /> 
+        <input type="button" name="bg_button" id="bg_button" value="Set"/>
+    </div>
+	<div>
+        <p>Green squares are zombie players, black squares are humans. The square with red around it is you.
+        <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
+        <br />The round ends once either all players become zombies (yes) or the humans survive for five minutes (maybe? unimplemented)</p>
+        <p>Controls: <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)</p>
+    </div>
+</div>
+
+</div>
+
 <p>With thanks to BeetRoot for initial idea + code</p>
 <div id='chat_sidebar'>
 	<div style='margin-top:-20px;'>
@@ -92,7 +114,10 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         $("#bgimage").css("width",dimensions.width + "px");
         $("#bgimage").width = dimensions.width;
     }
-    
+
+    // setup ul.tabs to work as tabs for each div directly under div.panes
+    $("ul.tabs").tabs("div.panes > div");
+
     // fix for canvas being unfocusable
     $("#canvas")[0].setAttribute('tabindex','0');
     $("#canvas")[0].focus();
@@ -471,6 +496,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
         if(keySpace) {
             fireBullet();
         }
+        /*
         if(keyW || keyA || keyS || keyD)
         {
             for(p=0;p<players.length;p++)
@@ -502,7 +528,7 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
                 
                 break;
             }
-        }
+        }*/
         // implement other keys here?
     }
 
@@ -550,33 +576,93 @@ Background: <input type="text" name="bg_changer" id="bg_changer" />
     {
         var code = event.keyCode || e.which;
         
-        if(code == 32) {
+        var moveX = 0;
+        var moveY = 0;
+        
+        if(code == 32)
+        {
             keySpace = true;
             return false; // Prevent the Page from scrolling down when Space Key is pressed
-        } else if(code == 87) {
+        }
+        else if(code == 87 && !keyW)
+        {
             keyW = true;
-        } else if(code == 65) {
-            keyA = true;
-        } else if(code == 83) {
+            moveY -= 1000;
+        }
+        else if(code == 83 && !keyS)
+        {
             keyS = true;
-        } else if(code == 68) {
+            moveY += 1000;
+        }
+        else if(code == 65 && !keyA)
+        {
+            keyA = true;
+            moveX -= 1000;
+        }
+        else if(code == 68 && !keyD)
+        {
             keyD = true;
+            moveX += 1000;
+        }
+        if(moveX !== 0 || moveY !== 0)
+        {
+            for(p=0;p<players.length;p++)
+            {
+                var player = players[p];
+                if(player.id!==id) continue;
+                moveX = player.x + moveX;
+                moveY = player.y + moveY;
+                if(moveX < 0) moveX = 0;
+                if(moveY < 0) moveY = 0;
+                if(moveX >= gameSizeX) moveX = gameSizeX - 10;
+                if(moveY >= gameSizeY) moveY = gameSizeY - 10;
+                console.log('moving player...');
+                socket.emit("position", {id: id, x: moveX, y: moveY, session: sessionID});
+                
+                break;
+            }
         }
     });
 
     $("#canvas").keyup(function(event)
     {
         var code = event.keyCode || e.which;
-        if(code == 32) {
+        if(code == 32)
+        {
             keySpace = false;
-        } else if(code == 87) {
-            keyW = false;
-        } else if(code == 65) {
-            keyA = false;
-        } else if(code == 83) {
-            keyS = false;
-        } else if(code == 68) {
-            keyD = false;
+            return true;
+        }
+        for(p=0;p<players.length;p++)
+        {
+            var player = players[p];
+            if(player.id!==id) continue;
+            var movementKeyUp = false;
+            //var moveX = 
+            if(code == 87 && keyW)
+            {
+                keyW = false;
+                movementKeyUp = true;
+            }
+            else if(code == 83 && keyS)
+            {
+                keyS = false;
+                movementKeyUp = true;
+            }
+            else if(code == 65 && keyA)
+            {
+                keyA = false;
+                movementKeyUp = true;
+            }
+            else if(code == 68 && keyD)
+            {
+                keyD = false;
+                movementKeyUp = true;
+            }
+            if(movementKeyUp)
+            {
+                socket.emit("position", {id: id, x: player.x, y: player.y, session: sessionID});
+            }
+            break;
         }
     });
     
