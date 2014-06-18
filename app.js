@@ -12,6 +12,7 @@ var fs = require('fs')
 var gameSizeX = 1280;
 var gameSizeY = 720;
 var nameSizeLimit = 256;
+var runningBehindProxy = false;
 
 // time limits, in seconds
 var imageChangeCooldown = 30;
@@ -106,6 +107,7 @@ var currentTime = [];
 
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
+var listeningport = Number((runningBehindProxy && process.env.PORT) || 8080);
 
 var serverPassword = "default";
 if(fs.existsSync(__dirname + '/password.txt'))
@@ -137,8 +139,8 @@ var server = http.createServer(function(req, res) {
         res.end(sourcedata);
     }
     console.log('conn to ' + req.url);
-}).listen(8080, function() {
-    console.log('Listening at: http://localhost:8080');
+}).listen(listeningport, function() {
+    console.log('Listening at: http://localhost:' + listeningport);
 });
 
 var io = socketio.listen(server);
@@ -764,7 +766,7 @@ setInterval(updateWorld,10);
 
 io.on('connection', function (socket)
 {
-    var remoteAddress = socket.request.connection.remoteAddress;
+    var remoteAddress = (runningBehindProxy && socket.handshake.headers['x-forwarded-for']) || socket.request.connection.remoteAddress;
 
     socket.on('joinRoom', function (msg)
     {
