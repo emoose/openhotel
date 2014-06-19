@@ -83,8 +83,8 @@ var bulletId = 0;
 
 var sessionID = math.randomInt(0, 65535);
 
-var speedPlayer = 5; // client code should be this / 10 because client updates 10x faster
-var speedMonster = 5.5;
+var speedPlayer = 0.5; // client code should be this / 10 because client updates 10x faster
+var speedMonster = 0.55;
 
 var gameStart = [];
 var infectStart = [];
@@ -515,7 +515,7 @@ function updateWorld()
             var player = players[p];
             if(!player.connected || player.room !== room) continue;
 
-            var speed = speedPlayer * (frametime / 100);
+            var speed = speedPlayer * (frametime / 10);
 
             if(player.x<player.newX || player.moveRight)
             {
@@ -595,8 +595,8 @@ function updateBullets(frametime)
         if(!bullets[i].alive)
             continue;
 
-        bullets[i].x += ((bullets[i].velocity[0] * 10) * (frametime / 100));
-        bullets[i].y += ((bullets[i].velocity[1] * 10) * (frametime / 100));
+        bullets[i].x += (bullets[i].velocity[0] * (frametime / 10));
+        bullets[i].y += (bullets[i].velocity[1] * (frametime / 10));
 
         // kill bullet if it is outside of canvas
         if(bullets[i].x > gameSizeX || bullets[i].x < 0 || bullets[i].y > gameSizeY || bullets[i].y < 0)
@@ -655,7 +655,7 @@ function updateBullets(frametime)
     }
 }
 
-setInterval(updateWorld,100);
+setInterval(updateWorld,10);
 //setInterval(updateBullets, 10);
 
 io.on('connection', function (socket)
