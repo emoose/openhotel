@@ -37,7 +37,6 @@
         <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
         <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
         <input type="checkbox" id="theme_toggle">Use dark theme</input><br>
-        <input type="checkbox" id="hitbox_toggle">Draw hitboxes</input><br>
         <input type="checkbox" id="mouse_toggle">Swap mouse (left to move, right to shoot)</input><br>
         <input type="checkbox" id="bg_toggle">Disable background</input><br>
     </div>
@@ -88,7 +87,6 @@
     var canvas = document.getElementById("canvas");
     var showDisconnected = false;
     var disableZombies = false;
-    var drawHitBox = false;
     var swapMouse = false;
     var disableBackground = false;
     var img = new Image;
@@ -293,7 +291,7 @@
             }
 
             ctx.beginPath();
-            if(player.monster && drawHitBox)
+            if(player.monster)
             {
                 ctx.fillStyle = "#FFCC00";
                 ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
@@ -650,13 +648,6 @@
         setTheme($(this).is(":checked") ? "dark" : "light");
     });
 
-    $("#hitbox_toggle").click(function() {
-        drawHitBox = $(this).is(":checked");
-        var lsValue = drawHitBox ? "1" : "0"; // convert to string since localStorage only allows string values
-        if(localStorage !== undefined && localStorage.drawHitBox !== lsValue)
-            localStorage.drawHitBox = lsValue;
-    });
-
     $("#mouse_toggle").click(function() {
         swapMouse = $(this).is(":checked");
         var lsValue = swapMouse ? "1" : "0";
@@ -686,11 +677,6 @@
     // load saved theme
     if(localStorage !== undefined && localStorage.theme !== undefined)
         setTheme(localStorage.theme);
-    if(localStorage !== undefined && localStorage.drawHitBox !== undefined && localStorage.drawHitBox === "1")
-    {
-        drawHitBox = true;
-        $("#hitbox_toggle").prop('checked', true);
-    }
     if(localStorage !== undefined && localStorage.swapMouse !== undefined && localStorage.swapMouse === "1")
     {
         swapMouse = true;
@@ -877,7 +863,8 @@
             document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
             document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
             chat_open = true;
-            scroll_sidebar();
+            // permission denied since we aren't on livechan domain :(
+            //scroll_sidebar();
         }
         function scroll_sidebar()
         {
