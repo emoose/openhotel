@@ -102,7 +102,9 @@ var sourcedata = fs.readFileSync(__dirname + '/app.js');
 var serverPassword = "default";
 if(fs.existsSync(__dirname + '/password.txt'))
     serverPassword = fs.readFileSync(__dirname + '/password.txt', 'utf8'); // todo: use hashes
-    
+
+serverPassword = serverPassword.replace(/^\s+|\s+$/g, '');
+
 console.log('server password:', serverPassword);
 
 var server = http.createServer(function(req, res) {
