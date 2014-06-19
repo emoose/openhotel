@@ -450,7 +450,7 @@ function updateWorld()
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
 
-        if(monsterCount >= connCount && (time - infectEnd[r]) >= 5)
+        if(monsterCount >= connCount && infectEnd[r] > 0 && (time - infectEnd[r]) >= 5)
         {
             for(p = 0; p < players.length; p++)
             {
@@ -604,7 +604,7 @@ function updateBullets(frametime)
             for(p = 0; p < players.length; p++)
             {
                 var player = players[p];
-                if(player.id === bullets[i].playerId || !player.monster) continue;
+                if(player.id === bullets[i].playerId || !player.monster || !player.connected) continue;
                 var player_box = aabb([player.x - 10, player.y - 10], [30, 30]);
                 if(bullet_box.intersects(player_box))
                 {
