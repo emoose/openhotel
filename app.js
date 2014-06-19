@@ -99,6 +99,12 @@ var currentTime = [];
 var indexdata = fs.readFileSync(__dirname + '/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
 
+var serverPassword = "default";
+if(fs.existsSync(__dirname + '/password.txt'))
+    serverPassword = fs.readFileSync(__dirname + '/password.txt', 'utf8'); // todo: use hashes
+    
+console.log('server password:', serverPassword);
+
 var server = http.createServer(function(req, res) {
     if(req.url === '/devindex.html')
     {
@@ -922,7 +928,12 @@ io.on('connection', function (socket)
 
     socket.on('changeSettings', function(msg)
     {
-        if(socket.request.connection.remoteAddress !== "127.0.0.1" && socket.request.connection.remoteAddress !== "localhost")
+        if(serverPassword === "default")
+        {
+            console.log('no password.txt file found, disallowing admin command!');
+            return;
+        }
+        if(msg.password === undefined || msg.password !== serverPassword)
         {
             console.log('attempted hack into admin command, ip: ' + remoteAddress);
             return;
