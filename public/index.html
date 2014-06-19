@@ -259,28 +259,28 @@
             {
                 var speed = (0.5 * speedPlayer) * (frametime / 10);
 
-                if(player.x<player.newX || player.moveRight)
+                if(player.x<player.newX || (player.moveRight && !player.bulletHit))
                 {
                     player.x+=speed;
-                    if(player.moveRight) { player.newX = player.x; player.newY = player.y }
+                    if(player.moveRight && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
                     if(player.x > player.newX) player.x = player.newX;
                 }
-                if(player.x>player.newX || player.moveLeft)
+                if(player.x>player.newX || (player.moveLeft && !player.bulletHit))
                 {
                     player.x-=speed;
-                    if(player.moveLeft) { player.newX = player.x; player.newY = player.y }
+                    if(player.moveLeft && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
                     if(player.x < player.newX) player.x = player.newX;
                 }
-                if(player.y<player.newY || player.moveDown)
+                if(player.y<player.newY || (player.moveDown && !player.bulletHit))
                 {
                     player.y+=speed;
-                    if(player.moveDown) { player.newX = player.x; player.newY = player.y }
+                    if(player.moveDown && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
                     if(player.y > player.newY) player.y = player.newY;
                 }
-                if(player.y>player.newY || player.moveUp)
+                if(player.y>player.newY || (player.moveUp && !player.bulletHit))
                 {
                     player.y-=speed;
-                    if(player.moveUp) { player.newX = player.x; player.newY = player.y }
+                    if(player.moveUp && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
                     if(player.y < player.newY) player.y = player.newY;
                 }
 
@@ -329,6 +329,8 @@
 
                 ctx.beginPath();
                 ctx.fillStyle = bullets[i].color;
+                if(bullets[i].playerId === id)
+                    ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
                 ctx.closePath();
             }
@@ -509,6 +511,11 @@
     // add new player to our list
     socket.on("newPlayer", function(data)
     {
+        for(p=0;p<players.length;p++)
+        {
+            if(players[p].id!==data.id) continue;
+            return;
+        }
         //console.log('new player: ', data);
         players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected, moveRight: false, moveLeft: false, moveUp: false, moveDown: false});
         addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
@@ -551,6 +558,8 @@
             player.moveLeft = data.moveLeft;
             player.moveUp = data.moveUp;
             player.moveDown = data.moveDown;
+            
+            player.bulletHit = data.bulletHit;
 
             if(player.monster !== data.monster && data.monster)
             {
@@ -823,9 +832,6 @@
         }
     });
     
-    joinRoom(currentRoom);
-    setInterval(update,10);
-
     // Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
     canvas.oncontextmenu = function() { return false; }
     
@@ -875,8 +881,15 @@
                 console.log("sidebar not found :(");
         }
     }
-
+    
     toggle_chat();
+    
+    $('#chat_frame').load(function()
+    {
+        joinRoom(currentRoom);
+        setInterval(update,10);
+    });
+
 </script>
 </body>
 </html>
