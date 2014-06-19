@@ -328,7 +328,7 @@
                 bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 
                 ctx.beginPath();
-                ctx.fillStyle = "#FF3399";
+                ctx.fillStyle = bullets[i].color;
                 ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
                 ctx.closePath();
             }
@@ -518,7 +518,7 @@
     socket.on("newBullet", function(data)
     {
         //console.log('new bullet: ', data);
-        bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, alive: data.alive});
+        bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, color: data.color, alive: data.alive});
     });
 
     // sent after user joins room and the player list has been sent

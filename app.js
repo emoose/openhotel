@@ -367,7 +367,9 @@ function fireBullet(player, targetX, targetY)
     // To change which shot is being used, simply call a different shot function, eg tripleShot()
     // (you should even be able to provide the same arguments)
     var id = {id: bulletId};
-    var shot = shottypes.singleShot(player, {x: targetX, y: targetY}, id, speedBullet);
+    // Example of using the optional color arg to specify shot color
+    // (internally, we don't even have to use this val for all bullets of the shot)
+    var shot = shottypes.singleShot(player, {x: targetX, y: targetY}, id, {speedBullet: speedBullet, color: "#0000FF"});
     bulletId = id.id;
 
     for(i = 0; i < shot.length; i++)
