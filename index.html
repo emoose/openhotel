@@ -24,10 +24,10 @@
 
 <!-- tab "panes" -->
 <div class="panes" style='border: 1px solid #000;'>
-    <div style='height:150px;font-size:12px;'>
-        <div id='event_log' style='height:150px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
+    <div style='height:180px;font-size:12px;'>
+        <div id='event_log' style='height:180px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
     </div>
-    <div style='height:150px;font-size:12px;'>
+    <div style='height:180px;font-size:12px;'>
         Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
         Username: <input type="text" name="username_changer" id="username_changer" />
         <input type="button" name="username_button" id="username_button" value="Set"/><br>
@@ -38,8 +38,9 @@
         <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
         <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
         <input type="checkbox" id="theme_toggle">Use dark theme</input><br>
+        <input type="checkbox" id="hitbox_toggle">Draw hitboxes</input><br>
     </div>
-    <div style='height:150px;font-size:12px;'>
+    <div style='height:180px;font-size:12px;'>
         Green squares are zombie players, black squares are humans. The square with red around it is you.
         <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
         <br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
@@ -99,6 +100,7 @@
     var canvas = document.getElementById("canvas");
     var showDisconnected = false;
     var disableZombies = false;
+    var drawHitBox = false;
     var img = new Image;
     var currentRoom = 'public';
     img.src = "";
@@ -165,6 +167,9 @@
     });
     $("#theme_toggle").click(function() {
         setTheme($(this).is(":checked") ? "dark" : "light");
+    });
+    $("#hitbox_toggle").click(function() {
+        drawHitBox = $(this).is(":checked");
     });
     
     function setTheme(themeName)
@@ -505,6 +510,11 @@
             }
 
             ctx.beginPath();
+            if(player.monster && drawHitBox)
+            {
+                ctx.fillStyle = "#FFCC00";
+                ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
+            }
             ctx.fillStyle = "#FFFFFF";
             if(player.id == id) // change border to red if its us
                 ctx.fillStyle = "#FF0000";
@@ -716,7 +726,7 @@
 
 var chat_open = false;
 var chat_loaded = false;
-var chat_channel = 'r#OpenHotel';
+var chat_channel = 'r';
 function toggle_chat(){
     if (chat_open === false && chat_loaded == false) {
         var chat_sidebar = document.getElementById("chat_sidebar");

@@ -22,6 +22,11 @@ var defaultBackgrounds = [
     'u6n9Ua5',
     'mOjgJNz',
 
+    // #lewd backgrounds
+    // inb4 not child friendly/worksafe, children shouldn't be visiting a site where humans shoot zombies
+    // and if you visit a site at work where anyone can change the pic to literally anything, you're gonna have a bad time
+    'u6n9Ua5',
+
     'YC1sfXU', // RMS
     'Af4V2dw', // XP bliss
     'DvKUZe6', // watermelon cat
@@ -562,6 +567,9 @@ function updateBullets(frametime)
     // update bullets
     for(i = 0; i < bullets.length; i++)
     {
+        if(!bullets[i].alive)
+            continue;
+
         bullets[i].x += ((bullets[i].velocity[0] * 10) * (frametime / 100));
         bullets[i].y += ((bullets[i].velocity[1] * 10) * (frametime / 100));
 
@@ -586,7 +594,7 @@ function updateBullets(frametime)
             {
                 var player = players[p];
                 if(player.id === bullets[i].playerId || !player.monster) continue;
-                var player_box = aabb([player.x, player.y], [10, 10]);
+                var player_box = aabb([player.x - 10, player.y - 10], [30, 30]);
                 if(bullet_box.intersects(player_box))
                 {
                     //console.log('player hit ' + player.id);
@@ -608,6 +616,7 @@ function updateBullets(frametime)
                         io.sockets.emit("updatePlayer", upd);
                     }
                     bullets[i].alive = false;
+                    io.sockets.in(bullets[i].room).emit("updateBullet", {id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, alive: bullets[i].alive});
                     break;
                 }
             }
