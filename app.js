@@ -239,35 +239,38 @@ function getBotForPlayer(player)
             return bots[b];
     }
     return false;
-}        
+}
+
+function getConnectedHumans(room)
+{
+    var valid = [];
+    for(p = 0; p < players.length; p++)
+    {
+        if(!players[p].connected || players[p].monster || players[p].room !== room)
+            continue;
+        valid.push(players[p]);
+    }
+    return valid;
+}
 
 function infectRandomPlayer(room)
 {
     if(players.length <= 0 || getConnCount(room) <= 0)
         return;
 
-    var trycount = 0;
-    while(true)
-    {
-        trycount++;
-        if(trycount >= 3) break;
-        var infectid = math.randomInt(0, players.length);
-        var infectidx = getIdxForID(infectid);
+    var valid = getConnectedHumans(room);
+    if(valid.length <= 0)
+        return;
 
-        // if player ID is invalid, player is disconnected or player is already a monster we'll try again
-        if(infectidx < 0 || !players[infectidx].connected || players[infectidx].monster || players[infectidx].room !== room) continue;
+    var infectid = math.randomInt(0, valid.length);
 
-        players[infectidx].monster = true;
-        console.log('infecting player ' + infectid);
-        console.log('conns: ' + getConnCount(room) + ' monsters: ' + getMonsterCount(room));
+    valid[infectid].monster = true;
+    console.log('infecting player ' + infectid);
+    console.log('conns: ' + getConnCount(room) + ' monsters: ' + getMonsterCount(room));
 
-        var upd = getPlayerUpdate(players[infectidx]);
-        if(upd !== undefined)
-            io.sockets.in(room).emit("updatePlayer", upd);
-
-        // break out because we've infected someone
-        break;
-    }
+    var upd = getPlayerUpdate(valid[infectid]);
+    if(upd !== undefined)
+        io.sockets.in(room).emit("updatePlayer", upd);
 }
 
 function getBotsForRoom(room)
@@ -361,7 +364,7 @@ function fireBullet(player, targetX, targetY)
 
     // To change which shot is being used, simply call a different shot function, eg tripleShot()
     // (you should even be able to provide the same arguments)
-    var shot = shottypes.brokenShot(player, {x: targetX, y: targetY}, {id: bulletId}, speedBullet);
+    var shot = shottypes.singleShot(player, {x: targetX, y: targetY}, {id: bulletId}, speedBullet);
 
     for(i = 0; i < shot.length; i++)
     {
@@ -946,7 +949,7 @@ io.on('connection', function (socket)
         var roomidx = rooms.indexOf(player.room);
         var validImage = (time - lastImageUserChange[roomidx] >= imageChangeCooldown);
 
-        if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 4 && msg.src.substring(0, 4) === "http")
+        if((validImage || remoteAddress == "127.0.0.1" || remoteAddress == "localhost") && msg.src.length > 5 && (msg.src.substring(0, 5) === "http:" || msg.src.substring(0, 5) === "data:"))
         {
             socket.broadcast.to(player.room).emit('updateImage', msg);
             socket.emit('updateImage', msg);

@@ -26,7 +26,7 @@
     <div style='height:200px;font-size:12px;'>
         <div id='event_log' style='height:200px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
     </div>
-    <div style='height:200px;font-size:12px;'>
+    <div style='height:auto;min-height:200px;font-size:12px;'>
         Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
         Username: <input type="text" name="username_changer" id="username_changer" />
         <input type="button" name="username_button" id="username_button" value="Set"/><br>
@@ -415,7 +415,7 @@
     function updateBackground()
     {
         var url = $("#bg_changer").val();
-        if(url.length < 4 || url.substring(0, 4) !== "http") return;
+        if(url.length < 5 || (url.substring(0, 5) !== "http:" && url.substring(0, 5) !== "data:")) return;
         $("#bg_changer").val('');
         if(url.indexOf("4chan.org") > -1 || url.indexOf("4cdn.org") > -1)
         {
