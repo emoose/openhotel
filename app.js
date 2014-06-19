@@ -85,6 +85,7 @@ var sessionID = math.randomInt(0, 65535);
 
 var speedPlayer = 0.5; // client code should be this / 10 because client updates 10x faster
 var speedMonster = 0.55;
+var speedBullet = 1.0;
 
 var gameStart = [];
 var infectStart = [];
@@ -779,6 +780,8 @@ io.on('connection', function (socket)
             var originX = players[p].x + 5;
             var originY = players[p].y + 5;
             var velocity = math.normalize(msg.x - originX, msg.y - originY);
+            velocity[0] = velocity[0] * speedBullet;
+            velocity[1] = velocity[1] * speedBullet;
 
             // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
             //
@@ -948,6 +951,8 @@ io.on('connection', function (socket)
             speedPlayer = msg.speedPlayer;
         if(msg.speedMonster !== undefined)
             speedMonster = msg.speedMonster;
+        if(msg.speedBullet !== undefined)
+            speedBullet = msg.speedBullet;
         for(p = 0; p < players.length; p++)
         {
             var player = players[p];
