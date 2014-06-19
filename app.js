@@ -223,6 +223,17 @@ function getPlayerForSocket(socket)
     return undefined;
 }
 
+function getBotForPlayer(player)
+{
+    if(player.iosock !== undefined) return false;
+    for(b=0; b<bots.length; b++)
+    {
+        if(players[bots[b].playeridx].id === player.id)
+            return bots[b];
+    }
+    return false;
+}        
+
 function infectRandomPlayer(room)
 {
     if(players.length <= 0 || getConnCount(room) <= 0)
@@ -280,7 +291,7 @@ function updateBots(room)
             
             var botplayer = addPlayer(pid, "127.0.0.1", room, "", randX, randY, false, undefined);
             
-            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think', timer: 0, lastType: 'human'});
+            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think', timer: 0, lastType: 'human', bulletHit: false});
             
             io.sockets.in(room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: false, connected: true});
             console.log('bot spawned, stats: ', botplayer, bots[bots.length - 1]);
@@ -409,9 +420,9 @@ function updateBots(room)
                 {
                     if(player.newX != targetplayer.x || player.newY != targetplayer.y)
                     {
-                        if(bot.timer === 0)
+                        if(bot.bulletHit && bot.timer === 0)
                             bot.timer = time;
-                        else if(time - bot.timer >= math.randomInt(2, 7))
+                        else if(!bot.bulletHit || time - bot.timer >= math.randomInt(2, 7))
                         {
                             player.newX = targetplayer.x;
                             player.newY = targetplayer.y;
@@ -419,6 +430,7 @@ function updateBots(room)
                             if(upd !== undefined)
                                 io.sockets.in(room).emit('updatePlayer', upd);
                             bot.timer = 0;
+                            bot.bulletHit = false;
                         }
                     }
                 }
@@ -642,6 +654,12 @@ function updateBullets(frametime)
                     if(player.newY >= gameSizeY) player.newY = gameSizeY - 10;
 
                     player.moveRight = player.moveLeft = player.moveUp = player.moveDown = false;
+                    
+                    if(player.iosock === undefined) // it's a bot
+                    {
+                        var bot = getBotForPlayer(player);
+                        bot.bulletHit = true;
+                    }
 
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
