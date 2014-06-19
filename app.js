@@ -49,6 +49,7 @@ var defaultBackgrounds = [
     'Slvh7PP', // RMS
     'fWK2UYH',
     'DRBZ2ID', // carlton
+    'LBjffOX',
 
     // Nintendrone backgrounds
     'Z99cY9Z',

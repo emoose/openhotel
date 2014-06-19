@@ -736,7 +736,7 @@
         }
     });
 
-    $(document).mousedown(function(event)
+    $("#canvas").mousedown(function(event)
     {
         var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
         var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
@@ -747,7 +747,7 @@
             //socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
     });
 
-    $(document).mouseup(function(event)
+    $("#canvas").mouseup(function(event)
     {
         var fireWhich = swapMouse ? 3 : 1;
         if(event.which == fireWhich)
