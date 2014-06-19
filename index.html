@@ -13,7 +13,7 @@
 <img id='bgimage' style='position:absolute;z-index:1;' />
 <canvas id='canvas' height='640' width='1020' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
 </div>
-
+<p style='font-size:14px;'>Time remaining: <span id="round_timer">00:00</span></p>
 <div class="box" style="width:1020px" >
 <!-- the tabs -->
 <ul class="tabs">
@@ -24,10 +24,10 @@
 
 <!-- tab "panes" -->
 <div class="panes" style='border: 1px solid #000;'>
-    <div style='height:180px;font-size:12px;'>
-        <div id='event_log' style='height:180px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
+    <div style='height:200px;font-size:12px;'>
+        <div id='event_log' style='height:200px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
     </div>
-    <div style='height:180px;font-size:12px;'>
+    <div style='height:200px;font-size:12px;'>
         Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
         Username: <input type="text" name="username_changer" id="username_changer" />
         <input type="button" name="username_button" id="username_button" value="Set"/><br>
@@ -39,8 +39,10 @@
         <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
         <input type="checkbox" id="theme_toggle">Use dark theme</input><br>
         <input type="checkbox" id="hitbox_toggle">Draw hitboxes</input><br>
+        <input type="checkbox" id="mouse_toggle">Swap mouse (left to move, right to shoot)</input><br>
+        <input type="checkbox" id="bg_toggle">Disable background</input><br>
     </div>
-    <div style='height:180px;font-size:12px;'>
+    <div style='height:200px;font-size:12px;'>
         Green squares are zombie players, black squares are humans. The square with red around it is you.
         <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
         <br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
@@ -101,11 +103,17 @@
     var showDisconnected = false;
     var disableZombies = false;
     var drawHitBox = false;
+    var swapMouse = false;
+    var disableBackground = false;
     var img = new Image;
     var currentRoom = 'public';
+    var roundEndTime = 0;
+    var roundTimer = 0;
+
     img.src = "";
-    img.onload = function()
+    function loadImage()
     {
+        if(disableBackground) return;
         var result = ScaleImage(img.width, img.height, gameSizeX, gameSizeY, true);
         var dimensions = {width: img.width, height: img.height};
         if(dimensions.width > gameSizeX || dimensions.height > gameSizeY)
@@ -119,6 +127,7 @@
         $("#bgimage").css("width",dimensions.width + "px");
         $("#bgimage").width = dimensions.width;
     }
+    img.onload = loadImage;
 
     // setup ul.tabs to work as tabs for each div directly under div.panes
     $("ul.tabs").tabs("div.panes > div");
@@ -131,7 +140,7 @@
     // Tracking Player State
     //--------------------------------------------------
     // Keep track of Player's keyboard
-    var keySpace = false;
+    var playerShooting = false;
     var keyW = false;
     var keyA = false;
     var keyS = false;
@@ -170,6 +179,33 @@
     });
     $("#hitbox_toggle").click(function() {
         drawHitBox = $(this).is(":checked");
+        var lsValue = drawHitBox ? "1" : "0"; // convert to string since localStorage only allows string values
+        if(localStorage !== undefined && localStorage.drawHitBox !== lsValue)
+            localStorage.drawHitBox = lsValue;
+    });
+    $("#mouse_toggle").click(function() {
+        swapMouse = $(this).is(":checked");
+        var lsValue = swapMouse ? "1" : "0";
+        if(localStorage !== undefined && localStorage.swapMouse !== lsValue)
+            localStorage.swapMouse = lsValue;
+    });
+    $("#bg_toggle").click(function() {
+        disableBackground = $(this).is(":checked");
+        var lsValue = "0";
+        if(disableBackground)
+        {
+            $("#bgimage").attr('src', "");
+            $("#bgimage").css("height", "0px");
+            $("#bgimage").height = 0;
+            $("#bgimage").css("width", "0px");
+            $("#bgimage").width = 0;
+            lsValue = "1";
+        }
+        else
+            loadImage();
+
+        if(localStorage !== undefined && localStorage.disableBackground !== lsValue)
+            localStorage.disableBackground = lsValue;
     });
     
     function setTheme(themeName)
@@ -194,6 +230,26 @@
     // load saved theme
     if(localStorage !== undefined && localStorage.theme !== undefined)
         setTheme(localStorage.theme);
+    if(localStorage !== undefined && localStorage.drawHitBox !== undefined && localStorage.drawHitBox === "1")
+    {
+        drawHitBox = true;
+        $("#hitbox_toggle").prop('checked', true);
+    }
+    if(localStorage !== undefined && localStorage.swapMouse !== undefined && localStorage.swapMouse === "1")
+    {
+        swapMouse = true;
+        $("#mouse_toggle").prop('checked', true);
+    }
+    if(localStorage !== undefined && localStorage.disableBackground !== undefined && localStorage.disableBackground === "1")
+    {
+        disableBackground = true;
+        $("#bgimage").attr('src', "");
+        $("#bgimage").css("height", "0px");
+        $("#bgimage").height = 0;
+        $("#bgimage").css("width", "0px");
+        $("#bgimage").width = 0;
+        $("#bg_toggle").prop('checked', true);
+    }
 
     function makeTextSafe(text)
     {
@@ -251,6 +307,11 @@
         return (+new Date());
     }
 
+    function getTime()
+    {
+        return Math.round(+new Date()/1000);
+    }
+
     $("#username_button").click(updateUsername);
     $("#username_changer").keypress(function(event)
     {
@@ -294,6 +355,7 @@
 
     socket.on("gameState", function(data)
     {
+        console.log('received game state: ', data);
         id = data.id;
         if(sessionID === -1)
             sessionID = data.session;
@@ -307,9 +369,16 @@
         $("#canvas")[0].height = gameSizeY;
 
         img.src = makeTextSafe(data.image);
+
         $("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
 
         $("#server_version").text(data.serverVersion);
+
+        if(data.timeLeft > 0)
+        {
+            roundEndTime = getTime() + data.timeLeft;
+            roundTimer = setInterval(updateRoundTimer, 1000);
+        }
         console.log('connected, id ' + id + ' session ' + sessionID);
         if(localStorage !== undefined && localStorage.username !== undefined)
         {
@@ -415,9 +484,34 @@
 
         $("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
     });
+
+    function updateRoundTimer()
+    {
+        var timeLeft = roundEndTime - getTime();
+        if(timeLeft <= 0)
+        {
+            clearInterval(roundTimer);
+            timeLeft = 0;
+        }
+        var minutes = parseInt( timeLeft / 60 ) % 60;
+        var seconds = timeLeft % 60;
+
+        var result = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+        $("#round_timer").text(result);
+    }
+
+    socket.on("roundStart", function(data)
+    {
+        roundEndTime = getTime() + data.timeLimit;
+        roundTimer = setInterval(updateRoundTimer, 1000);
+    });
+
     socket.on("roundEnd", function(data)
     {
-        addToLog("<b>Round ended!</b> The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.");
+        var text = "The humans managed to survive for five minutes!";
+        if(data.id > 0)
+            text = "The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.";
+        addToLog("<b>Round ended!</b> " + text);
     });
 
     /* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
@@ -573,9 +667,8 @@
     function update()
     {
         draw();
-        if(keySpace) {
+        if(playerShooting)
             fireBullet();
-        }
         /*
         if(keyW || keyA || keyS || keyD)
         {
@@ -645,11 +738,20 @@
 
     $(document).mousedown(function(event)
     {
-        if(event.which == 3) { // Left click to Move
+        var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
+        var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
+        if(event.which == moveWhich)
             socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
-        } else if (event.which == 1) { // Right click to Shoot
-            socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
-        }
+        else if (event.which == fireWhich)
+            playerShooting = true;
+            //socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
+    });
+
+    $(document).mouseup(function(event)
+    {
+        var fireWhich = swapMouse ? 3 : 1;
+        if(event.which == fireWhich)
+            playerShooting = false;
     });
 
     $("#canvas").keydown(function(event)
@@ -660,7 +762,7 @@
         
         if(code == 32)
         {
-            keySpace = true;
+            playerShooting = true;
             return false; // Prevent the Page from scrolling down when Space Key is pressed
         }
         else if(code == 87 && !keyW)
@@ -695,7 +797,7 @@
         
         if(code == 32)
         {
-            keySpace = false;
+            playerShooting = false;
             return true;
         }
         else if(code == 87 && keyW)
@@ -731,7 +833,7 @@
 
 var chat_open = false;
 var chat_loaded = false;
-var chat_channel = 'r';
+var chat_channel = 'hotel';
 function toggle_chat(){
     if (chat_open === false && chat_loaded == false) {
         var chat_sidebar = document.getElementById("chat_sidebar");

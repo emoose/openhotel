@@ -9,10 +9,14 @@ var fs = require('fs')
 var gameSizeX = 1020;
 var gameSizeY = 640;
 var nameSizeLimit = 256;
+
+// time limits, in seconds
 var imageChangeCooldown = 30;
+var roundTimeLimit = 5 * 60;
 
 // imgur ids to default backgrounds
 // bg is chosen at random when someone joins an empty room
+// some are nsfw, but its your own fault for playing a game at work where people can change the background to any picture
 var defaultBackgrounds = [
     // Weeb backgrounds
     'ZlfgFEd',
@@ -24,8 +28,6 @@ var defaultBackgrounds = [
     'mOjgJNz',
 
     // #lewd backgrounds
-    // inb4 not child friendly/worksafe, children shouldn't be visiting a site where humans shoot zombies
-    // and if you visit a site at work where anyone can change the pic to literally anything, you're gonna have a bad time
     'u6n9Ua5',
     'k1ZYP',
 
@@ -443,14 +445,24 @@ function updateWorld()
 
         updateBots(room);
 
-        if(monsterCount >= connCount && infectEnd[r] <= 0) // monsters win
+        // monsters win
+        if(monsterCount >= connCount && infectEnd[r] <= 0)
         {
             infectEnd[r] = time;
-            console.log('game over @ ' + time + ' room ' + room);
+            console.log('monsters win @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
         }
 
-        if(monsterCount >= connCount && infectEnd[r] > 0 && (time - infectEnd[r]) >= 5)
+        // humans win
+        if(connCount > monsterCount && infectEnd[r] <= 0 && gameStart[r] > 0 && time - gameStart[r] >= roundTimeLimit)
+        {
+            infectEnd[r] = time;
+            console.log('humans win @ ' + time + ' room ' + room);
+            console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+            io.sockets.in(room).emit("roundEnd", {id: 0, victimid: 0});
+        }
+
+        if(infectEnd[r] > 0 && (time - infectEnd[r]) >= 5)
         {
             for(p = 0; p < players.length; p++)
             {
@@ -464,14 +476,15 @@ function updateWorld()
             gameStart[r] = 0;
             infectStart[r] = 0;
             infectEnd[r] = 0;
-            console.log('game reset @ ' + time + ' room ' + room);
+            console.log('round reset @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + getMonsterCount(room));
         }
         if(connCount >= 2 && gameStart[r] <= 0)
         {
             gameStart[r] = time;
-            console.log('game start @ ' + time + ' room ' + room);
+            console.log('round start @ ' + time + ' room ' + room);
             console.log('conns: ' + connCount + ' monsters: ' + monsterCount);
+            io.sockets.in(room).emit("roundStart", {timeLimit: roundTimeLimit});
         }
         if(connCount >= 2 && gameStart[r] > 0 && infectStart[r] <= 0 && (time - gameStart[r]) >= 15)
         {
@@ -687,7 +700,13 @@ io.on('connection', function (socket)
                // if(pid == 1) monst = true;
                 addPlayer(pid, remoteAddress, msg.room, '', randX, randY, monst, socket);
                 
-                socket.emit('gameState', {id: pid, session: sessionID, serverVersion: serverVersion, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(msg.room)]});
+                var timeleft = roundTimeLimit - (utils.getTime() - gameStart[rooms.indexOf(msg.room)]);
+                if(timeleft < 0)
+                    timeleft = 0;
+                if(timeleft > roundTimeLimit)
+                    timeleft = roundTimeLimit;
+
+                socket.emit('gameState', {id: pid, session: sessionID, serverVersion: serverVersion, timeLeft: timeleft, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(msg.room)]});
                 socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: true});
 
                 console.log('conns: ' + getConnCount(msg.room) + ' monsters: ' + getMonsterCount(msg.room));
