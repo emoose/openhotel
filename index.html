@@ -10,10 +10,10 @@
 <script type='text/javascript' src='https://cdn.socket.io/socket.io-1.0.4.js'></script>
 <div id='canvas_wrapper'>
 <img id='bgimage' style='position:absolute;z-index:1;' />
-<canvas id='canvas' height='640' width='1020' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
+<canvas id='canvas' height='720' width='1280' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
 </div>
 <p style='font-size:14px;'>Time remaining: <span id="round_timer">00:00</span></p>
-<div class="box" style="width:1020px" >
+<div class="box" style="width:1280px" >
 <!-- the tabs -->
 <ul class="tabs">
     <li><a href="#">Event Log</a></li>
@@ -77,8 +77,8 @@
     var newY = 0;
     var mouseX = 0;
     var mouseY = 0;
-    var speedPlayer = 1.5;
-    var speedMonster = 1.5;
+    var speedPlayer = 1.25;
+    var speedMonster = 1.25;
     var players = [];
     var bullets = [];
     var blockSize=10;
@@ -108,7 +108,7 @@
     var keyD = false;
 
     // Keep track of bullet/movement cooldown (stop players from firing a ton of bullets in a small period)
-    var BULLET_FIRE_RATE = 20; // Constant, cooldownTimer resets to this when bullet is fired
+    var BULLET_FIRE_RATE = 15; // Constant, cooldownTimer resets to this when bullet is fired
     var MOVEMENT_RATE = 10;
     var bulletCooldown = 0;
     var movementCooldown = 0;

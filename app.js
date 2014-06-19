@@ -6,8 +6,8 @@ var fs = require('fs')
     , utils = require('./utils')
     , git = require('git-rev');
 
-var gameSizeX = 1020;
-var gameSizeY = 640;
+var gameSizeX = 1280;
+var gameSizeY = 720;
 var nameSizeLimit = 256;
 
 // time limits, in seconds
@@ -83,9 +83,9 @@ var bulletId = 0;
 
 var sessionID = math.randomInt(0, 65535);
 
-var speedPlayer = 1.5; // speed multiplier, speed is 0.5 * this
-var speedMonster = 1.5;
-var speedBullet = 1.0;
+var speedPlayer = 1.25; // speed multiplier, speed is 0.5 * this
+var speedMonster = 1.25;
+var speedBullet = 2.0;
 
 var gameStart = [];
 var infectStart = [];
