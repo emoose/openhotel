@@ -279,6 +279,67 @@ function getBotsForRoom(room)
     return roombots;
 }
 
+function getDistanceBetweenPlayers(player1, player2)
+{
+    var xd = player1.x-player2.x;
+    var yd = player1.y-player2.y;
+    return Math.abs(Math.sqrt(xd*xd + yd*yd));
+}
+function getClosestPlayerIdx(player, type)
+{
+    var targetdistance = 9999999999;
+    var targetidx = -1;
+    if(type !== 'human' && type !== 'monster')
+        return targetidx;
+
+    for(p=0; p<players.length; p++)
+    {
+        if((type === 'human' && players[p].monster) || (type === 'monster' && !players[p].monster) || players[p].room !== player.room)
+            continue;
+        var dist = getDistanceBetweenPlayers(player, players[p]);
+        if(targetdistance > dist)
+        {
+            targetidx = p;
+            targetdistance = dist;
+            console.log('bot ' + player.id + ' chose player ' + players[targetidx].id, players[targetidx].username);
+        }
+    }
+    return targetidx;
+}
+function botRetarget(bot)
+{
+    var player = players[bot.playeridx];
+// lets choose a target
+    var targetidx = getClosestPlayerIdx(player, 'human');
+    var randX = player.newX;
+    var randY = player.newY;
+    if(targetidx >= 0)
+    {
+        var targetplayer = players[targetidx];
+        randX = targetplayer.x;
+        randY = targetplayer.y;
+    }
+    else
+    {
+        if(randX == player.x && randY == player.y)
+        {
+            randX = math.randomInt(0, Math.floor(gameSizeX / 10)) * 10;
+            randY = math.randomInt(0, Math.floor(gameSizeY / 10)) * 10;
+        }
+    }
+    bot.targetidx = targetidx;
+    if(randX != player.newX || randY != player.newY)
+    {
+        player.newX = randX;
+        player.newY = randY;
+        var upd = getPlayerUpdate(player);
+        if(upd !== undefined)
+            io.sockets.in(player.room).emit('updatePlayer', upd);
+    }
+    if(targetidx >= 0)
+        bot.status = 'attack';
+}
+
 function updateBots(room)
 {
     var time = utils.getTime();
@@ -360,54 +421,15 @@ function updateBots(room)
             }
             if(bot.status === 'think')
             {
-                // lets choose a target
-                var targetdistance = 9999999999;
-                var targetidx = -1;
-                var targetplayer = undefined;
-                for(p=0; p<players.length; p++)
-                {
-                    if(players[p].monster || players[p].room !== room) continue;
-                    var xd = player.x-players[p].x;
-                    var yd = player.y-players[p].y;
-                    var dist = Math.abs(Math.sqrt(xd*xd + yd*yd));
-                    if(targetdistance > dist)
-                    {
-                        targetidx = p;
-                        targetdistance = dist;
-                        targetplayer = players[p];
-                        //console.log('bot ', bot, ' chose player ', targetplayer.id);
-                    }
-                }
-
-                var randX = player.newX;
-                var randY = player.newY;
-                if(targetidx >= 0)
-                {
-                    randX = targetplayer.x;
-                    randY = targetplayer.y;
-                }
-                else
-                {
-                    if(randX == player.x && randY == player.y)
-                    {
-                        randX = math.randomInt(0, Math.floor(gameSizeX / 10)) * 10;
-                        randY = math.randomInt(0, Math.floor(gameSizeY / 10)) * 10;
-                    }
-                }
-                bot.targetidx = targetidx;
-                if(randX != player.newX || randY != player.newY)
-                {
-                    player.newX = randX;
-                    player.newY = randY;
-                    var upd = getPlayerUpdate(player);
-                    if(upd !== undefined)
-                        io.sockets.in(room).emit('updatePlayer', upd);
-                }
-                if(targetidx >= 0)
-                    bot.status = 'attack';
+                botRetarget(bot);
             }
             else if(bot.status === 'attack' && bot.targetidx >= 0)
             {
+                if(getClosestPlayerIdx(player, 'human') !== bot.targetidx)
+                {
+                    bot.status = 'think';
+                    continue;
+                }
                 var targetplayer = players[bot.targetidx];
                 if(!targetplayer.connected || targetplayer.monster)
                 {
