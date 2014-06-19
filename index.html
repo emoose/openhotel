@@ -438,7 +438,7 @@
         {
             if(players[p].id!==playerid) continue;
             if(players[p].username !== undefined && players[p].username !== '')
-                return '<b>Player ' + playerid + ' (' + makeTextSafe(players[p].username) + ')</b>';
+                return '<b>' + makeTextSafe(players[p].username) + '</b>';
             return '<b>Player ' + playerid + '</b>';
         }
         return '<b>Unknown player</b>';

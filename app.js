@@ -14,6 +14,10 @@ var nameSizeLimit = 256;
 var imageChangeCooldown = 30;
 var roundTimeLimit = 5 * 60;
 
+// how long bots should wait after being hit, randomly chosen between these numbers
+var botWaitLimitLower = 1.5;
+var botWaitLimitUpper = 4;
+
 // imgur ids to default backgrounds
 // bg is chosen at random when someone joins an empty room
 // some are nsfw, but its your own fault for playing a game at work where people can change the background to any picture
@@ -334,7 +338,7 @@ function updateBots(room)
         {
             if(bot.lastType === 'human')
             {
-                if(bot.timer !== 0 && time - bot.timer >= math.randomInt(2, 7))
+                if(bot.timer !== 0 && time - bot.timer >= math.randomInt(botWaitLimitLower, botWaitLimitUpper))
                 {
                     bot.lastType = 'infected';
                     bot.timer = 0;
@@ -422,7 +426,7 @@ function updateBots(room)
                     {
                         if(bot.bulletHit && bot.timer === 0)
                             bot.timer = time;
-                        else if(!bot.bulletHit || time - bot.timer >= math.randomInt(2, 7))
+                        else if(!bot.bulletHit || time - bot.timer >= math.randomInt(botWaitLimitLower, botWaitLimitUpper))
                         {
                             player.newX = targetplayer.x;
                             player.newY = targetplayer.y;
@@ -971,12 +975,16 @@ io.on('connection', function (socket)
             speedMonster = msg.speedMonster;
         if(msg.speedBullet !== undefined)
             speedBullet = msg.speedBullet;
+        if(msg.botLower !== undefined)
+            botWaitLimitLower = msg.botLower;
+        if(msg.botUpper !== undefined)
+            botWaitLimitUpper = msg.botUpper;
         for(p = 0; p < players.length; p++)
         {
             var player = players[p];
             if(!player.connected || player.iosock === undefined) continue;
             player.iosock.emit('gameState', {id: player.id, session: sessionID, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(player.room)]});
-            // todo: fix this
+            // todo: fix this, it should move out of bound players back into the game for when the game is resized
             /*var updated = false;
             if(player.x >= gameSizeX)
             {
