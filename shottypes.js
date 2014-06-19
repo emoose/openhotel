@@ -17,6 +17,7 @@ function genSingleBullet(player, target, speedBullet)
 //--------------------------------------------------------------------------------
 // All Shot type arguments require:
 // player      - Object containing a player's `x`, `y`, `id` and `room` properties
+// target      - Object containing `x`, `y` properties which shot will aim at
 // id          - Object containing an `id` property which should be unique for each bullet
 //               (id will be incremented differently depending on each shot)
 // speedBullet - Float that multiplies the speed of all bullets generated
