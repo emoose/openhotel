@@ -579,7 +579,7 @@ function updateBullets(frametime)
         }
 
         var idx = getIdxForID(bullets[i].playerId);
-        if(idx >= 0 && players.length > idx && players[idx].monster !== 1)
+        if(idx >= 0 && players.length > idx && !players[idx].monster)
         {
             var bullet_box = aabb([bullets[i].x, bullets[i].y], [5, 5]);
             for(p = 0; p < players.length; p++)
