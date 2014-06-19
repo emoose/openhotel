@@ -83,8 +83,8 @@ var bulletId = 0;
 
 var sessionID = math.randomInt(0, 65535);
 
-var speedPlayer = 0.5; // client code should be this / 10 because client updates 10x faster
-var speedMonster = 0.55;
+var speedPlayer = 1.5; // speed multiplier, speed is 0.5 * this
+var speedMonster = 1.5;
 var speedBullet = 1.0;
 
 var gameStart = [];
@@ -524,7 +524,7 @@ function updateWorld()
             var player = players[p];
             if(!player.connected || player.room !== room) continue;
 
-            var speed = speedPlayer * (frametime / 10);
+            var speed = (0.5 * speedPlayer) * (frametime / 10);
 
             if(player.x<player.newX || player.moveRight)
             {

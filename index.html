@@ -77,8 +77,8 @@
     var newY = 0;
     var mouseX = 0;
     var mouseY = 0;
-    var speedPlayer = 0.5;
-    var speedMonster = 0.55;
+    var speedPlayer = 1.5;
+    var speedMonster = 1.5;
     var players = [];
     var bullets = [];
     var blockSize=10;
@@ -257,7 +257,7 @@
 
             if(player.connected)
             {
-                var speed = speedPlayer * (frametime / 10);
+                var speed = (0.5 * speedPlayer) * (frametime / 10);
 
                 if(player.x<player.newX || player.moveRight)
                 {
