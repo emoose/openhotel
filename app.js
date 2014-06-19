@@ -364,7 +364,9 @@ function fireBullet(player, targetX, targetY)
 
     // To change which shot is being used, simply call a different shot function, eg tripleShot()
     // (you should even be able to provide the same arguments)
-    var shot = shottypes.singleShot(player, {x: targetX, y: targetY}, {id: bulletId}, speedBullet);
+    var id = {id: bulletId};
+    var shot = shottypes.singleShot(player, {x: targetX, y: targetY}, id, speedBullet);
+    bulletId = id.id;
 
     for(i = 0; i < shot.length; i++)
     {
