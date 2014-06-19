@@ -43,7 +43,7 @@ function tryGenColor(color, defaultColor)
 // speedBullet - Float that multiplies the speed of all bullets generated
 // color       - String containing color Hex Code to color some/all bullet(s) of shot
 //
-// Additional optional arguments are noted in comments above the function, prefixed with [Optional]
+// Additional optional args are noted in comments above the function, prefixed with `[Optional]:`
 //------------------------------------------------------------------------------------------
 //
 // All Shot type functions return an array of bullet objects with the follow properties:
@@ -64,7 +64,7 @@ var singleShot = function(player, target, id, optional)
 };
 
 // Desc: Fires a spread of 3 shots in the direction of target's `x` and `y` coords
-// [Optional] Float angle arg to specify the spread angle
+// [Optional]: customAngle - Float angle arg to specify the spread angle
 // Increments id by 3
 var tripleShot = function(player, target, id, optional)
 {
