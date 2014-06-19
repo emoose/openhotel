@@ -779,7 +779,6 @@ io.on('connection', function (socket)
             currentTime.push(utils.getHighResTime());
             var imgurid = defaultBackgrounds[math.randomInt(0, defaultBackgrounds.length - 1)];
             lastImage.push("http://i.imgur.com/" + imgurid + ".jpg");
-
         }
         if(player === undefined || (player !== undefined && player.room !== msg.room))
         {
@@ -799,8 +798,7 @@ io.on('connection', function (socket)
                 var randX = math.randomInt(0, (gameSizeX / 10)) * 10;
                 var randY = math.randomInt(0, (gameSizeY / 10)) * 10;
 
-                var monst = false;
-               // if(pid == 1) monst = true;
+                var monst = infectStart[rooms.indexOf(msg.room)] > 0;
                 addPlayer(pid, remoteAddress, msg.room, '', randX, randY, monst, socket);
                 
                 var timeleft = roundTimeLimit - (utils.getTime() - gameStart[rooms.indexOf(msg.room)]);
