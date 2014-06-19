@@ -30,7 +30,6 @@ var defaultBackgrounds = [
     'c4LI12K',
     'aVU460l',
     '7IiT5Dr',
-    'no6tZ88',
     'HdiU8si',
     'QnknX9f',
     'qa10MHM',
@@ -599,6 +598,8 @@ function updateBullets(frametime)
                     if(player.newY < 0) player.newY = 0;
                     if(player.newX >= gameSizeX) player.newX = gameSizeX - 10;
                     if(player.newY >= gameSizeY) player.newY = gameSizeY - 10;
+
+                    player.moveRight = player.moveLeft = player.moveUp = player.moveDown = false;
 
                     var upd = getPlayerUpdate(player);
                     if(upd !== undefined)
