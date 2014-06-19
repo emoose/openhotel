@@ -51,7 +51,7 @@
 
 </div>
 
-<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a>, thanks to BeetRoot for initial idea + code</p>
+<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
 <div id='chat_sidebar'>
     <div style='margin-top:-20px;'>
         <div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px;
@@ -294,17 +294,22 @@
 
     socket.on("gameState", function(data)
     {
-        id=data.id;
+        id = data.id;
         if(sessionID === -1)
             sessionID = data.session;
+
         gameSizeX = data.x;
         gameSizeY = data.y;
         speedPlayer = data.speedPlayer / 10;
         speedMonster = data.speedMonster / 10;
+
         $("#canvas")[0].width = gameSizeX;
         $("#canvas")[0].height = gameSizeY;
+
         img.src = makeTextSafe(data.image);
         $("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
+
+        $("#server_version").text(data.serverVersion);
         console.log('connected, id ' + id + ' session ' + sessionID);
         if(localStorage !== undefined && localStorage.username !== undefined)
         {

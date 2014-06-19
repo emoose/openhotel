@@ -3,7 +3,8 @@ var fs = require('fs')
     , socketio = require('socket.io')
     , aabb = require('aabb-2d')
     , math = require('./math')
-    , utils = require('./utils');
+    , utils = require('./utils')
+    , git = require('git-rev');
 
 var gameSizeX = 1020;
 var gameSizeY = 640;
@@ -26,6 +27,7 @@ var defaultBackgrounds = [
     // inb4 not child friendly/worksafe, children shouldn't be visiting a site where humans shoot zombies
     // and if you visit a site at work where anyone can change the pic to literally anything, you're gonna have a bad time
     'u6n9Ua5',
+    'k1ZYP',
 
     'YC1sfXU', // RMS
     'Af4V2dw', // XP bliss
@@ -60,6 +62,15 @@ var defaultBackgrounds = [
     'y7OgpcR',
     'K6FPsql'
 ];
+var serverVersion = "unknown";
+git.short(function(str)
+{
+    var ver = str;
+    if(ver === undefined || ver === '')
+        ver = "unknown";
+    serverVersion = ver;
+    console.log('running openhotel version ' + ver);
+});
 
 var players = [];
 var rooms = [];
@@ -676,7 +687,7 @@ io.on('connection', function (socket)
                // if(pid == 1) monst = true;
                 addPlayer(pid, remoteAddress, msg.room, '', randX, randY, monst, socket);
                 
-                socket.emit('gameState', {id: pid, session: sessionID, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(msg.room)]});
+                socket.emit('gameState', {id: pid, session: sessionID, serverVersion: serverVersion, x: gameSizeX, y: gameSizeY, speedPlayer: speedPlayer, speedMonster: speedMonster, image: lastImage[rooms.indexOf(msg.room)]});
                 socket.broadcast.to(msg.room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: monst, connected: true});
 
                 console.log('conns: ' + getConnCount(msg.room) + ' monsters: ' + getMonsterCount(msg.room));
