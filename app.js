@@ -294,14 +294,14 @@ function getClosestPlayerIdx(player, type)
 
     for(p=0; p<players.length; p++)
     {
-        if((type === 'human' && players[p].monster) || (type === 'monster' && !players[p].monster) || players[p].room !== player.room)
+        if((type === 'human' && players[p].monster) || (type === 'monster' && !players[p].monster) || players[p].room !== player.room || !players[p].connected)
             continue;
         var dist = getDistanceBetweenPlayers(player, players[p]);
         if(targetdistance > dist)
         {
             targetidx = p;
             targetdistance = dist;
-            console.log('bot ' + player.id + ' chose player ' + players[targetidx].id, players[targetidx].username);
+           // console.log('bot ' + player.id + ' chose player ' + players[targetidx].id, players[targetidx].username);
         }
     }
     return targetidx;
@@ -340,6 +340,38 @@ function botRetarget(bot)
         bot.status = 'attack';
 }
 
+
+function fireBullet(player, targetX, targetY)
+{
+    var time = utils.getTime();
+    if(player.firstFire === undefined || player.firstFire === 0)
+        player.firstFire = time;
+    else if(time - player.firstFire >= 2)
+    {
+        player.firstFire = 0;
+        player.fireCount = 0;
+    }
+    if(player.fireCount !== undefined && player.fireCount > 10)
+        return;
+
+    player.fireCount++;
+
+    var originX = player.x + 5;
+    var originY = player.y + 5;
+    var velocity = math.normalize(targetX - originX, targetY - originY);
+    velocity[0] = velocity[0] * speedBullet;
+    velocity[1] = velocity[1] * speedBullet;
+
+    // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
+    //
+    // At the moment every bullet gets a unique id from a basic incrementing counter, I don't think it'll overflow
+    // but if it ever comes to it, we can just keep an array to store id values that can be recycled and reuse those
+    bullets.push({id: bulletId, playerId: player.id, x: originX, y: originY, velocity: velocity, alive: true, room: player.room});
+    io.sockets.in(player.room).emit('newBullet', {id: bulletId, playerId: player.id, x: originX, y: originY, velocity: velocity, alive: true});
+
+    bulletId++;
+}
+
 function updateBots(room)
 {
     var time = utils.getTime();
@@ -356,7 +388,7 @@ function updateBots(room)
             
             var botplayer = addPlayer(pid, "127.0.0.1", room, "", randX, randY, false, undefined);
             
-            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think', timer: 0, lastType: 'human', bulletHit: false});
+            bots.push({playeridx: players.length - 1, targetidx: -1, status: 'think', timer: 0, lastType: 'human', bulletHit: false, lastShot: 0});
             
             io.sockets.in(room).emit('newPlayer', {id: pid, username: '', x: randX, y: randY, monster: false, connected: true});
             console.log('bot spawned, stats: ', botplayer, bots[bots.length - 1]);
@@ -394,6 +426,18 @@ function updateBots(room)
                 //else
                 //    console.log('bot thinking... ', player.id, curXtile, destXtile, curYtile, destYtile);
             //}
+            var hrtime = utils.getHighResTime();
+            if(!player.monster && (hrtime - bot.lastShot >= 300))
+            {
+                // fire a bullet at the closest monster
+                var targetidx = getClosestPlayerIdx(player, 'monster');
+                if(targetidx < 0)
+                    continue;
+
+                var target = players[targetidx];
+                fireBullet(player, target.x, target.y);
+                bot.lastShot = hrtime;
+            }
         }
         else
         {
@@ -809,33 +853,9 @@ io.on('connection', function (socket)
                 console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + players[p].ip);
                 break;
             }
-            if(players[p].firstFire === undefined || players[p].firstFire === 0)
-                players[p].firstFire = time;
-            else if(time - players[p].firstFire >= 2)
-            {
-                players[p].firstFire = 0;
-                players[p].fireCount = 0;
-            }
-            if(players[p].fireCount !== undefined && players[p].fireCount > 10)
-                break;
 
-            players[p].fireCount++;
+            fireBullet(players[p], msg.x, msg.y);
 
-            var originX = players[p].x + 5;
-            var originY = players[p].y + 5;
-            var velocity = math.normalize(msg.x - originX, msg.y - originY);
-            velocity[0] = velocity[0] * speedBullet;
-            velocity[1] = velocity[1] * speedBullet;
-
-            // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
-            //
-            // At the moment every bullet gets a unique id from a basic incrementing counter, I don't think it'll overflow
-            // but if it ever comes to it, we can just keep an array to store id values that can be recycled and reuse those
-            bullets.push({id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: true, room: players[p].room});
-            socket.broadcast.to(players[p].room).emit('newBullet', {id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: true});
-            socket.emit('newBullet', {id: bulletId, playerId: msg.id, x: originX, y: originY, velocity: velocity, alive: true});
-
-            bulletId++;
             break;
         }
     });
