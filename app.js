@@ -1,10 +1,13 @@
+    // Node modules
 var fs = require('fs')
     , http = require('http')
     , socketio = require('socket.io')
     , aabb = require('aabb-2d')
+    , git = require('git-rev')
+    // Native/local modules
     , math = require('./math')
     , utils = require('./utils')
-    , git = require('git-rev');
+    , shottypes = require('./shottypes');
 
 var gameSizeX = 1280;
 var gameSizeY = 720;
@@ -356,20 +359,19 @@ function fireBullet(player, targetX, targetY)
 
     player.fireCount++;
 
-    var originX = player.x + 5;
-    var originY = player.y + 5;
-    var velocity = math.normalize(targetX - originX, targetY - originY);
-    velocity[0] = velocity[0] * speedBullet;
-    velocity[1] = velocity[1] * speedBullet;
+    // To change which shot is being used, simply call a different shot function, eg tripleShot()
+    // (you should even be able to provide the same arguments)
+    var shot = shottypes.brokenShot(player, {x: targetX, y: targetY}, {id: bulletId}, speedBullet);
 
-    // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
-    //
-    // At the moment every bullet gets a unique id from a basic incrementing counter, I don't think it'll overflow
-    // but if it ever comes to it, we can just keep an array to store id values that can be recycled and reuse those
-    bullets.push({id: bulletId, playerId: player.id, x: originX, y: originY, velocity: velocity, alive: true, room: player.room});
-    io.sockets.in(player.room).emit('newBullet', {id: bulletId, playerId: player.id, x: originX, y: originY, velocity: velocity, alive: true});
-
-    bulletId++;
+    for(i = 0; i < shot.length; i++)
+    {
+        // Push bullet into array, have it keep track of its own room and emit the bullet to room that spawned it
+        //
+        // At the moment every bullet gets a unique id from a basic incrementing counter, I don't think it'll overflow
+        // but if it ever comes to it, we can just keep an array to store id values that can be recycled and reuse those
+        bullets.push(shot[i]);
+        io.sockets.in(player.room).emit('newBullet', shot[i]);
+    }
 }
 
 function updateBots(room)
@@ -1073,4 +1075,4 @@ io.on('connection', function (socket)
             break;
         }
     });
-});
+}); 
