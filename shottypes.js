@@ -3,6 +3,7 @@ var math = require('./math');
 //==========================================================================================
 // Generates a single bullet object containing x, y coords and a velocity
 // Requires a player and target object both containing `x` and `y` properties
+// [Optional]: speedBullet - Float that multiplies the speed of the bullet
 function genSingleBullet(player, target, speedBullet)
 {
     var speedMultiplier = 1;
