@@ -20,7 +20,8 @@ function genSingleBullet(player, target, speedBullet)
 }
 
 // Returns color if defined, otherwise defaults to "#FF3399" (purple) or some specified default arg
-function tryGenColor(color, defaultColor)
+// [Optional]: defaultColor - Color Hex Code String to fallback on if main color arg undefined
+function genColor(color, defaultColor)
 {
     if(color === undefined)
     {
@@ -56,7 +57,7 @@ function tryGenColor(color, defaultColor)
 // Increments id by 1
 var singleShot = function(player, target, id, optional)
 {
-    var color = tryGenColor(optional.color);
+    var color = genColor(optional.color);
     var b     = genSingleBullet(player, target, optional.speedBullet);
     var shot  = [{id: id.id, playerId: player.id, x: b.x, y: b.y, velocity: b.velocity, color: color, alive: true, room: player.room}];
     id.id++;
@@ -73,7 +74,7 @@ var tripleShot = function(player, target, id, optional)
     if(customAngle !== undefined)
         spreadAngle = optional.customAngle;
 
-    var color = tryGenColor(optional.color);
+    var color = genColor(optional.color);
     var b     = genSingleBullet(player, target, optional.speedBullet);
     var shot  = [{id: id.id, playerId: player.id, x: b.x, y: b.y, velocity: b.velocity, color: color, alive: true, room: player.room}];
     id.id++;
@@ -94,7 +95,7 @@ var tripleShot = function(player, target, id, optional)
 // Increments id by 6
 var brokenShot = function(player, target, id, optional)
 {
-    var color = tryGenColor(optional.color);
+    var color = genColor(optional.color);
     var b = genSingleBullet(player, target, optional.speedBullet);
     var shot = [{id: id.id, playerId: player.id, x: b.x, y: b.y, velocity: b.velocity, color: color, alive: true, room: player.room}];
     id.id++;
