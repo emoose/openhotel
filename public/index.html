@@ -1,69 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<link rel="stylesheet" type="text/css" href="style.css">
-<title>OpenHotel</title>
-</head>
-<body>
-<script src='jquery.tools.min.js'></script>
-<script type='text/javascript' src='socket.io-1.0.4.js'></script>
-<div id='canvas_wrapper'>
-<img id='bgimage' style='position:absolute;z-index:1;' />
-<canvas id='canvas' height='720' width='1280' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
-</div>
-<p style='font-size:14px;'>Time remaining: <span id="round_timer">00:00</span></p>
-<div class="box" style="width:1280px" >
-<!-- the tabs -->
-<ul class="tabs">
-    <li><a href="#">Event Log</a></li>
-    <li><a href="#">Settings</a></li>
-    <li><a href="#">Help</a></li>
-</ul>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<title>OpenHotel</title>
+	</head>
+	<body>
+		<script src='jquery.tools.min.js'></script>
+		<script type='text/javascript' src='socket.io-1.0.4.js'></script>
+		<div id='canvas_wrapper'>
+			<img id='bgimage' style='position:absolute;z-index:1;' />
+			<canvas id='canvas' height='720' width='1280' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
+		</div>
+		<p style='font-size:14px;'>Time remaining: <span id="round_timer">00:00</span></p>
+		<div class="box" style="width:1280px" >
+			<!-- the tabs -->
+			<ul class="tabs">
+			    <li><a href="#">Event Log</a></li>
+			    <li><a href="#">Settings</a></li>
+			    <li><a href="#">Help</a></li>
+			</ul>
 
-<!-- tab "panes" -->
-<div class="panes" style='border: 1px solid #000;'>
-    <div style='height:200px;font-size:12px;'>
-        <div id='event_log' style='height:200px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
-    </div>
-    <div style='height:auto;min-height:200px;font-size:12px;'>
-        Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
-        Username: <input type="text" name="username_changer" id="username_changer" />
-        <input type="button" name="username_button" id="username_button" value="Set"/><br>
-        <!--Room: <input type="text" name="room_changer" id="room_changer" />
-        <input type="button" name="room_button" id="room_button" value="Set"/><br>-->
-        Background: <input type="text" name="bg_changer" id="bg_changer" />
-        <input type="button" name="bg_button" id="bg_button" value="Set"/><br />
-        <input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
-        <input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
-        <input type="checkbox" id="theme_toggle">Use dark theme</input><br>
-        <input type="checkbox" id="mouse_toggle">Swap mouse (left to move, right to shoot)</input><br>
-        <input type="checkbox" id="bg_toggle">Disable background</input><br>
-    </div>
-    <div style='height:200px;font-size:12px;'>
-        Green squares are zombie players, black squares are humans. The square with red around it is you.
-        <br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
-        <br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
-        <br><br>
-        <b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
-    </div>
-</div>
+			<!-- tab "panes" -->
+			<div class="panes" style='border: 1px solid #000;'>
+				<div style='height:200px;font-size:12px;'>
+					<div id='event_log' style='height:200px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
+				</div>
+				<div style='height:auto;min-height:200px;font-size:12px;'>
+					Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
+					Username: <input type="text" name="username_changer" id="username_changer" />
+					<input type="button" name="username_button" id="username_button" value="Set"/><br>
+					<!--Room: <input type="text" name="room_changer" id="room_changer" />
+					<input type="button" name="room_button" id="room_button" value="Set"/><br>-->
+					Background: <input type="text" name="bg_changer" id="bg_changer" />
+					<input type="button" name="bg_button" id="bg_button" value="Set"/><br />
+					<input type="checkbox" id="dc_toggle">Show disconnected players' last positions</input><br>
+					<input type="checkbox" id="zombie_toggle">Disable zombies mode</input><br>
+					<input type="checkbox" id="theme_toggle">Use dark theme</input><br>
+					<input type="checkbox" id="mouse_toggle">Swap mouse (left to move, right to shoot)</input><br>
+					<input type="checkbox" id="bg_toggle">Disable background</input><br>
+				</div>
+				<div style='height:200px;font-size:12px;'>
+					Green squares are zombie players, black squares are humans. The square with red around it is you.
+					<br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
+					<br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
+					<br><br>
+					<b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
+				</div>
+			</div>
 
-</div>
-
-<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
-<div id='chat_sidebar' style='z-index:30;'>
-    <div style='margin-top:-20px;'>
-        <div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px;
-        margin-left:0px; border-top-left-radius:3px; margin-right:-1px;'>
-            <div style='float:left;' id='chat_button'>&#x25BC; hide chat - powered by livechan
-            </div><br><br>
-        </div>
-    </div>
-    <iframe id='chat_frame' style='position:absolute;width:100%;height:100%;border:none;right:0;'></iframe>
-</div>
-<script type='text/javascript' src='client.js'>
- 
-</script>
-</body>
+		</div>
+		<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
+		<div id='chat_sidebar' style='z-index:30;'>
+			<div style='margin-top:-20px;'>
+				<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px;margin-left:0px; border-top-left-radius:3px; margin-right:-1px;'>
+					<div style='float:left;' id='chat_button'>&#x25BC; hide chat - powered by livechan
+					</div>
+				</div>
+			</div>
+			<iframe id='chat_frame' style='position:absolute;width:100%;height:100%;border:none;right:0;'></iframe>
+		</div>
+		<script type='text/javascript' src='client.js'></script>
+	</body>
 </html>
