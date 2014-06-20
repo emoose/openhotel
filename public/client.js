@@ -2,7 +2,7 @@ window.onload=function(){
 	//==================================================
 	// Game variables
 	//--------------------------------------------------
-	var id = "";
+	var id = '';
 	var sessionID = -1;
 	var gameSizeX = 0;
 	var gameSizeY = 0;
@@ -18,8 +18,8 @@ window.onload=function(){
 	var bullets = [];
 	var blockSize=10;
 	var socket = io.connect();
-	var ctx = $("#canvas")[0].getContext("2d");
-	var canvas = document.getElementById("canvas");
+	var ctx = $('#canvas')[0].getContext('2d');
+	var canvas = document.getElementById('canvas');
 	var showDisconnected = false;
 	var disableZombies = false;
 	var swapMouse = false;
@@ -49,30 +49,30 @@ window.onload=function(){
 	var movementCooldown = 0;
 
 	var hidden, visibilityChange;
-	
+
 	//==================================================
 	// Utility functions
 	//--------------------------------------------------
-	
-	if (typeof document.hidden !== "undefined")
+
+	if (typeof document.hidden !== 'undefined')
 	{ // Opera 12.10 and Firefox 18 and later support
-	  hidden = "hidden";
-	  visibilityChange = "visibilitychange";
+	  hidden = 'hidden';
+	  visibilityChange = 'visibilitychange';
 	}
-	else if (typeof document.mozHidden !== "undefined")
+	else if (typeof document.mozHidden !== 'undefined')
 	{
-	  hidden = "mozHidden";
-	  visibilityChange = "mozvisibilitychange";
+	  hidden = 'mozHidden';
+	  visibilityChange = 'mozvisibilitychange';
 	}
-	else if (typeof document.msHidden !== "undefined")
+	else if (typeof document.msHidden !== 'undefined')
 	{
-	  hidden = "msHidden";
-	  visibilityChange = "msvisibilitychange";
+	  hidden = 'msHidden';
+	  visibilityChange = 'msvisibilitychange';
 	}
-	else if (typeof document.webkitHidden !== "undefined")
+	else if (typeof document.webkitHidden !== 'undefined')
 	{
-	  hidden = "webkitHidden";
-	  visibilityChange = "webkitvisibilitychange";
+	  hidden = 'webkitHidden';
+	  visibilityChange = 'webkitvisibilitychange';
 	}
 
 	function loadImage()
@@ -85,11 +85,11 @@ window.onload=function(){
 		else if(gameSizeX > dimensions.width || gameSizeY > dimensions.height)
 			dimensions = {width: gameSizeX, height: gameSizeY};
 
-		$("#bgimage").attr('src', img.src);
-		$("#bgimage").css("height",dimensions.height + "px");
-		$("#bgimage").height = dimensions.height;
-		$("#bgimage").css("width",dimensions.width + "px");
-		$("#bgimage").width = dimensions.width;
+		$('#bgimage').attr('src', img.src);
+		$('#bgimage').css('height',dimensions.height + 'px');
+		$('#bgimage').height = dimensions.height;
+		$('#bgimage').css('width',dimensions.width + 'px');
+		$('#bgimage').width = dimensions.width;
 	}
 	img.onload = loadImage;
 
@@ -155,9 +155,9 @@ window.onload=function(){
 	function addToLog(entry)
 	{
 		if(dontLog) return;
-		var log = $("#event_log").html();
-		log = entry + "<br />" + log;
-		$("#event_log").html(log);
+		var log = $('#event_log').html();
+		log = entry + '<br />' + log;
+		$('#event_log').html(log);
 	}
 
 	function getHighResTime()
@@ -228,19 +228,19 @@ window.onload=function(){
 			ctx.beginPath();
 			if(player.monster)
 			{
-				ctx.fillStyle = "#FFCC00";
+				ctx.fillStyle = '#FFCC00';
 				ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
 			}
-			ctx.fillStyle = "#FFFFFF";
+			ctx.fillStyle = '#FFFFFF';
 			if(player.id == id) // change border to red if its us
-				ctx.fillStyle = "#FF0000";
+				ctx.fillStyle = '#FF0000';
 
 			ctx.fillRect(player.x, player.y, 10, 10);
 
 			if(player.monster && !disableZombies)
-				ctx.fillStyle = "#00FF00";
+				ctx.fillStyle = '#00FF00';
 			else
-				ctx.fillStyle = "#000";
+				ctx.fillStyle = '#000';
 
 			ctx.fillRect(player.x + 1,player.y + 1,8,8);
 
@@ -248,7 +248,7 @@ window.onload=function(){
 			if(player.username != '' && player.username !== undefined)
 				name = name + '. ' + player.username;
 
-			ctx.font = "12px Arial";
+			ctx.font = '12px Arial';
 			ctx.textAlign = 'center';
 			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+12);
 
@@ -265,7 +265,7 @@ window.onload=function(){
 				ctx.beginPath();
 				ctx.fillStyle = bullets[i].color;
 				if(bullets[i].playerId === id)
-					ctx.fillStyle = "#FFFFFF";
+					ctx.fillStyle = '#FFFFFF';
 				ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
 				ctx.closePath();
 			}
@@ -296,7 +296,7 @@ window.onload=function(){
 	{
 		if(bulletCooldown <= 0)
 		{
-			socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
+			socket.emit('fireBullet', {id: id, x: mouseX, y: mouseY, session: sessionID});
 			bulletCooldown = BULLET_FIRE_RATE;
 		}
 		else
@@ -307,28 +307,28 @@ window.onload=function(){
 	{
 		if(movementCooldown <= 0)
 		{
-			socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
+			socket.emit('position', {id: id, x: mouseX, y: mouseY, session: sessionID});
 			movementCooldown = MOVEMENT_RATE;
 		}
 		else
 			movementCooldown--;
 	}
-	
+
 	function setTheme(themeName)
 	{
-		var bgcolor = "#fff";
-		var fontcolor = "#000";
-		var logbgcolor = "#EBEBEB";
-		if(themeName === "dark")
+		var bgcolor = '#fff';
+		var fontcolor = '#000';
+		var logbgcolor = '#EBEBEB';
+		if(themeName === 'dark')
 		{
-			bgcolor = "#282A2E";
-			fontcolor = "#fff";
-			logbgcolor = "#282A2E";
-			$("#theme_toggle").prop('checked', true);
+			bgcolor = '#282A2E';
+			fontcolor = '#fff';
+			logbgcolor = '#282A2E';
+			$('#theme_toggle').prop('checked', true);
 		}
-		$("body").css("background-color", bgcolor);
-		$("body").css("color", fontcolor);
-		$("#event_log").css("background-color", logbgcolor);
+		$('body').css('background-color', bgcolor);
+		$('body').css('color', fontcolor);
+		$('#event_log').css('background-color', logbgcolor);
 		if(localStorage !== undefined && localStorage.theme !== themeName)
 			localStorage.theme = themeName;
 	}
@@ -341,31 +341,31 @@ window.onload=function(){
 
 	function updateUsername()
 	{
-		var name = $("#username_changer").val();
+		var name = $('#username_changer').val();
 		if(name.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
-		$("#username_changer").val('');
-		socket.emit("username", {id: id, username: name, session: sessionID});
+		$('#username_changer').val('');
+		socket.emit('username', {id: id, username: name, session: sessionID});
 		if(localStorage !== undefined)
 			localStorage.username = name;
 	}
 
 	function updateBackground()
 	{
-		var url = $("#bg_changer").val();
-		if(url.length < 5 || (url.substring(0, 5) !== "http:" && url.substring(0, 5) !== "data:")) return;
-		$("#bg_changer").val('');
-		if(url.indexOf("4chan.org") > -1 || url.indexOf("4cdn.org") > -1)
+		var url = $('#bg_changer').val();
+		if(url.length < 5 || (url.substring(0, 5) !== 'http:' && url.substring(0, 5) !== 'data:')) return;
+		$('#bg_changer').val('');
+		if(url.indexOf('4chan.org') > -1 || url.indexOf('4cdn.org') > -1)
 		{
-			alert("4chan images won't load for other people because of some hotlink protection bs, thanks moot");
+			alert('4chan images won't load for other people because of some hotlink protection bs, thanks moot');
 			return;
 		}
-		socket.emit("updateImage", {id: id, src: url, session: sessionID});
+		socket.emit('updateImage', {id: id, src: url, session: sessionID});
 	}
 
 	function changeRoom()
 	{
-		var room = $("#room_changer").val();
-		$("#room_changer").val('');
+		var room = $('#room_changer').val();
+		$('#room_changer').val('');
 		joinRoom(room);
 	}
 
@@ -386,7 +386,7 @@ window.onload=function(){
 		currentRoom = room;
 		players = [];
 		dontLog = true;
-		socket.emit("joinRoom", {room: room});
+		socket.emit('joinRoom', {room: room});
 	}
 
 	function updateRoundTimer()
@@ -400,16 +400,16 @@ window.onload=function(){
 		var minutes = parseInt( timeLeft / 60 ) % 60;
 		var seconds = timeLeft % 60;
 
-		var result = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-		$("#round_timer").text(result);
+		var result = (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+		$('#round_timer').text(result);
 	}
-	
+
 	//==================================================
 	// Server messages
 	//--------------------------------------------------
 
 	// sent when user joins a room
-	socket.on("gameState", function(data)
+	socket.on('gameState', function(data)
 	{
 		console.log('received game state: ', data);
 		id = data.id;
@@ -421,14 +421,14 @@ window.onload=function(){
 		speedPlayer = data.speedPlayer;
 		speedMonster = data.speedMonster;
 
-		$("#canvas")[0].width = gameSizeX;
-		$("#canvas")[0].height = gameSizeY;
+		$('#canvas')[0].width = gameSizeX;
+		$('#canvas')[0].height = gameSizeY;
 
 		img.src = makeTextSafe(data.image);
 
-		$("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
+		$('#bgimage_src').html('<a href='' + img.src + ''>' + img.src + '</a>');
 
-		$("#server_version").text(data.serverVersion);
+		$('#server_version').text(data.serverVersion);
 
 		if(data.timeLeft > 0)
 		{
@@ -438,13 +438,13 @@ window.onload=function(){
 		console.log('connected, id ' + id + ' session ' + sessionID);
 		if(localStorage !== undefined && localStorage.username !== undefined)
 		{
-			$("#username_changer").val(localStorage.username);
+			$('#username_changer').val(localStorage.username);
 			updateUsername();
 		}
 	});
 
 	// add new player to our list
-	socket.on("newPlayer", function(data)
+	socket.on('newPlayer', function(data)
 	{
 		for(p=0;p<players.length;p++)
 		{
@@ -457,17 +457,17 @@ window.onload=function(){
 	});
 
 	// add new bullet to bullet list
-	socket.on("newBullet", function(data)
+	socket.on('newBullet', function(data)
 	{
 		//console.log('new bullet: ', data);
 		bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, color: data.color, alive: data.alive});
 	});
 
 	// sent after user joins room and the player list has been sent
-	socket.on("endPlayerList", function(data) { dontLog = false; });
+	socket.on('endPlayerList', function(data) { dontLog = false; });
 
 	// update our player list with updated player info
-	socket.on("updatePlayer", function(data)
+	socket.on('updatePlayer', function(data)
 	{
 		//console.log('player update: ', data);
 		for(p=0;p<players.length;p++)
@@ -485,22 +485,22 @@ window.onload=function(){
 			}
 			player.connected = data.connected;
 			if(player.username !== data.username && data.username !== undefined && data.username !== '')
-				addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
+				addToLog(getPlayerName(data.id) + ' changed name to '' + makeTextSafe(data.username) + ''');
 
 			player.username = data.username;
-			
+
 			player.moveRight = data.moveRight;
 			player.moveLeft = data.moveLeft;
 			player.moveUp = data.moveUp;
 			player.moveDown = data.moveDown;
-			
+
 			player.bulletHit = data.bulletHit;
 
 			if(player.monster !== data.monster && data.monster)
 			{
-				var attacker = " has become infected!";
+				var attacker = ' has become infected!';
 				if(data.attackerid !== undefined && data.attackerid > 0)
-					attacker = " was bit by " + getPlayerName(data.attackerid) + "!";
+					attacker = ' was bit by ' + getPlayerName(data.attackerid) + '!';
 				addToLog(getPlayerName(data.id) + attacker);
 			}
 			player.monster = data.monster;
@@ -509,7 +509,7 @@ window.onload=function(){
 	});
 
 	// Remove bullet if it's dead, otherwise update its position
-	socket.on("updateBullet", function(data)
+	socket.on('updateBullet', function(data)
 	{
 		// Search through bullet array to find bullet id that needs updating
 		// Works, but is pretty inefficent, ideas?
@@ -531,7 +531,7 @@ window.onload=function(){
 	});
 
 	// sent by the server when sessions don't match, usually means server was restarted
-	socket.on("refresh", function(data)
+	socket.on('refresh', function(data)
 	{
 		// TODO: uncomment this once the game isn't updated as much
 		//refreshGame();
@@ -539,32 +539,32 @@ window.onload=function(){
 	});
 
 	// update background image
-	socket.on("updateImage", function(data)
+	socket.on('updateImage', function(data)
 	{
 		img.src = makeTextSafe(data.src);
 
 		if(data.id !== undefined)
-			addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + img.src + '">' + img.src + '</a>');
+			addToLog(getPlayerName(data.id) + ' changed the background to <a href='' + img.src + ''>' + img.src + '</a>');
 		else
-			addToLog('Background changed to <a href="' + img.src + '">' + img.src + '</a>');
+			addToLog('Background changed to <a href='' + img.src + ''>' + img.src + '</a>');
 
-		$("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
+		$('#bgimage_src').html('<a href='' + img.src + ''>' + img.src + '</a>');
 	});
 
 	// new round started
-	socket.on("roundStart", function(data)
+	socket.on('roundStart', function(data)
 	{
 		roundEndTime = getTime() + data.timeLimit;
 		roundTimer = setInterval(updateRoundTimer, 1000);
 	});
 
 	// round ended
-	socket.on("roundEnd", function(data)
+	socket.on('roundEnd', function(data)
 	{
-		var text = "The humans managed to survive for five minutes!";
+		var text = 'The humans managed to survive for five minutes!';
 		if(data.id > 0)
-			text = "The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.";
-		addToLog("<b>Round ended!</b> " + text);
+			text = 'The last survivor was ' + getPlayerName(data.victimid) + ' until ' + getPlayerName(data.id) + ' bit them.';
+		addToLog('<b>Round ended!</b> ' + text);
 	});
 
 	//==================================================
@@ -572,44 +572,44 @@ window.onload=function(){
 	//--------------------------------------------------
 
 	// setup ul.tabs to work as tabs for each div directly under div.panes
-	$("ul.tabs").tabs("div.panes > div");
+	$('ul.tabs').tabs('div.panes > div');
 
 	// fix for canvas being unfocusable
-	$("#canvas")[0].setAttribute('tabindex','0');
-	$("#canvas")[0].focus();
-	
+	$('#canvas')[0].setAttribute('tabindex','0');
+	$('#canvas')[0].focus();
+
 	document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
-	$("#dc_toggle").click(function() {
-		showDisconnected = $(this).is(":checked");
+	$('#dc_toggle').click(function() {
+		showDisconnected = $(this).is(':checked');
 	});
 
-	$("#zombie_toggle").click(function() {
-		disableZombies = $(this).is(":checked");
+	$('#zombie_toggle').click(function() {
+		disableZombies = $(this).is(':checked');
 	});
 
-	$("#theme_toggle").click(function() {
-		setTheme($(this).is(":checked") ? "dark" : "light");
+	$('#theme_toggle').click(function() {
+		setTheme($(this).is(':checked') ? 'dark' : 'light');
 	});
 
-	$("#mouse_toggle").click(function() {
-		swapMouse = $(this).is(":checked");
-		var lsValue = swapMouse ? "1" : "0";
+	$('#mouse_toggle').click(function() {
+		swapMouse = $(this).is(':checked');
+		var lsValue = swapMouse ? '1' : '0';
 		if(localStorage !== undefined && localStorage.swapMouse !== lsValue)
 			localStorage.swapMouse = lsValue;
 	});
 
-	$("#bg_toggle").click(function() {
-		disableBackground = $(this).is(":checked");
-		var lsValue = "0";
+	$('#bg_toggle').click(function() {
+		disableBackground = $(this).is(':checked');
+		var lsValue = '0';
 		if(disableBackground)
 		{
-			$("#bgimage").attr('src', "");
-			$("#bgimage").css("height", "0px");
-			$("#bgimage").height = 0;
-			$("#bgimage").css("width", "0px");
-			$("#bgimage").width = 0;
-			lsValue = "1";
+			$('#bgimage').attr('src', '');
+			$('#bgimage').css('height', '0px');
+			$('#bgimage').height = 0;
+			$('#bgimage').css('width', '0px');
+			$('#bgimage').width = 0;
+			lsValue = '1';
 		}
 		else
 			loadImage();
@@ -621,42 +621,42 @@ window.onload=function(){
 	// load saved theme
 	if(localStorage !== undefined && localStorage.theme !== undefined)
 		setTheme(localStorage.theme);
-	if(localStorage !== undefined && localStorage.swapMouse !== undefined && localStorage.swapMouse === "1")
+	if(localStorage !== undefined && localStorage.swapMouse !== undefined && localStorage.swapMouse === '1')
 	{
 		swapMouse = true;
-		$("#mouse_toggle").prop('checked', true);
+		$('#mouse_toggle').prop('checked', true);
 	}
-	if(localStorage !== undefined && localStorage.disableBackground !== undefined && localStorage.disableBackground === "1")
+	if(localStorage !== undefined && localStorage.disableBackground !== undefined && localStorage.disableBackground === '1')
 	{
 		disableBackground = true;
-		$("#bgimage").attr('src', "");
-		$("#bgimage").css("height", "0px");
-		$("#bgimage").height = 0;
-		$("#bgimage").css("width", "0px");
-		$("#bgimage").width = 0;
-		$("#bg_toggle").prop('checked', true);
+		$('#bgimage').attr('src', '');
+		$('#bgimage').css('height', '0px');
+		$('#bgimage').height = 0;
+		$('#bgimage').css('width', '0px');
+		$('#bgimage').width = 0;
+		$('#bg_toggle').prop('checked', true);
 	}
-	
-	$("#username_button").click(updateUsername);
-	$("#username_changer").keypress(function(event)
+
+	$('#username_button').click(updateUsername);
+	$('#username_changer').keypress(function(event)
 	{
 		if(event.which == 13 || event.keyCode == 13) updateUsername();
 	});
-	
-	$("#bg_button").click(updateBackground);
-	$("#bg_changer").keypress(function(event)
+
+	$('#bg_button').click(updateBackground);
+	$('#bg_changer').keypress(function(event)
 	{
 		if(event.which == 13 || event.keyCode == 13) updateBackground();
 	});
-	
-	$("#room_button").click(changeRoom);
-	$("#room_changer").keypress(function(event)
+
+	$('#room_button').click(changeRoom);
+	$('#room_changer').keypress(function(event)
 	{
 		if(event.which == 13 || event.keyCode == 13) changeRoom();
-	});	
+	});
 
-	
-	$("#canvas").mousedown(function(event)
+
+	$('#canvas').mousedown(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
 		var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
@@ -666,7 +666,7 @@ window.onload=function(){
 			playerShooting = true;
 	});
 
-	$("#canvas").mouseup(function(event)
+	$('#canvas').mouseup(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
 		var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
@@ -676,12 +676,12 @@ window.onload=function(){
 			playerShooting = false;
 	});
 
-	$("#canvas").keydown(function(event)
+	$('#canvas').keydown(function(event)
 	{
 		var code = event.keyCode || e.which;
-		
+
 		var moveChanged = false;
-		
+
 		if(code == 32)
 		{
 			playerShooting = true;
@@ -708,15 +708,15 @@ window.onload=function(){
 			moveChanged = true;
 		}
 		if(moveChanged)
-			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
+			socket.emit('movement', {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
 	});
 
-	$("#canvas").keyup(function(event)
+	$('#canvas').keyup(function(event)
 	{
 		var code = event.keyCode || e.which;
-		
+
 		var moveChanged = false;
-		
+
 		if(code == 32)
 		{
 			playerShooting = false;
@@ -743,10 +743,10 @@ window.onload=function(){
 			moveChanged = true;
 		}
 		if(moveChanged)
-			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
+			socket.emit('movement', {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
 	});
 
-	$("#canvas").mousemove( function(e)
+	$('#canvas').mousemove( function(e)
 	{
 		var x,y;
 		for(x=e.pageX-8;x>=0;x--)
@@ -766,10 +766,10 @@ window.onload=function(){
 			}
 		}
 	});
-	
+
 	// Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
 	canvas.oncontextmenu = function() { return false; }
-	
+
 	//==================================================
 	// LiveChan integration, taken from http://livechan.net/draw/
 	//--------------------------------------------------
@@ -781,10 +781,10 @@ window.onload=function(){
 	{
 		if (chat_open === false && chat_loaded == false)
 		{
-			var chat_sidebar = document.getElementById("chat_sidebar");
+			var chat_sidebar = document.getElementById('chat_sidebar');
 			chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
 			document.getElementById('chat_frame').style.display = 'block';
-			document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
+			document.getElementById('chat_sidebar').style.top = document.width < 600 ? '20px' : '30%';
 			document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
 			chat_open = true;
 			chat_loaded = true;
@@ -801,7 +801,7 @@ window.onload=function(){
 		else if (chat_open === false && chat_loaded == true)
 		{
 			document.getElementById('chat_frame').style.display = 'block';
-			document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
+			document.getElementById('chat_sidebar').style.top = document.width < 600 ? '20px' : '30%';
 			document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
 			chat_open = true;
 			// permission denied since we aren't on livechan domain :(
@@ -809,20 +809,19 @@ window.onload=function(){
 		}
 		function scroll_sidebar()
 		{
-			var sidebar_check = document.getElementById("chat_frame");
+			var sidebar_check = document.getElementById('chat_frame');
 			if (typeof(sidebar_check) != 'undefined' && sidebar_check != null)
 				sidebar_check.contentWindow.scroll();
 			else
-				console.log("sidebar not found :(");
+				console.log('sidebar not found :(');
 		}
 	}
-	
+
 	toggle_chat();
-	
+
 	$('#chat_frame').load(function()
 	{
 		joinRoom(currentRoom);
 		setInterval(update,10);
 	});
 }
-
