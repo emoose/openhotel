@@ -19,8 +19,7 @@
   "dependencies": {
     "aabb-2d": "*",
     "git-rev": "*",
-    "socket.io": "*",
-    "connect": "*"
+    "socket.io": "*"
   },
   "engines": {
     "node": ">=0.10.0"
