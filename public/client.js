@@ -341,12 +341,14 @@ window.onload=function(){
 
 	function updateUsername()
 	{
-		var name = $("#username_changer").val();
-		if(name.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
+		var username = $("#username_changer").val();
+		if(username.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
 		$("#username_changer").val('');
 		socket.emit("username", {id: id, username: name, session: sessionID});
 		if(localStorage !== undefined)
 			localStorage.username = name;
+		// Tell the server your username
+		socket.emit('add user', username);
 	}
 
 	function updateBackground()
@@ -637,12 +639,6 @@ window.onload=function(){
 		$("#bg_toggle").prop('checked', true);
 	}
 
-	$("#username_button").click(updateUsername);
-	$("#username_changer").keypress(function(event)
-	{
-		if(event.which == 13 || event.keyCode == 13) updateUsername();
-	});
-
 	$("#bg_button").click(updateBackground);
 	$("#bg_changer").keypress(function(event)
 	{
@@ -875,6 +871,10 @@ $(function() {
 
       // Tell the server your username
       socket.emit('add user', username);
+			//set the ingame username to same
+			socket.emit("username", {id: id, username: username, session: sessionID});
+			if(localStorage !== undefined)
+				localStorage.username = username;
     }
   }
 
