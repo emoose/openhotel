@@ -42,7 +42,7 @@
 {
   border: 1px solid #000;
 }
-#logcontainer
+#log_container
 {
   height:200px;
   font-size:12px;
@@ -58,7 +58,7 @@
   height:200px;
   font-size:12px;
 }
-#togglechat
+#toggle_chat
 {
   height:20px;
   width:100%;
