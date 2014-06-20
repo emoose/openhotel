@@ -38,6 +38,12 @@
   background-color:#EBEBEB;
   font-size:10px;
 }
+#chat
+{
+  overflow:scroll;
+  background-color:#EBEBEB;
+  font-size:10px;
+}
 #panes
 {
   border: 1px solid #000;
