@@ -784,33 +784,8 @@ window.onload=function(){
 			document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
 			chat_open = true;
 			chat_loaded = true;
-			if (document.width < 600)
-				toggle_chat();
 		}
-		else if (chat_open === true && chat_loaded == true)
-		{
-			document.getElementById('chat_frame').style.display = 'none';
-			document.getElementById('chat_sidebar').style.top = '100%';
-			document.getElementById('chat_button').innerHTML = '&#x25B2; chat - powered by livechan';
-			chat_open = false;
-		}
-		else if (chat_open === false && chat_loaded == true)
-		{
-			document.getElementById('chat_frame').style.display = 'block';
-			document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
-			document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
-			chat_open = true;
-			// permission denied since we aren't on livechan domain :(
-			//scroll_sidebar();
-		}
-		function scroll_sidebar()
-		{
-			var sidebar_check = document.getElementById("chat_frame");
-			if (typeof(sidebar_check) != 'undefined' && sidebar_check != null)
-				sidebar_check.contentWindow.scroll();
-			else
-				console.log("sidebar not found :(");
-		}
+
 	}
 
 	toggle_chat();
@@ -875,6 +850,7 @@ $(function() {
 			socket.emit("username", {id: id, username: username, session: sessionID});
 			if(localStorage !== undefined)
 				localStorage.username = username;
+
     }
   }
 
