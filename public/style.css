@@ -13,6 +13,14 @@
   position:relative;
   z-index:20;
 }
+#remaining
+{
+  font-size:14px;
+}
+#box
+{
+  width:1280px
+}
 #chat_sidebar
 {
     display:block;
@@ -29,6 +37,21 @@
   overflow:scroll;
   background-color:#EBEBEB;
   font-size:10px;
+}
+#panes
+{
+  border: 1px solid #000;
+}
+#logcontainer
+{
+  height:200px;
+  font-size:12px;
+}
+#settings
+{
+  height:auto;
+  min-height:200px;
+  font-size:12px;
 }
 #instructions
 {
@@ -54,6 +77,19 @@
   border:none;
   right:0;
 }
+#copyrights
+{
+  font-size:10px;
+}
+#chat_container
+{
+  margin-top:-20px;
+}
+#chat_button
+{
+  float:left;
+}
+
 canvas, #canvas_wrapper, #bgimage {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
