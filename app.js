@@ -11,7 +11,7 @@ var fs = require('fs')
     , players = require('./lib/players')
     , bots = require('./lib/bots')
     , zombies = require('./lib/gametypes/zombies');
-    
+
 var config =
 {
 // imgur ids to default backgrounds
@@ -105,11 +105,11 @@ var config =
     currentTime: [],
 
     serverPassword: [],
-    
+
     io: undefined
-    
+
 };
-    
+
 var indexdata = fs.readFileSync(__dirname + '/public/index.html');
 var sourcedata = fs.readFileSync(__dirname + '/app.js');
 var listeningport = Number((config.runningBehindProxy && process.env.PORT) || 8080);
@@ -128,7 +128,7 @@ git.short(function(str)
     if(ver === undefined || ver === '')
         ver = "unknown";
     config.serverVersion = ver;
-    console.log('running openhotel version ' + ver);
+    console.log('(running version ' + ver + ')');
 });
 
 var http = require("http"),
@@ -139,7 +139,7 @@ var http = require("http"),
 
 var server = http.createServer(function(request, response) {
 
-  var uri = "./public" + url.parse(request.url).pathname 
+  var uri = "./public" + url.parse(request.url).pathname
     , filename = path.join(process.cwd(), uri);
 
   path.exists(filename, function(exists) {
@@ -153,7 +153,7 @@ var server = http.createServer(function(request, response) {
     if (fs.statSync(filename).isDirectory()) filename += '/index.html';
 
     fs.readFile(filename, "binary", function(err, file) {
-      if(err) {        
+      if(err) {
         response.writeHead(500, {"Content-Type": "text/plain"});
         response.write(err + "\n");
         response.end();
@@ -167,7 +167,7 @@ var server = http.createServer(function(request, response) {
   });
 }).listen(parseInt(port, 10));
 
-console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+console.log("openhotel server is running at => http://localhost:" + port + "/\nCTRL + C to shutdown");
 
 config.io = socketio.listen(server);
 
@@ -198,7 +198,7 @@ function updateWorld()
         }
 
         bots.update(room, config);
-        
+
         zombies.update(room, config);
 
         for(p = 0; p < config.players.length; p++)
@@ -235,7 +235,7 @@ function updateWorld()
                 if(player.moveUp && !player.bulletHit) { player.newX = player.x; player.newY = player.y; }
                 if(player.y < player.newY) player.y = player.newY;
             }
-            
+
             if(player.x < 0) player.x = 0;
             if(player.y < 0) player.y = 0;
             if(player.x >= (config.gameSizeX - 10)) player.x = config.gameSizeX - 10;
@@ -294,7 +294,7 @@ function updateBullets(frametime)
                     if(player.newY < 0) player.newY = 0;
                     if(player.newX >= config.gameSizeX) player.newX = config.gameSizeX - 10;
                     if(player.newY >= config.gameSizeY) player.newY = config.gameSizeY - 10;
-                    
+
                     player.bulletHit = true;
 
                     var upd = players.getPlayerUpdate(player);
@@ -363,7 +363,7 @@ config.io.on('connection', function (socket)
 
                 var monst = config.infectStart[config.rooms.indexOf(msg.room)] > 0;
                 players.addPlayer(pid, remoteAddress, msg.room, '', randX, randY, monst, socket, config);
-                
+
                 var timeleft = config.roundTimeLimit - (utils.getTime() - config.gameStart[config.rooms.indexOf(msg.room)]);
                 if(timeleft < 0)
                     timeleft = 0;
@@ -431,7 +431,7 @@ config.io.on('connection', function (socket)
             socket.emit('refresh', {time:'now'});
             return;
         }
-        
+
         for(p = 0; p < config.players.length; p++)
         {
             var player = config.players[p];
@@ -442,13 +442,13 @@ config.io.on('connection', function (socket)
                 console.log('attempted hack into unowned player, ip: ' + remoteAddress + ' expected ' + player.ip);
                 break;
             }
-            
+
             player.moveRight = msg.moveRight;
             player.moveLeft = msg.moveLeft;
             player.moveUp = msg.moveUp;
             player.moveDown = msg.moveDown;
-                
-            players.sendPlayerUpdate(player, config);            
+
+            players.sendPlayerUpdate(player, config);
             break;
         }
     });
@@ -611,10 +611,10 @@ config.io.on('connection', function (socket)
                 continue;
             player.connected = false;
             players.sendPlayerUpdate(player, config);
-            
+
             console.log('player ' + player.id + ' disconnected');
             console.log('conns: ' + players.getConnCount(player.room, config) + ' monsters: ' + zombies.getMonsterCount(player.room, config));
             break;
         }
     });
-}); 
+});
