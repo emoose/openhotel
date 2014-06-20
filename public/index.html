@@ -9,8 +9,8 @@
 		<script src='jquery.tools.min.js'></script>
 		<script type='text/javascript' src='socket.io-1.0.4.js'></script>
 		<div id='canvas_wrapper'>
-			<img id='bgimage' style='position:absolute;z-index:1;' />
-			<canvas id='canvas' height='720' width='1280' style='border: 1px solid #000;position:relative;z-index:20;' ></canvas>
+			<img id='bgimage'/>
+			<canvas id='canvas' height='720' width='1280'></canvas>
 		</div>
 		<p style='font-size:14px;'>Time remaining: <span id="round_timer">00:00</span></p>
 		<div class="box" style="width:1280px" >
@@ -24,7 +24,7 @@
 			<!-- tab "panes" -->
 			<div class="panes" style='border: 1px solid #000;'>
 				<div style='height:200px;font-size:12px;'>
-					<div id='event_log' style='height:200px;overflow:scroll;background-color:#EBEBEB;font-size:10px;'></div>
+					<div id='event_log'></div>
 				</div>
 				<div style='height:auto;min-height:200px;font-size:12px;'>
 					Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
@@ -51,7 +51,7 @@
 
 		</div>
 		<p style='font-size:10px;'>Copyright (c) 2014 OpenHotel Team <a href="https://github.com/emoose/openhotel">[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
-		<div id='chat_sidebar' style='z-index:30;'>
+		<div id='chat_sidebar'>
 			<div style='margin-top:-20px;'>
 				<div onclick='toggle_chat();' style='height:20px; width:100%; background:#00930a;color:white;margin-top:0px;margin-left:0px; border-top-left-radius:3px; margin-right:-1px;'>
 					<div style='float:left;' id='chat_button'>&#x25BC; hide chat - powered by livechan
