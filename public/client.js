@@ -643,6 +643,9 @@ window.onload=function(){
 	$("#legacy_graphics").click(function() {
 		legacygfx = $(this).is(":checked");
 		if(leggfx==1){leggfx = 0}else{leggfx = 1};
+		var lsValue = swapMouse ? "1" : "0";
+		if(localStorage !== undefined && localStorage.legacyGraphics !== leggfx)
+			localStorage.legacyGraphics = leggfx;
 	});
 
 	$("#bg_toggle").click(function() {
@@ -671,6 +674,18 @@ window.onload=function(){
 	{
 		swapMouse = true;
 		$("#mouse_toggle").prop('checked', true);
+	}
+	if(localStorage !== undefined && localStorage.legacyGraphics !== undefined && localStorage.legacyGraphics === "1")
+	{
+		leggfx=1;
+		legacyGraphics = true;
+		$("#legacy_graphics").prop('checked', true);
+	}
+	if(localStorage !== undefined && localStorage.legacyGraphics !== undefined && localStorage.legacyGraphics === "0")
+	{
+		leggfx=0;
+		legacyGraphics = true;
+		$("#legacy_graphics").prop('checked', false);
 	}
 	if(localStorage !== undefined && localStorage.disableBackground !== undefined && localStorage.disableBackground === "1")
 	{
