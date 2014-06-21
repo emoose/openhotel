@@ -274,12 +274,7 @@ window.onload=function(){
 				bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 
 				ctx.beginPath();
-				ctx.fillStyle = "#2F2F4F";
-				if(bullets[i].playerId === id)
-					ctx.fillStyle = "#000000";
-				ctx.arc(bullets[i].x+2, bullets[i].y+2,2,0,2*Math.PI);
-				ctx.stroke();
-				ctx.fill();
+				ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
 				ctx.closePath();
 			}
 
