@@ -232,7 +232,7 @@ window.onload=function(){
 			}
 
 
-			ctx.beginPath();
+
 
 			if(player.id == id) // change border to red if its us
 				{
@@ -258,7 +258,7 @@ window.onload=function(){
 			var name = player.id;
 			if(player.username != '' && player.username !== undefined)
 				name = name + '. ' + player.username;
-
+			ctx.beginPath();
 			ctx.font = "12px Arial";
 			ctx.textAlign = 'center';
 			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+20);
@@ -278,6 +278,7 @@ window.onload=function(){
 					ctx.fillStyle = "#FFFFFF";
 				ctx.arc(bullets[i].x+2, bullets[i].y+2,2,0,2*Math.PI);
 				ctx.stroke();
+				ctx.fill();
 			}
 
 		ctx.beginPath();
