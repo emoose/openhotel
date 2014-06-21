@@ -2,6 +2,7 @@ window.onload=function(){
 	//==================================================
 	// Game variables
 	//--------------------------------------------------
+	var leggfx = 0;
 	var id = "";
 	var sessionID = -1;
 	var gameSizeX = 0;
@@ -238,21 +239,55 @@ window.onload=function(){
 				{
 					if (player.monster)
 					{
-						ctx.drawImage(playermonsterimg,player.x-11,player.y-11,32,32);
+						if(leggfx==1)
+						{
+							ctx.fillStyle = "#8B0000";
+							ctx.fillRect(player.x + 1,player.y + 1,8,8);
+						}
+						else
+						{
+							ctx.drawImage(playermonsterimg,player.x-11,player.y-11,32,32);
+						}
 					}
 					else
 					{
-						ctx.drawImage(playerimg,player.x-11,player.y-11,32,32);
+						if(leggfx==1)
+						{
+							ctx.fillStyle = "#000";
+							ctx.fillRect(player.x + 1,player.y + 1,8,8);
+						}
+						else
+						{
+							ctx.drawImage(playerimg,player.x-11,player.y-11,32,32);
+						}
+
+
 					}
 				}
 			else
 				{
-					ctx.drawImage(humanimg,player.x-11,player.y-11,32,32);
+					if(leggfx==1)
+					{
+						ctx.fillStyle = "#A9A9A9";
+						ctx.fillRect(player.x + 1,player.y + 1,8,8);
+					}
+					else
+					{
+						ctx.drawImage(humanimg,player.x-11,player.y-11,32,32);
+					}
 				}
 
 			if(player.monster && player.id != id)
 			{
-				ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
+				if(leggfx==1)
+				{
+					ctx.fillStyle = "#FF8C00";
+					ctx.fillRect(player.x + 1,player.y + 1,8,8);
+				}
+				else
+				{
+					ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
+				}
 			};
 
 			var name = player.id;
@@ -274,7 +309,15 @@ window.onload=function(){
 				bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 
 				ctx.beginPath();
-				ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
+				if(leggfx==1)
+				{
+					ctx.fillStyle = "#FF8C00";
+					ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
+				}
+				else
+				{
+					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
+				}
 				ctx.closePath();
 			}
 
@@ -395,7 +438,7 @@ window.onload=function(){
 
 		var result = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
 		$("#round_timer").text(result);
-		
+
 	}
 
 	//==================================================
@@ -591,6 +634,11 @@ window.onload=function(){
 		var lsValue = swapMouse ? "1" : "0";
 		if(localStorage !== undefined && localStorage.swapMouse !== lsValue)
 			localStorage.swapMouse = lsValue;
+	});
+
+	$("#legacy_graphics").click(function() {
+		legacygfx = $(this).is(":checked");
+		if(leggfx==1){leggfx = 0}else{leggfx = 1};
 	});
 
 	$("#bg_toggle").click(function() {
