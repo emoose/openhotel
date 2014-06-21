@@ -808,6 +808,7 @@ $(function() {
       $loginPage.off('click');
       $currentInput = $inputMessage.focus();
 			$("#inputMessage").show();
+			$("#usernameInputs").hide();
       // Tell the server your username
       socket.emit('add user', username);
 			//set the ingame username to same
@@ -832,6 +833,7 @@ $(function() {
       });
       // tell server to execute 'new message' and send along one parameter
       socket.emit('new message', message);
+			addToLog(data.username + ' said "' + message + '"');
     }
   }
 
@@ -1011,12 +1013,14 @@ $(function() {
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', function (data) {
     log(data.username + ' joined');
+		addToLog(data.username + ' joined');
     addParticipantsMessage(data);
   });
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
     log(data.username + ' left');
+		addToLog(data.username + ' left');
     addParticipantsMessage(data);
     removeChatTyping(data);
   });

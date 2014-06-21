@@ -33,20 +33,16 @@
 }
 #event_log
 {
-  height:200px;
-  overflow:scroll;
   background-color:#EBEBEB;
   font-size:10px;
 }
 #chat
 {
-  overflow:scroll;
-  background-color:#EBEBEB;
   font-size:10px;
 }
 #panes
 {
-  height:200px;
+  height:280px;
   overflow:scroll;
   border: 1px solid #000;
 }

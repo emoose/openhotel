@@ -25,20 +25,18 @@
 			<!-- tab 'panes' -->
 			<div class='panes' id='panes'>
 				<div id='chat'>
-					<ul class="pages">
-						<li class="chat page">
+
 							<div class="chatArea">
 								<ul class="messages"></ul>
 							</div>
 							<input class="inputMessage" id="inputMessage" placeholder="Type here..."/>
-						</li>
-						<li class="login page">
-							<div class="form">
+
+
+							<div class="form" id='usernameInputs'>
 								<h3 class="title">What's your nickname?</h3>
-								<input class="usernameInput" type="text" maxlength="14" />
+								<input class="usernameInput" type="text" maxlength="14"/>
 							</div>
-						</li>
-					</ul>
+
 				</div>
 				<div id='log_container'>
 					<div id='event_log'></div>
@@ -54,23 +52,25 @@
 					<input type='checkbox' id='bg_toggle' checked='true'>Disable background</input><br>
 				</div>
 				<div id='instructions'>
-					<img src="monster.png" width="32" height="32">Orange biohazard triangles are zombie players<br>
+					<img src="monster.png" width="32" height="32">Orange biohazard triangles are zombies<br>
 					<img src="human.png" width="32" height="32">Grey triangles are humans.<br>
 					<img src="player.png" width="32" height="32">The green triangle is you if you are uninfected.<br>
 					<img src="playermonster.png" width="32" height="32">The green biohazard triangle is you if you are infected.<br>
-					<br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
+					<br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.<br>
 					<br />The round ends once either all players become zombies or the humans survive for five minutes.
 					<br><br>
-					<b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
+					<b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot <img src="bullet.png" width="8" height="8">(point with mouse to aim)
 				</div>
 			</div>
 		</div>
 		<p id='copyrights'>Copyright (c) 2014 OpenHotel Team <a href='https://github.com/emoose/openhotel'>[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
 		<script type='text/javascript' src='client.js'></script>
-		<img id="monsterimg" src="monster.png" width="32" height="32">
-		<img id="playermonsterimg" src="playermonster.png" width="32" height="32">
-		<img id="playerimg" src="player.png" width="32" height="32">
-		<img id="humanimg" src="human.png" width="32" height="32">
-		<img id="bulletimg" src="bullet.png" width="8" height="8">
+		<div style="display:none">
+			<img id="monsterimg" src="monster.png" width="32" height="32">
+			<img id="playermonsterimg" src="playermonster.png" width="32" height="32">
+			<img id="playerimg" src="player.png" width="32" height="32">
+			<img id="humanimg" src="human.png" width="32" height="32">
+			<img id="bulletimg" src="bullet.png" width="8" height="8">
+		</div>
 	</body>
 </html>
