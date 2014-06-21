@@ -23,7 +23,7 @@ window.onload=function(){
 	var showDisconnected = false;
 	var disableZombies = false;
 	var swapMouse = false;
-	var disableBackground = false;
+	var disableBackground = true;
 	var img = new Image;
 	var currentRoom = 'public';
 	var roundEndTime = 0;
@@ -230,23 +230,28 @@ window.onload=function(){
 			}
 
 			ctx.beginPath();
+
 			if(player.monster)
 			{
 				ctx.fillStyle = "#FFCC00";
-				ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
+				ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
+				ctx.stroke();
+				//ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
 			}
 			ctx.fillStyle = "#FFFFFF";
 			if(player.id == id) // change border to red if its us
 				ctx.fillStyle = "#FF0000";
 
-			ctx.fillRect(player.x, player.y, 10, 10);
+			ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
+			ctx.stroke();
 
 			if(player.monster && !disableZombies)
 				ctx.fillStyle = "#00FF00";
 			else
 				ctx.fillStyle = "#000";
 
-			ctx.fillRect(player.x + 1,player.y + 1,8,8);
+			ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
+			ctx.stroke();
 
 			var name = player.id;
 			if(player.username != '' && player.username !== undefined)
@@ -270,8 +275,8 @@ window.onload=function(){
 				ctx.fillStyle = bullets[i].color;
 				if(bullets[i].playerId === id)
 					ctx.fillStyle = "#FFFFFF";
-				ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
-				ctx.closePath();
+				ctx.arc(bullets[i].x+2, bullets[i].y+2,2,0,2*Math.PI);
+				ctx.stroke();
 			}
 
 		ctx.beginPath();
