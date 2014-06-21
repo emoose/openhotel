@@ -259,6 +259,7 @@ window.onload=function(){
 			if(player.username != '' && player.username !== undefined)
 				name = name + '. ' + player.username;
 			ctx.beginPath();
+			ctx.fillStyle = "#000000";
 			ctx.font = "12px Arial";
 			ctx.textAlign = 'center';
 			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+20);
@@ -273,12 +274,13 @@ window.onload=function(){
 				bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 
 				ctx.beginPath();
-				ctx.fillStyle = bullets[i].color;
+				ctx.fillStyle = "#2F2F4F";
 				if(bullets[i].playerId === id)
-					ctx.fillStyle = "#FFFFFF";
+					ctx.fillStyle = "#000000";
 				ctx.arc(bullets[i].x+2, bullets[i].y+2,2,0,2*Math.PI);
 				ctx.stroke();
 				ctx.fill();
+				ctx.closePath();
 			}
 
 		ctx.beginPath();
