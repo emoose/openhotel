@@ -296,7 +296,7 @@ window.onload=function(){
 				if(leggfx==1)
 				{
 					ctx.fillStyle = "#FF8C00";
-					ctx.fillRect(bullets[i].x, bullets[i].y, 5, 5);
+					ctx.fillRect(bullets[i].x-3, bullets[i].y-3, 6, 6);
 				}
 				else
 				{
