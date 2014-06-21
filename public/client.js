@@ -231,6 +231,15 @@ window.onload=function(){
 
 			ctx.beginPath();
 
+			if(player.id == id) // change border to red if its us
+				ctx.fillStyle = "#FF0000";
+
+			ctx.arc(player.x+5,player.y+5,7,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+			ctx.fill();
+			ctx.beginPath();
+
 			if(player.monster)
 			{
 				ctx.fillStyle = "#FFCC00";
@@ -239,11 +248,7 @@ window.onload=function(){
 				//ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
 			}
 			ctx.fillStyle = "#FFFFFF";
-			if(player.id == id) // change border to red if its us
-				ctx.fillStyle = "#FF0000";
 
-			ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
-			ctx.stroke();
 
 			if(player.monster && !disableZombies)
 				ctx.fillStyle = "#00FF00";
@@ -260,8 +265,8 @@ window.onload=function(){
 			ctx.font = "12px Arial";
 			ctx.textAlign = 'center';
 			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+12);
-
 			ctx.closePath();
+			ctx.fill();
 		}
 
 		// draw bullets above players
