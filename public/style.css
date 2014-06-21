@@ -30,6 +30,12 @@
 {
   font-size:12px;
 }
+#remaining
+{
+  position:absolute;
+  font-size:28px;
+  left:4px;
+}
 #panes
 {
   background:#FFFFFF;

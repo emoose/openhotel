@@ -9,11 +9,12 @@
 	<body>
 		<script src='jquery.tools.min.js'></script>
 		<script type='text/javascript' src='socket.io-1.0.4.js'></script>
+		<p id='remaining'> &nbsp; &nbsp;<span id='round_timer'>00:00</span></p>
 		<div id='canvas_wrapper'>
 			<img id='bgimage'/>
 			<canvas id='canvas' height='720' width='1280'></canvas>
 		</div>
-		<p id='remaining'>Time remaining: <span id='round_timer'>00:00</span></p>
+
 		<div class='box' id='box'>
 			<!-- the tabs -->
 			<ul class='tabs'>
