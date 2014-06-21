@@ -91,6 +91,7 @@ window.onload=function(){
 		$("#bgimage").height = dimensions.height;
 		$("#bgimage").css("width",dimensions.width + "px");
 		$("#bgimage").width = dimensions.width;
+
 	}
 	img.onload = loadImage;
 
@@ -175,10 +176,13 @@ window.onload=function(){
 	// Game functions
 	//--------------------------------------------------
 
-	function draw()
+	function update()
 	{
+		if(playerShooting)
+			fireBullet();
+		if(playerMoving)
+			movePlayer();
 		//draw the game into canvas
-		update();
 		var newtime = getHighResTime();
 		var frametime = newtime - currentTime;
 		currentTime = newtime;
@@ -284,15 +288,6 @@ window.onload=function(){
 		ctx.lineTo(mouseX,mouseY);
 		ctx.stroke();
 		ctx.closePath();
-	}
-
-	function update()
-	{
-		draw();
-		if(playerShooting)
-			fireBullet();
-		if(playerMoving)
-			movePlayer();
 	}
 
 	function fireBullet()
@@ -758,12 +753,7 @@ window.onload=function(){
 
 
 	socket.emit("joinRoom", {room: 'public'});
-
-
-
-
 }
-
 $(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
@@ -1034,4 +1024,5 @@ $(function() {
   socket.on('stop typing', function (data) {
     removeChatTyping(data);
   });
+	setInterval(function(){update();}, 10);
 });
