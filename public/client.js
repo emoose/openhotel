@@ -395,6 +395,12 @@ window.onload=function(){
 
 		var result = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
 		$("#round_timer").text(result);
+		ctx.beginPath();
+		ctx.fillStyle = "#000000";
+		ctx.font = "36px Arial";
+		ctx.textAlign = 'center';
+		ctx.fillText(result,12,12);
+		ctx.closePath();
 	}
 
 	//==================================================
