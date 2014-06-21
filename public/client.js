@@ -755,8 +755,8 @@ window.onload=function(){
 	//==================================================
 	// LiveChan integration, taken from http://livechan.net/draw/
 	//--------------------------------------------------
-	var chat_open = false;
-	var chat_loaded = false;
+	var chat_open = true;
+	var chat_loaded = true;
 	var chat_channel = 'hotel';
 
 	function toggle_chat()
@@ -765,16 +765,14 @@ window.onload=function(){
 		{
 		  var chat_sidebar = document.getElementById("chat_sidebar");
 			chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
-			chat_open = true;
-			chat_loaded = true;
 		}
 
 	}
 	socket.emit("joinRoom", {room: 'public'});
 
 
-		setInterval(update,10);
 
+var myVar = setInterval(function(){update()}, 10);
 }
 
 $(function() {
