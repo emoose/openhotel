@@ -233,7 +233,8 @@ window.onload=function(){
 
 			if(player.id == id) // change border to red if its us
 				ctx.fillStyle = "#FF0000";
-
+			else
+				ctx.fillStyle = "#000000"; // or black if it's not
 			ctx.arc(player.x+5,player.y+5,7,0,2*Math.PI);
 			ctx.stroke();
 			ctx.closePath();
