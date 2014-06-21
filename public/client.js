@@ -347,7 +347,7 @@ window.onload=function(){
 	function updateUsername()
 	{
 		var username = $("#username_changer").val();
-		if(username.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
+		//if(username.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
 		$("#username_changer").val('');
 		socket.emit("username", {id: id, username: name, session: sessionID});
 		if(localStorage !== undefined)
