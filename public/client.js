@@ -1,7 +1,5 @@
 window.onload=function(){
-	//==================================================
-	// Game variables
-	//--------------------------------------------------
+	//game variables
 	var leggfx = 0;
 	var id = "";
 	var sessionID = -1;
@@ -34,9 +32,7 @@ window.onload=function(){
 	var humanimg=document.getElementById("humanimg");
 	var monsterimg=document.getElementById("monsterimg");
 	var playerimg=document.getElementById("playerimg");
-	//==================================================
-	// Tracking Player State
-	//--------------------------------------------------
+	//Tracking player state
 	// Keep track of player actions
 	var playerShooting = false;
 	var playerMoving = false;
@@ -44,19 +40,13 @@ window.onload=function(){
 	var keyA = false;
 	var keyS = false;
 	var keyD = false;
-
 	// Keep track of bullet/movement cooldown (stop players from firing a ton of bullets in a small period)
 	var BULLET_FIRE_RATE = 15; // Constant, cooldownTimer resets to this when bullet is fired
 	var MOVEMENT_RATE = 10;
 	var bulletCooldown = 0;
 	var movementCooldown = 0;
-
 	var hidden, visibilityChange;
-
-	//==================================================
-	// Utility functions
-	//--------------------------------------------------
-
+	//Utility functions
 	if (typeof document.hidden !== "undefined")
 	{ // Opera 12.10 and Firefox 18 and later support
 	  hidden = "hidden";
@@ -77,17 +67,22 @@ window.onload=function(){
 	  hidden = "webkitHidden";
 	  visibilityChange = "webkitvisibilitychange";
 	}
-
 	function loadImage()
 	{
-		if(disableBackground) return;
+		if(disableBackground)
+		{
+			return;
+		}
 		var result = ScaleImage(img.width, img.height, gameSizeX, gameSizeY, true);
 		var dimensions = {width: img.width, height: img.height};
 		if(dimensions.width > gameSizeX || dimensions.height > gameSizeY)
+		{
 			dimensions = result;
+		}
 		else if(gameSizeX > dimensions.width || gameSizeY > dimensions.height)
+		{
 			dimensions = {width: gameSizeX, height: gameSizeY};
-
+		}
 		$("#bgimage").attr('src', img.src);
 		$("#bgimage").css("height",dimensions.height + "px");
 		$("#bgimage").height = dimensions.height;
@@ -95,49 +90,46 @@ window.onload=function(){
 		$("#bgimage").width = dimensions.width;
 	}
 	img.onload = loadImage;
-
 	/* thanks to http://selbie.wordpress.com/2011/01/23/scale-crop-and-center-an-image-with-correct-aspect-ratio-in-html-and-javascript/ */
 	function ScaleImage(srcwidth, srcheight, targetwidth, targetheight, fLetterBox)
 	{
 		var result = { width: 0, height: 0, fScaleToTargetWidth: true };
-
-		if ((srcwidth <= 0) || (srcheight <= 0) || (targetwidth <= 0) || (targetheight <= 0)) {
+		if ((srcwidth <= 0) || (srcheight <= 0) || (targetwidth <= 0) || (targetheight <= 0))
+		{
 			return result;
 		}
-
 		// scale to the target width
 		var scaleX1 = targetwidth;
 		var scaleY1 = (srcheight * targetwidth) / srcwidth;
-
 		// scale to the target height
 		var scaleX2 = (srcwidth * targetheight) / srcheight;
 		var scaleY2 = targetheight;
-
 		// now figure out which one we should use
 		var fScaleOnWidth = (scaleX2 > targetwidth);
-		if (fScaleOnWidth) {
+		if (fScaleOnWidth)
+		{
 			fScaleOnWidth = fLetterBox;
 		}
-		else {
+		else
+		{
 		   fScaleOnWidth = !fLetterBox;
 		}
-
-		if (fScaleOnWidth) {
+		if (fScaleOnWidth)
+		{
 			result.width = Math.floor(scaleX1);
 			result.height = Math.floor(scaleY1);
 			result.fScaleToTargetWidth = true;
 		}
-		else {
+		else
+		{
 			result.width = Math.floor(scaleX2);
 			result.height = Math.floor(scaleY2);
 			result.fScaleToTargetWidth = false;
 		}
 		result.targetleft = Math.floor((targetwidth - result.width) / 2);
 		result.targettop = Math.floor((targetheight - result.height) / 2);
-
 		return result;
 	}
-
 	function handleVisibilityChange()
 	{
 		if (!document[hidden])
@@ -145,62 +137,63 @@ window.onload=function(){
 			refreshGame();
 		}
 		else
+		{
 			console.log('hidden...');
+		}
 	}
-
 	function makeTextSafe(text)
 	{
 		var div = document.createElement('div');
 		div.appendChild(document.createTextNode(text));
 		return div.innerHTML;
 	}
-
 	function addToLog(entry)
 	{
-		if(dontLog) return;
+		if(dontLog)
+		{
+			return;
+		}
 		var log = $("#event_log").html();
 		log = entry + "<br />" + log;
 		$("#event_log").html(log);
 	}
-
 	function getHighResTime()
 	{
 		return (+new Date());
 	}
-
 	function getTime()
 	{
 		return Math.round(+new Date()/1000);
 	}
-
-	//==================================================
-	// Game functions
-	//--------------------------------------------------
-
+	//Game functions
 	function draw()
 	{
 		if(playerShooting)
+		{
 			fireBullet();
+		}
 		if(playerMoving)
+		{
 			movePlayer();
+		}
 		var newtime = getHighResTime();
 		var frametime = newtime - currentTime;
 		currentTime = newtime;
-
-		if(gameSizeX <= 0 || gameSizeY <= 0) return;
-
+		if(gameSizeX <= 0 || gameSizeY <= 0)
+		{
+			return;
+		}
 		ctx.clearRect(0,0,gameSizeX,gameSizeY);
-
 		for(p=0;p<players.length;p++)
 		{
 			var player = players[p];
 			if(window.location.pathname !== '/all' && !player.connected && !showDisconnected) // don't draw disconnected players
+			{
 				continue;
-
+			}
 			if(player.connected)
 			{
 				var speed = (0.5 * speedPlayer) * (frametime / 10);
-
 				if(player.x<player.newX || (player.moveRight && !player.bulletHit))
 				{
 					player.x+=speed;
@@ -225,16 +218,11 @@ window.onload=function(){
 					if(player.moveUp && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
 					if(player.y < player.newY) player.y = player.newY;
 				}
-
 				if(player.x < 0) player.x = 0;
 				if(player.y < 0) player.y = 0;
 				if(player.x >= (gameSizeX - 10)) player.x = gameSizeX - 10;
 				if(player.y >= (gameSizeY - 10)) player.y = gameSizeY - 10;
 			}
-
-
-
-
 			if(player.id == id) // change border to red if its us
 				{
 					if (player.monster)
@@ -260,8 +248,6 @@ window.onload=function(){
 						{
 							ctx.drawImage(playerimg,player.x-11,player.y-11,32,32);
 						}
-
-
 					}
 				}
 			else
@@ -276,7 +262,6 @@ window.onload=function(){
 						ctx.drawImage(humanimg,player.x-11,player.y-11,32,32);
 					}
 				}
-
 			if(player.monster && player.id != id)
 			{
 				if(leggfx==1)
@@ -289,10 +274,11 @@ window.onload=function(){
 					ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
 				}
 			};
-
 			var name = player.id;
 			if(player.username != '' && player.username !== undefined)
+			{
 				name = name + '. ' + player.username;
+			}
 			ctx.beginPath();
 			ctx.fillStyle = "#000000";
 			ctx.font = "12px Arial";
@@ -300,14 +286,12 @@ window.onload=function(){
 			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+20);
 			ctx.closePath();
 		}
-
 		// draw bullets above players
 		if(!disableZombies)
 			for(i = 0; i < bullets.length; i++)
 			{
 				bullets[i].x += bullets[i].velocity[0] * (frametime / 10);
 				bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
-
 				ctx.beginPath();
 				if(leggfx==1)
 				{
@@ -320,7 +304,6 @@ window.onload=function(){
 				}
 				ctx.closePath();
 			}
-
 		ctx.beginPath();
 		ctx.moveTo(mouseX,mouseY);
 		ctx.lineTo(mouseX+blockSize,mouseY);
@@ -333,7 +316,6 @@ window.onload=function(){
 		ctx.stroke();
 		ctx.closePath();
 	}
-
 	function fireBullet()
 	{
 		if(bulletCooldown <= 0)
@@ -342,9 +324,10 @@ window.onload=function(){
 			bulletCooldown = BULLET_FIRE_RATE;
 		}
 		else
+		{
 			bulletCooldown--;
+		}
 	}
-
 	function movePlayer()
 	{
 		if(movementCooldown <= 0)
@@ -353,9 +336,10 @@ window.onload=function(){
 			movementCooldown = MOVEMENT_RATE;
 		}
 		else
+		{
 			movementCooldown--;
+		}
 	}
-
 	function setTheme(themeName)
 	{
 		var bgcolor = "#fff";
@@ -375,15 +359,15 @@ window.onload=function(){
 		$("event_log").css("background-color", bgcolor);
 		$("event_log").css("color", fontcolor);
 		if(localStorage !== undefined && localStorage.theme !== themeName)
+		{
 			localStorage.theme = themeName;
+		}
 	}
-
 	function refreshGame()
 	{
 		joinRoom(currentRoom);
 		console.log('brought back!');
 	}
-
 	function updateUsername()
 	{
 		var username = $("#username_changer").val();
@@ -395,7 +379,6 @@ window.onload=function(){
 		// Tell the server your username
 		socket.emit('add user', username);
 	}
-
 	function updateBackground()
 	{
 		var url = $("#bg_changer").val();
@@ -408,7 +391,6 @@ window.onload=function(){
 		}
 		socket.emit("updateImage", {id: id, src: url, session: sessionID});
 	}
-
 	function getPlayerName(playerid)
 	{
 		for(p=0;p<players.length;p++)
@@ -420,7 +402,6 @@ window.onload=function(){
 		}
 		return '<b>Unknown player</b>';
 	}
-
 	function joinRoom(room)
 	{
 		currentRoom = room;
@@ -428,7 +409,6 @@ window.onload=function(){
 		dontLog = true;
 		socket.emit("joinRoom", {room: public});
 	}
-
 	function updateRoundTimer()
 	{
 		var timeLeft = roundEndTime - getTime();
@@ -439,16 +419,10 @@ window.onload=function(){
 		}
 		var minutes = parseInt( timeLeft / 60 ) % 60;
 		var seconds = timeLeft % 60;
-
 		var result = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
 		$("#round_timer").text(result);
-
 	}
-
-	//==================================================
-	// Server messages
-	//--------------------------------------------------
-
+	//Server messages
 	// sent when user joins a room
 	socket.on("gameState", function(data)
 	{
@@ -456,21 +430,15 @@ window.onload=function(){
 		id = data.id;
 		if(sessionID === -1)
 			sessionID = data.session;
-
 		gameSizeX = data.x;
 		gameSizeY = data.y;
 		speedPlayer = data.speedPlayer;
 		speedMonster = data.speedMonster;
-
 		$("#canvas")[0].width = gameSizeX;
 		$("#canvas")[0].height = gameSizeY;
-
 		img.src = makeTextSafe(data.image);
-
 		$("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
-
 		$("#server_version").text(data.serverVersion);
-
 		if(data.timeLeft > 0)
 		{
 			roundEndTime = getTime() + data.timeLeft;
@@ -483,7 +451,6 @@ window.onload=function(){
 			updateUsername();
 		}
 	});
-
 	// add new player to our list
 	socket.on("newPlayer", function(data)
 	{
@@ -496,17 +463,17 @@ window.onload=function(){
 		players.push({id: data.id, username: data.username, x: data.x, y: data.y, newX: data.x, newY: data.y, monster: data.monster, connected: data.connected, moveRight: false, moveLeft: false, moveUp: false, moveDown: false});
 		addToLog('<b>New player (ID ' + data.id + ') connected!</b>');
 	});
-
 	// add new bullet to bullet list
 	socket.on("newBullet", function(data)
 	{
 		//console.log('new bullet: ', data);
 		bullets.push({id: data.id, playerId: data.playerId, x: data.x, y: data.y, velocity: data.velocity, color: data.color, alive: data.alive});
 	});
-
 	// sent after user joins room and the player list has been sent
-	socket.on("endPlayerList", function(data) { dontLog = false; });
-
+	socket.on("endPlayerList", function(data)
+	{
+		dontLog = false;
+	});
 	// update our player list with updated player info
 	socket.on("updatePlayer", function(data)
 	{
@@ -514,9 +481,7 @@ window.onload=function(){
 		for(p=0;p<players.length;p++)
 		{
 			if(players[p].id!==data.id) continue;
-
 			var player = players[p];
-
 			player.newX = data.x;
 			player.newY = data.y;
 			if(player.absolute !== undefined && player.absolute === 1)
@@ -527,28 +492,25 @@ window.onload=function(){
 			player.connected = data.connected;
 			if(player.username !== data.username && data.username !== undefined && data.username !== '')
 				addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
-
 			player.username = data.username;
-
 			player.moveRight = data.moveRight;
 			player.moveLeft = data.moveLeft;
 			player.moveUp = data.moveUp;
 			player.moveDown = data.moveDown;
-
 			player.bulletHit = data.bulletHit;
-
 			if(player.monster !== data.monster && data.monster)
 			{
 				var attacker = " has become infected!";
 				if(data.attackerid !== undefined && data.attackerid > 0)
+				{
 					attacker = " was bit by " + getPlayerName(data.attackerid) + "!";
+				}
 				addToLog(getPlayerName(data.id) + attacker);
 			}
 			player.monster = data.monster;
 			break;
 		}
 	});
-
 	// Remove bullet if it's dead, otherwise update its position
 	socket.on("updateBullet", function(data)
 	{
@@ -557,9 +519,7 @@ window.onload=function(){
 		for(i = 0; i < bullets.length; i++)
 		{
 			if(bullets[i].id !== data.id) continue;
-
 			var bullet = bullets[i];
-
 			if(!data.alive)
 				bullets.splice(i, 1);
 			else
@@ -570,7 +530,6 @@ window.onload=function(){
 			break;
 		}
 	});
-
 	// sent by the server when sessions don't match, usually means server was restarted
 	socket.on("refresh", function(data)
 	{
@@ -578,27 +537,22 @@ window.onload=function(){
 		//refreshGame();
 		setTimeout(function(){ window.location.reload(1); }, 1000);
 	});
-
 	// update background image
 	socket.on("updateImage", function(data)
 	{
 		img.src = makeTextSafe(data.src);
-
 		if(data.id !== undefined)
 			addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + img.src + '">' + img.src + '</a>');
 		else
 			addToLog('Background changed to <a href="' + img.src + '">' + img.src + '</a>');
-
 		$("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
 	});
-
 	// new round started
 	socket.on("roundStart", function(data)
 	{
 		roundEndTime = getTime() + data.timeLimit;
 		roundTimer = setInterval(updateRoundTimer, 1000);
 	});
-
 	// round ended
 	socket.on("roundEnd", function(data)
 	{
@@ -607,39 +561,28 @@ window.onload=function(){
 			text = "The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.";
 		addToLog("<b>Round ended!</b> " + text);
 	});
-
-	//==================================================
-	// Startup code, run when the page is loaded
-	//--------------------------------------------------
-
+	//Startup code, run when the page is loaded
 	// setup ul.tabs to work as tabs for each div directly under div.panes
 	$("ul.tabs").tabs("div.panes > div");
-
 	// fix for canvas being unfocusable
 	$("#canvas")[0].setAttribute('tabindex','0');
 	$("#canvas")[0].focus();
-
 	document.addEventListener(visibilityChange, handleVisibilityChange, false);
-
 	$("#dc_toggle").click(function() {
 		showDisconnected = $(this).is(":checked");
 	});
-
 	$("#zombie_toggle").click(function() {
 		disableZombies = $(this).is(":checked");
 	});
-
 	$("#theme_toggle").click(function() {
 		setTheme($(this).is(":checked") ? "dark" : "light");
 	});
-
 	$("#mouse_toggle").click(function() {
 		swapMouse = $(this).is(":checked");
 		var lsValue = swapMouse ? "1" : "0";
 		if(localStorage !== undefined && localStorage.swapMouse !== lsValue)
 			localStorage.swapMouse = lsValue;
 	});
-
 	$("#legacy_graphics").click(function() {
 		legacygfx = $(this).is(":checked");
 		if(leggfx==1){leggfx = 0}else{leggfx = 1};
@@ -647,7 +590,6 @@ window.onload=function(){
 		if(localStorage !== undefined && localStorage.legacyGraphics !== leggfx)
 			localStorage.legacyGraphics = leggfx;
 	});
-
 	$("#bg_toggle").click(function() {
 		disableBackground = $(this).is(":checked");
 		var lsValue = "0";
@@ -661,15 +603,17 @@ window.onload=function(){
 			lsValue = "1";
 		}
 		else
+		{
 			loadImage();
-
+		}
 		if(localStorage !== undefined && localStorage.disableBackground !== lsValue)
 			localStorage.disableBackground = lsValue;
 	});
-
 	// load saved theme
 	if(localStorage !== undefined && localStorage.theme !== undefined)
+	{
 		setTheme(localStorage.theme);
+	}
 	if(localStorage !== undefined && localStorage.swapMouse !== undefined && localStorage.swapMouse === "1")
 	{
 		swapMouse = true;
@@ -697,13 +641,11 @@ window.onload=function(){
 		$("#bgimage").width = 0;
 		$("#bg_toggle").prop('checked', true);
 	}
-
 	$("#bg_button").click(updateBackground);
 	$("#bg_changer").keypress(function(event)
 	{
 		if(event.which == 13 || event.keyCode == 13) updateBackground();
 	});
-
 	$("#canvas").mousedown(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
@@ -713,7 +655,6 @@ window.onload=function(){
 		else if (event.which == fireWhich)
 			playerShooting = true;
 	});
-
 	$("#canvas").mouseup(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
@@ -723,13 +664,10 @@ window.onload=function(){
 		else if(event.which == fireWhich)
 			playerShooting = false;
 	});
-
 	$("#canvas").keydown(function(event)
 	{
 		var code = event.keyCode || e.which;
-
 		var moveChanged = false;
-
 		if(code == 32)
 		{
 			playerShooting = true;
@@ -758,13 +696,10 @@ window.onload=function(){
 		if(moveChanged)
 			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
 	});
-
 	$("#canvas").keyup(function(event)
 	{
 		var code = event.keyCode || e.which;
-
 		var moveChanged = false;
-
 		if(code == 32)
 		{
 			playerShooting = false;
@@ -793,7 +728,6 @@ window.onload=function(){
 		if(moveChanged)
 			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
 	});
-
 	$("#canvas").mousemove( function(e)
 	{
 		var x,y;
@@ -814,19 +748,17 @@ window.onload=function(){
 			}
 		}
 	});
-
 	// Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
-	canvas.oncontextmenu = function() { return false; }
-
-
-
+	canvas.oncontextmenu = function()
+	{
+		return false;
+	}
 	socket.emit("joinRoom", {room: 'public'});
-
-
-
-var myVar = setInterval(function(){draw()}, 10);
+	var myVar = setInterval(function()
+	{
+		draw()
+	}, 10);
 }
-
 $(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
@@ -835,41 +767,40 @@ $(function() {
     '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
     '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
   ];
-
   // Initialize varibles
   var $window = $(window);
   var $usernameInput = $('.usernameInput'); // Input for username
   var $messages = $('.messages'); // Messages area
   var $inputMessage = $('.inputMessage'); // Input message input box
-
   var $loginPage = $('.login.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
-
   // Prompt for setting a username
   var username;
   var connected = false;
   var typing = false;
   var lastTypingTime;
   var $currentInput = $usernameInput.focus();
-
   var socket = io();
-
-  function addParticipantsMessage (data) {
+  function addParticipantsMessage (data)
+	{
     var message = '';
-    if (data.numUsers === 1) {
+    if (data.numUsers === 1)
+		{
       message += "there's 1 participant";
-    } else {
+    }
+		else
+		{
       message += "there're " + data.numUsers + " participants";
     }
     log(message);
   }
-
   // Sets the client's username
-  function setUsername () {
+  function setUsername ()
+	{
     username = cleanInput($usernameInput.val().trim());
-
     // If the username is valid
-    if (username) {
+    if (username)
+		{
       $loginPage.fadeOut();
       $chatPage.show();
       $loginPage.off('click');
@@ -881,18 +812,20 @@ $(function() {
 			//set the ingame username to same
 			socket.emit("username", {id: id, username: username, session: sessionID});
 			if(localStorage !== undefined)
+			{
 				localStorage.username = username;
-
+			}
     }
   }
-
   // Sends a chat message
-  function sendMessage () {
+  function sendMessage ()
+	{
     var message = $inputMessage.val();
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
-    if (message && connected) {
+    if (message && connected)
+		{
       $inputMessage.val('');
       addChatMessage({
         username: username,
@@ -903,15 +836,15 @@ $(function() {
 			addToLog(data.username + ' said "' + message + '"');
     }
   }
-
   // Log a message
-  function log (message, options) {
+  function log (message, options)
+	{
     var $el = $('<li>').addClass('log').text(message);
     addMessageElement($el, options);
   }
-
   // Adds the visual chat message to the message list
-  function addChatMessage (data, options) {
+  function addChatMessage (data, options)
+	{
     // Don't fade the message in if there is an 'X was typing'
     var $typingMessages = getTypingMessages(data);
     options = options || {};
@@ -919,44 +852,40 @@ $(function() {
       options.fade = false;
       $typingMessages.remove();
     }
-
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
-
     var typingClass = data.typing ? 'typing' : '';
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .append($usernameDiv, $messageBodyDiv);
-
     addMessageElement($messageDiv, options);
   }
-
   // Adds the visual chat typing message
-  function addChatTyping (data) {
+  function addChatTyping (data)
+	{
     data.typing = true;
     data.message = 'is typing';
     addChatMessage(data);
   }
-
   // Removes the visual chat typing message
-  function removeChatTyping (data) {
+  function removeChatTyping (data)
+	{
     getTypingMessages(data).fadeOut(function () {
       $(this).remove();
     });
   }
-
   // Adds a message element to the messages and scrolls to the bottom
   // el - The element to add as a message
   // options.fade - If the element should fade-in (default = true)
   // options.prepend - If the element should prepend
   //   all other messages (default = false)
-  function addMessageElement (el, options) {
+  function addMessageElement (el, options)
+	{
     var $el = $(el);
-
     // Setup default options
     if (!options) {
       options = {};
@@ -967,7 +896,6 @@ $(function() {
     if (typeof options.prepend === 'undefined') {
       options.prepend = false;
     }
-
     // Apply options
     if (options.fade) {
       $el.hide().fadeIn(FADE_TIME);
@@ -979,21 +907,20 @@ $(function() {
     }
     $messages[0].scrollTop = $messages[0].scrollHeight;
   }
-
   // Prevents input from having injected markup
-  function cleanInput (input) {
+  function cleanInput (input)
+	{
     return $('<div/>').text(input).text();
   }
-
   // Updates the typing event
-  function updateTyping () {
+  function updateTyping ()
+	{
     if (connected) {
       if (!typing) {
         typing = true;
         socket.emit('typing');
       }
       lastTypingTime = (new Date()).getTime();
-
       setTimeout(function () {
         var typingTimer = (new Date()).getTime();
         var timeDiff = typingTimer - lastTypingTime;
@@ -1004,16 +931,17 @@ $(function() {
       }, TYPING_TIMER_LENGTH);
     }
   }
-
   // Gets the 'X is typing' messages of a user
-  function getTypingMessages (data) {
-    return $('.typing.message').filter(function (i) {
+  function getTypingMessages (data)
+	{
+    return $('.typing.message').filter(function (i)
+		{
       return $(this).data('username') === data.username;
     });
   }
-
   // Gets the color of a username through our hash function
-  function getUsernameColor (username) {
+  function getUsernameColor (username)
+	{
     // Compute hash code
     var hash = 7;
     for (var i = 0; i < username.length; i++) {
@@ -1023,10 +951,9 @@ $(function() {
     var index = Math.abs(hash % COLORS.length);
     return COLORS[index];
   }
-
   // Keyboard events
-
-  $window.keydown(function (event) {
+  $window.keydown(function (event)
+	{
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
       $currentInput.focus();
@@ -1042,27 +969,25 @@ $(function() {
       }
     }
   });
-
-  $inputMessage.on('input', function() {
+  $inputMessage.on('input', function()
+	{
     updateTyping();
   });
-
   // Click events
-
   // Focus input when clicking anywhere on login page
-  $loginPage.click(function () {
+  $loginPage.click(function ()
+	{
     $currentInput.focus();
   });
-
   // Focus input when clicking on the message input's border
-  $inputMessage.click(function () {
+  $inputMessage.click(function ()
+	{
     $inputMessage.focus();
   });
-
   // Socket events
-
   // Whenever the server emits 'login', log the login message
-  socket.on('login', function (data) {
+  socket.on('login', function (data)
+	{
     connected = true;
     // Display the welcome message
     var message = "Welcome to OpenHotel chat";
@@ -1071,34 +996,34 @@ $(function() {
     });
     addParticipantsMessage(data);
   });
-
   // Whenever the server emits 'new message', update the chat body
-  socket.on('new message', function (data) {
+  socket.on('new message', function (data)
+	{
     addChatMessage(data);
   });
-
   // Whenever the server emits 'user joined', log it in the chat body
-  socket.on('user joined', function (data) {
+  socket.on('user joined', function (data)
+	{
     log(data.username + ' joined');
 		addToLog(data.username + ' joined');
     addParticipantsMessage(data);
   });
-
   // Whenever the server emits 'user left', log it in the chat body
-  socket.on('user left', function (data) {
+  socket.on('user left', function (data)
+	{
     log(data.username + ' left');
 		addToLog(data.username + ' left');
     addParticipantsMessage(data);
     removeChatTyping(data);
   });
-
   // Whenever the server emits 'typing', show the typing message
-  socket.on('typing', function (data) {
+  socket.on('typing', function (data)
+	{
     addChatTyping(data);
   });
-
   // Whenever the server emits 'stop typing', kill the typing message
-  socket.on('stop typing', function (data) {
+  socket.on('stop typing', function (data)
+	{
     removeChatTyping(data);
   });
 });
