@@ -364,13 +364,6 @@ window.onload=function(){
 		socket.emit("updateImage", {id: id, src: url, session: sessionID});
 	}
 
-	function changeRoom()
-	{
-		var room = $("#room_changer").val();
-		$("#room_changer").val('');
-		joinRoom(room);
-	}
-
 	function getPlayerName(playerid)
 	{
 		for(p=0;p<players.length;p++)
@@ -388,7 +381,7 @@ window.onload=function(){
 		currentRoom = room;
 		players = [];
 		dontLog = true;
-		socket.emit("joinRoom", {room: room});
+		socket.emit("joinRoom", {room: public});
 	}
 
 	function updateRoundTimer()
@@ -645,13 +638,6 @@ window.onload=function(){
 		if(event.which == 13 || event.keyCode == 13) updateBackground();
 	});
 
-	$("#room_button").click(changeRoom);
-	$("#room_changer").keypress(function(event)
-	{
-		if(event.which == 13 || event.keyCode == 13) changeRoom();
-	});
-
-
 	$("#canvas").mousedown(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
@@ -777,25 +763,20 @@ window.onload=function(){
 	{
 		if (chat_open === false && chat_loaded == false)
 		{
-			var chat_sidebar = document.getElementById("chat_sidebar");
+		  var chat_sidebar = document.getElementById("chat_sidebar");
 			chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
-			document.getElementById('chat_frame').style.display = 'block';
-			document.getElementById('chat_sidebar').style.top = document.width < 600 ? "20px" : '30%';
-			document.getElementById('chat_button').innerHTML = '&#x25BC; hide chat - powered by livechan';
 			chat_open = true;
 			chat_loaded = true;
 		}
 
 	}
+	socket.emit("joinRoom", {room: 'public'});
 
-	toggle_chat();
 
-	$('#chat_frame').load(function()
-	{
-		joinRoom(currentRoom);
 		setInterval(update,10);
-	});
+
 }
+
 $(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
