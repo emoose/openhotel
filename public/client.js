@@ -752,22 +752,8 @@ window.onload=function(){
 	// Disable context menu on canvas so that right clicks to fire bullets don't bring up menu
 	canvas.oncontextmenu = function() { return false; }
 
-	//==================================================
-	// LiveChan integration, taken from http://livechan.net/draw/
-	//--------------------------------------------------
-	var chat_open = true;
-	var chat_loaded = true;
-	var chat_channel = 'hotel';
 
-	function toggle_chat()
-	{
-		if (chat_open === false && chat_loaded == false)
-		{
-		  var chat_sidebar = document.getElementById("chat_sidebar");
-			chat_sidebar.getElementsByTagName('iframe')[0].src = 'https://livechan.net/chat/' + chat_channel;
-		}
 
-	}
 	socket.emit("joinRoom", {room: 'public'});
 
 
