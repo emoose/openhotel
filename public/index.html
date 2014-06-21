@@ -9,10 +9,6 @@
 	<body>
 		<script src='jquery.tools.min.js'></script>
 		<script type='text/javascript' src='socket.io-1.0.4.js'></script>
-		<img id="monsterimg" src="monster.png" width="32" height="32">
-		<img id="playerimg" src="player.png" width="32" height="32">
-		<img id="playermonsterimg" src="playermonster.png" width="32" height="32">
-		<img id="humanimg" src="human.png" width="32" height="32">
 		<div id='canvas_wrapper'>
 			<img id='bgimage'/>
 			<canvas id='canvas' height='720' width='1280'></canvas>
@@ -26,7 +22,6 @@
 			    <li><a href='#'>Settings</a></li>
 			    <li><a href='#'>Help</a></li>
 			</ul>
-
 			<!-- tab 'panes' -->
 			<div class='panes' id='panes'>
 				<div id='chat'>
@@ -59,16 +54,22 @@
 					<input type='checkbox' id='bg_toggle' checked='true'>Disable background</input><br>
 				</div>
 				<div id='instructions'>
-					Green squares are zombie players, black squares are humans. The square with red around it is you.
+					<img src="monster.png" width="32" height="32">Orange biohazard triangles are zombie players<br>
+					<img src="human.png" width="32" height="32">Grey triangles are humans.<br>
+					<img src="player.png" width="32" height="32">The green triangle is you if you are uninfected.<br>
+					<img src="playermonster.png" width="32" height="32">The green biohazard triangle is you if you are infected.<br>
 					<br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
 					<br />The round ends once either all players become zombies or the humans survive for five minutes.
 					<br><br>
 					<b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
 				</div>
 			</div>
-
 		</div>
 		<p id='copyrights'>Copyright (c) 2014 OpenHotel Team <a href='https://github.com/emoose/openhotel'>[github]</a> - server version: <span id='server_version'>unknown</span> - thanks to BeetRoot for initial idea + code</p>
 		<script type='text/javascript' src='client.js'></script>
+		<img id="monsterimg" src="monster.png" width="32" height="32">
+		<img id="playermonsterimg" src="playermonster.png" width="32" height="32">
+		<img id="playerimg" src="player.png" width="32" height="32">
+		<img id="humanimg" src="human.png" width="32" height="32">
 	</body>
 </html>
