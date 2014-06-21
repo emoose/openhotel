@@ -176,6 +176,10 @@ window.onload=function(){
 
 	function draw()
 	{
+		if(playerShooting)
+			fireBullet();
+		if(playerMoving)
+			movePlayer();
 		var newtime = getHighResTime();
 		var frametime = newtime - currentTime;
 		currentTime = newtime;
@@ -281,15 +285,6 @@ window.onload=function(){
 		ctx.lineTo(mouseX,mouseY);
 		ctx.stroke();
 		ctx.closePath();
-	}
-
-	function update()
-	{
-		draw();
-		if(playerShooting)
-			fireBullet();
-		if(playerMoving)
-			movePlayer();
 	}
 
 	function fireBullet()
@@ -758,7 +753,7 @@ window.onload=function(){
 
 
 
-var myVar = setInterval(function(){update()}, 10);
+var myVar = setInterval(function(){draw()}, 10);
 }
 
 $(function() {
