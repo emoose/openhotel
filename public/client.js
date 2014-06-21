@@ -327,7 +327,6 @@ window.onload=function(){
 		}
 		$("body").css("background-color", bgcolor);
 		$("body").css("color", fontcolor);
-		$("#event_log").css("background-color", logbgcolor);
 		if(localStorage !== undefined && localStorage.theme !== themeName)
 			localStorage.theme = themeName;
 	}
