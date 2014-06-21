@@ -370,6 +370,10 @@ window.onload=function(){
 		}
 		$("body").css("background-color", bgcolor);
 		$("body").css("color", fontcolor);
+		$("panes").css("background-color", bgcolor);
+		$("panes").css("color", fontcolor);
+		$("event_log").css("background-color", bgcolor);
+		$("event_log").css("color", fontcolor);
 		if(localStorage !== undefined && localStorage.theme !== themeName)
 			localStorage.theme = themeName;
 	}

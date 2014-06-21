@@ -23,7 +23,6 @@
 }
 #event_log
 {
-  background:#FFFFFF;
   font-size:12px;
 }
 #chat
@@ -38,7 +37,7 @@
 }
 #panes
 {
-  background:#FFFFFF;
+
   height:280px;
   overflow:scroll;
   border: 1px solid #000;
@@ -94,11 +93,12 @@ ul.tabs {
     margin:0 !important;
     padding:0;
     border-bottom:1px solid #666;
-    height:30px;
+    height:26px;
 }
 
 /* single tab */
 ul.tabs li {
+    border: 1px solid #000;
     float:left;
     text-indent:0;
     padding:0;
@@ -108,12 +108,11 @@ ul.tabs li {
 
 /* link inside the tab. uses a background image */
 ul.tabs a {
-    background: url(http://i.imgur.com/31LIxvS.png) no-repeat -420px 0;
     font-size:11px;
     display:block;
-    height: 30px;
+    height: 26px;
     line-height:30px;
-    width: 134px;
+    width: 318px;
     text-align:center;
     text-decoration:none;
     color:#333;
@@ -130,7 +129,7 @@ ul.tabs a:active {
 /* when mouse enters the tab move the background image */
 ul.tabs a:hover {
     background-position: -420px -31px;
-    color:#fff;
+    color:#000;
 }
 
 /* active tab uses a class name "current". its highlight is also done by moving the background image. */
