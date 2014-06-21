@@ -811,6 +811,7 @@ $(function() {
       socket.emit('add user', username);
 			//set the ingame username to same
 			socket.emit("username", {id: id, username: username, session: sessionID});
+			player.username=username;
 			if(localStorage !== undefined)
 			{
 				localStorage.username = username;
@@ -990,7 +991,7 @@ $(function() {
 	{
     connected = true;
     // Display the welcome message
-    var message = "Welcome to OpenHotel chat";
+    var message = "pool's closed";
     log(message, {
       prepend: true
     });
