@@ -808,7 +808,7 @@ $(function() {
       $chatPage.show();
       $loginPage.off('click');
       $currentInput = $inputMessage.focus();
-
+			$("#inputMessage").show();
       // Tell the server your username
       socket.emit('add user', username);
 			//set the ingame username to same

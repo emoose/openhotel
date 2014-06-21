@@ -33,7 +33,7 @@
 							<div class="chatArea">
 								<ul class="messages"></ul>
 							</div>
-							<input class="inputMessage" placeholder="Type here..."/>
+							<input class="inputMessage" id="inputMessage" placeholder="Type here..."/>
 						</li>
 						<li class="login page">
 							<div class="form">
@@ -48,8 +48,6 @@
 				</div>
 				<div id='settings'>
 					Current background: <span id='bgimage_src'>http://google.com/</span><br><br>
-					<!--Room: <input type='text' name='room_changer' id='room_changer' />
-					<input type='button' name='room_button' id='room_button' value='Set'/><br>-->
 					Background: <input type='text' name='bg_changer' id='bg_changer' />
 					<input type='button' name='bg_button' id='bg_button' value='Set'/><br />
 					<input type='checkbox' id='dc_toggle'>Show disconnected players' last positions</input><br>
@@ -61,7 +59,7 @@
 				<div id='instructions'>
 					Green squares are zombie players, black squares are humans. The square with red around it is you.
 					<br />If a zombie gets too close to a human the zombie will bite them, turning the human into a part of the zombie horde.
-					<br />The round ends once either all players become zombies (implemented) or the humans survive for five minutes (unimplemented)
+					<br />The round ends once either all players become zombies or the humans survive for five minutes.
 					<br><br>
 					<b><u>Controls:</u></b> <br /><b>WASD / Right mouse button</b>: Move<br /><b>Space / Left mouse button</b>: Shoot (point with mouse to aim)
 				</div>

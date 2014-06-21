@@ -50,6 +50,10 @@
   overflow:scroll;
   border: 1px solid #000;
 }
+#inputMessage
+{
+  display:none;
+}
 #log_container
 {
   height:200px;
