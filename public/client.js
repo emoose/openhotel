@@ -1,5 +1,6 @@
 window.onload=function(){
 	//game variables
+	var username="anon";
 	var leggfx = 0;
 	var id = "";
 	var sessionID = -1;
@@ -275,10 +276,7 @@ window.onload=function(){
 				}
 			};
 			var name = player.id;
-			if(player.username != '' && player.username !== undefined)
-			{
-				name = name + '. ' + player.username;
-			}
+			name = name + '. ' + username;
 			ctx.beginPath();
 			ctx.fillStyle = "#000000";
 			ctx.font = "12px Arial";
@@ -811,7 +809,6 @@ $(function() {
       socket.emit('add user', username);
 			//set the ingame username to same
 			socket.emit("username", {id: id, username: username, session: sessionID});
-			player.username=username;
 			if(localStorage !== undefined)
 			{
 				localStorage.username = username;
