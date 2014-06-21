@@ -91,7 +91,7 @@ var config =
     sessionID: math.randomInt(0, 65535),
 
     speedPlayer: 1.25, // speed multiplier, speed is 0.5 * this
-    speedMonster: 1.25,
+    speedMonster: 0.75,
     speedBullet: 2.0,
 
     gameStart: [],
