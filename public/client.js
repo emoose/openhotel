@@ -30,7 +30,9 @@ window.onload=function(){
 	var roundTimer = 0;
 	var dontLog = false;
 	var currentTime = getHighResTime();
-
+	var humanimg=document.getElementById("humanimg");
+	var monsterimg=document.getElementById("monsterimg");
+	var playerimg=document.getElementById("playerimg");
 	//==================================================
 	// Tracking Player State
 	//--------------------------------------------------
@@ -229,35 +231,29 @@ window.onload=function(){
 				if(player.y >= (gameSizeY - 10)) player.y = gameSizeY - 10;
 			}
 
+
 			ctx.beginPath();
 
 			if(player.id == id) // change border to red if its us
-				ctx.fillStyle = "#FF0000";
+				{
+					if (player.monster)
+					{
+						ctx.drawImage(playermonsterimg,player.x-11,player.y-11,32,32);
+					}
+					else
+					{
+						ctx.drawImage(playerimg,player.x-11,player.y-11,32,32);
+					}
+				}
 			else
-				ctx.fillStyle = "#000000"; // or black if it's not
-			ctx.arc(player.x+5,player.y+5,7,0,2*Math.PI);
-			ctx.stroke();
-			ctx.closePath();
-			ctx.fill();
-			ctx.beginPath();
+				{
+					ctx.drawImage(humanimg,player.x-11,player.y-11,32,32);
+				}
 
-			if(player.monster)
+			if(player.monster && player.id != id)
 			{
-				ctx.fillStyle = "#FFCC00";
-				ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
-				ctx.stroke();
-				//ctx.fillRect(player.x - 10, player.y - 10, 30, 30);
-			}
-			ctx.fillStyle = "#FFFFFF";
-
-
-			if(player.monster && !disableZombies)
-				ctx.fillStyle = "#00FF00";
-			else
-				ctx.fillStyle = "#000";
-
-			ctx.arc(player.x+5,player.y+5,5,0,2*Math.PI);
-			ctx.stroke();
+				ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
+			};
 
 			var name = player.id;
 			if(player.username != '' && player.username !== undefined)
@@ -265,9 +261,8 @@ window.onload=function(){
 
 			ctx.font = "12px Arial";
 			ctx.textAlign = 'center';
-			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+12);
+			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+20);
 			ctx.closePath();
-			ctx.fill();
 		}
 
 		// draw bullets above players
