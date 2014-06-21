@@ -23,7 +23,7 @@ window.onload=function(){
 	var showDisconnected = false;
 	var disableZombies = false;
 	var swapMouse = false;
-	var disableBackground = false;
+	var disableBackground = true;
 	var img = new Image;
 	var currentRoom = 'public';
 	var roundEndTime = 0;
@@ -77,6 +77,7 @@ window.onload=function(){
 
 	function loadImage()
 	{
+		//load the background image
 		if(disableBackground) return;
 		var result = ScaleImage(img.width, img.height, gameSizeX, gameSizeY, true);
 		var dimensions = {width: img.width, height: img.height};
@@ -176,6 +177,8 @@ window.onload=function(){
 
 	function draw()
 	{
+		//draw the game into canvas
+		update();
 		var newtime = getHighResTime();
 		var frametime = newtime - currentTime;
 		currentTime = newtime;
@@ -758,7 +761,7 @@ window.onload=function(){
 
 
 
-var myVar = setInterval(function(){update()}, 10);
+
 }
 
 $(function() {
