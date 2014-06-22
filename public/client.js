@@ -252,54 +252,62 @@ window.onload=function()
 					player.y = gameSizeY - 10;
 				}
 			}
-			if(player.id == id) // change border to red if its us
+			if(player.id == id) //if its us
 				{
-					if (player.monster)
+					if (player.monster) //if we're a monster
 					{
-						if(leggfx==1)
+						if(leggfx==1) //if legacy graphics are enabled
 						{
+							//draw a basic player monster square
 							ctx.fillStyle = "#8B0000";
 							ctx.fillRect(player.x-1,player.y-1,16,16);
 						}
 						else
 						{
+							//draw a fancy player monster from image
 							ctx.drawImage(playermonsterimg,player.x,player.y,16,16);
 						}
 					}
 					else
 					{
-						if(leggfx==1)
+						if(leggfx==1) //if legacy graphics are enabled
 						{
+							//draw a basic player square
 							ctx.fillStyle = "#025e02";
 							ctx.fillRect(player.x-1,player.y-1,16,16);
 						}
 						else
 						{
+							//draw a fancy player from image
 							ctx.drawImage(playerimg,player.x,player.y,16,16);
 						}
 					}
 				}
 			else
 				{
-					if(leggfx==1)
+					if(leggfx==1) //if legacy graphics are enabled
 					{
+						//draw a basic human square
 						ctx.fillStyle = "#A9A9A9";
 						ctx.fillRect(player.x-1,player.y-1,16,16);
 					}
-					else
+					else //if legacy graphics are disabled
 					{
+						//draw a fancy human from image
 						ctx.drawImage(humanimg,player.x,player.y,16,16);
 					}
 				}
 			if(player.monster && player.id != id)
 			{
-				if(leggfx==1)
+				if(leggfx==1) //if legacy graphics are enabled
 				{
+					//draw a basic zombie square
 					ctx.fillStyle = "#FF8C00";
 					ctx.fillRect(player.x-1,player.y-1,16,16);
 				}
-				else
+				else //if legacy graphics are disabled
 				{
+					//draw a fancy zombie from image
 					ctx.drawImage(monsterimg,player.x,player.y,16,16);
 				}
 			}
@@ -311,17 +319,20 @@ window.onload=function()
 				bullets[i].x += bullets[i].velocity[0] * (frametime / 10);
 				bullets[i].y += bullets[i].velocity[1] * (frametime / 10);
 				ctx.beginPath();
-				if(leggfx==1)
+				if(leggfx==1) //if legacy graphics are enabled
 				{
+					//draw a basic bullet square
 					ctx.fillStyle = "#FF8C00";
 					ctx.fillRect(bullets[i].x, bullets[i].y, 8, 8);
 				}
-				else
+				else //if legacy graphics are disabled
 				{
+					//draw a fancy bullet from image
 					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
 				}
 				ctx.closePath();
 			}
+		//draw the mouse cursor
 		ctx.beginPath();
 		ctx.moveTo(mouseX,mouseY);
 		ctx.lineTo(mouseX+blockSize,mouseY);
@@ -333,20 +344,24 @@ window.onload=function()
 		ctx.lineTo(mouseX,mouseY);
 		ctx.stroke();
 		ctx.closePath();
+		//draw the map
 		drawCells(cells);
 	}
 	function fireBullet()
 	{
+		//if the gun is cool, fire a bullet
 		if(bulletCooldown <= 0)
 		{
 			socket.emit("fireBullet",
 			{
 				id: id, x: mouseX, y: mouseY, session: sessionID
 			});
+			//firing heats up the gun
 			bulletCooldown = BULLET_FIRE_RATE;
 		}
 		else
 		{
+			//the gun cools down
 			bulletCooldown--;
 		}
 	}
@@ -354,14 +369,17 @@ window.onload=function()
 	{
 		if(movementCooldown <= 0)
 		{
+			//if the player is rested, move
 			socket.emit("position",
 			{
 				id: id, x: mouseX, y: mouseY, session: sessionID
 			});
+			//moving tires out the player
 			movementCooldown = MOVEMENT_RATE;
 		}
 		else
 		{
+			//player rests
 			movementCooldown--;
 		}
 	}
