@@ -1,12 +1,8 @@
 {
   "name": "OpenHotel",
-  "version": "0.0.1",
+  "version": "0.0.1-1",
   "description": "tiles n stuff.",
   "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/emoose/openhotel.git"

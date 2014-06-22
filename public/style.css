@@ -2,17 +2,117 @@
 {
     font-family:Verdana;
 }
-
-#chat_sidebar
+#bgimage
 {
-    display:block;
-    position:absolute;
-    top:document.width < 600 ? "20px" : '30%';
-    bottom:0;
-    right:0;
-    width:400px;
+  position:absolute;
+  z-index:1;
 }
-canvas, #canvas_wrapper, #bgimage {
+#mainbody
+{
+  width: 1300px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+#canvas
+{
+  border: 1px solid #000;
+  position: absolute;
+  top:0px;
+  z-index:20;
+}
+#bgimage
+{
+  position: absolute;
+  top:1px;
+  z-index:20;
+}
+#box
+{
+  position: absolute;
+  top:1024px;
+  width:1026px
+}
+#event_log
+{
+  font-size:12px;
+}
+#chat
+{
+  font-size:12px;
+}
+#remaining
+{
+  position: fixed;
+  bottom:0px;
+  right:56px;
+  font-size:48px;
+  font-family: "Georgia", Georgia, serif;
+}
+#panes
+{
+  padding:16px;
+  height:200px;
+  overflow:scroll;
+  border: 1px solid #000;
+}
+::-webkit-scrollbar {
+		  width: 15px;
+	} /* this targets the default scrollbar (compulsory) */
+
+	::-webkit-scrollbar-track {
+		  background-color: lightgrey;
+	} /* the new scrollbar will have a flat appearance with the set background color */
+
+	::-webkit-scrollbar-thumb {
+		  background-color: grey;
+	} /* this will style the thumb, ignoring the track */
+
+	::-webkit-scrollbar-button {
+		  background-color: darkgrey;
+	} /* optionally, you can style the top and the bottom buttons (left and right for horizontal bars) */
+
+	::-webkit-scrollbar-corner {
+		  background-color: black;
+	} /* if both the vertical and the horizontal bars appear, then perhaps the right bottom corner also needs to be styled */
+#inputMessage
+{
+  display:none;
+}
+#log_container
+{
+  height:200px;
+  font-size:12px;
+}
+#settings
+{
+  height:auto;
+  min-height:200px;
+  font-size:12px;
+}
+#instructions
+{
+  height:200px;
+  font-size:12px;
+}
+#copyrights
+{
+  position: absolute;
+  top:0px;
+  left:0px;
+  padding:0px;
+  font-size:10px;
+}
+#chat_container
+{
+  margin-top:-20px;
+}
+#chat_button
+{
+  float:left;
+}
+canvas, #canvas_wrapper, #bgimage
+{
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -21,82 +121,62 @@ canvas, #canvas_wrapper, #bgimage {
     user-select: none;
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+    position: absolute;
+
+    top: 0px;
 }
-
-
 /* root element for tabs  */
-ul.tabs {
+ul.tabs
+{
     list-style:none;
     margin:0 !important;
     padding:0;
     border-bottom:1px solid #666;
-    height:30px;
+    height:26px;
 }
-
 /* single tab */
-ul.tabs li {
+ul.tabs li
+{
+    width: calc(25% - 2px);
+    border: 1px solid #000;
     float:left;
-    text-indent:0;
-    padding:0;
+    padding-left:4px;
     margin:0 !important;
     list-style-image:none !important;
+    width: calc(25% - 6px);
 }
-
 /* link inside the tab. uses a background image */
-ul.tabs a {
-    background: url(http://i.imgur.com/31LIxvS.png) no-repeat -420px 0;
-    font-size:11px;
+ul.tabs a
+{
+    font-size:16px;
     display:block;
-    height: 30px;
-    line-height:30px;
-    width: 134px;
-    text-align:center;
+    height: 26px;
+    line-height:26px;
+    width: calc(25% - 6px);
     text-decoration:none;
     color:#333;
-    padding:0px;
-    margin:0px;
     position:relative;
-    top:1px;
 }
-
-ul.tabs a:active {
+ul.tabs a:active
+{
     outline:none;
+    color:green;
 }
-
 /* when mouse enters the tab move the background image */
-ul.tabs a:hover {
+ul.tabs a:hover
+{
     background-position: -420px -31px;
-    color:#fff;
+    color:lightgrey;
 }
-
 /* active tab uses a class name "current". its highlight is also done by moving the background image. */
-ul.tabs a.current, ul.tabs a.current:hover, ul.tabs li.current a {
+ul.tabs a.current, ul.tabs a.current:hover, ul.tabs li.current a
+{
     background-position: -420px -62px;
     cursor:default !important;
-    color:#000 !important;
+    color:orange !important;
 }
-
-/* Different widths for tabs: use a class name: w1, w2, w3 or w2 */
-
-
-/* width 1 */
-ul.tabs a.s { background-position: -553px 0; width:81px; }
-ul.tabs a.s:hover { background-position: -553px -31px; }
-ul.tabs a.s.current  { background-position: -553px -62px; }
-
-/* width 2 */
-ul.tabs a.l { background-position: -248px -0px; width:174px; }
-ul.tabs a.l:hover { background-position: -248px -31px; }
-ul.tabs a.l.current { background-position: -248px -62px; }
-
-
-/* width 3 */
-ul.tabs a.xl { background-position: 0 -0px; width:248px; }
-ul.tabs a.xl:hover { background-position: 0 -31px; }
-ul.tabs a.xl.current { background-position: 0 -62px; }
-
-
 /* initially all panes are hidden */
-.panes .pane {
+.panes .pane
+{
     display:none;
 }
