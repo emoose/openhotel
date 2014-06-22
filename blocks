@@ -1,0 +1,28 @@
+{
+  block
+  block
+  block
+  block
+  block
+  block
+  bedrock
+}
+
+block
+{
+  air
+  tree
+  sand(wet to make soil)
+  soil(grows trees)
+  stone(cannot be dig through without pick)
+  water(wets sand, flows downhill)
+  ore(slow to mine, can be smelted into metal)
+  metal(very slow to mine through)
+  seed(grows tree on block above if surrounded with soil)
+  furnace(smelts ore + tree into metal)
+  workbench(makes items)
+  bedrock(can never be dug out)
+  axe(cuts trees faster)
+  pick(digs through stone)
+  bucket(transports 1 block of water)
+}
