@@ -17,7 +17,7 @@ window.onload=function()
 	var speedMonster = 0.75;
 	var players = [];
 	var bullets = [];
-	var blockSize=10;
+	var blockSize=1024/64;
 	var socket = io.connect();
 	var canvas = document.getElementById("canvas");
 	var ctx = $("#canvas")[0].getContext("2d");
@@ -263,7 +263,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playermonsterimg,player.x-4,player.y-4,18,14);
+							ctx.drawImage(playermonsterimg,player.x,player.y,16,16);
 						}
 					}
 					else
@@ -275,7 +275,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playerimg,player.x-4,player.y-4,18,14);
+							ctx.drawImage(playerimg,player.x,player.y,16,16);
 						}
 					}
 				}
@@ -288,7 +288,7 @@ window.onload=function()
 					}
 					else
 					{
-						ctx.drawImage(humanimg,player.x-4,player.y-4,18,14);
+						ctx.drawImage(humanimg,player.x,player.y,16,16);
 					}
 				}
 			if(player.monster && player.id != id)
@@ -300,7 +300,7 @@ window.onload=function()
 				}
 				else
 				{
-					ctx.drawImage(monsterimg,player.x-4,player.y-4,18,14);
+					ctx.drawImage(monsterimg,player.x,player.y,16,16);
 				}
 			}
 		}
