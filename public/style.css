@@ -41,9 +41,11 @@
 }
 #remaining
 {
-  position: relative;
-  font-size:28px;
-  left:4px;
+  position: fixed;
+  bottom:0px;
+  left:0px;
+  font-size:48px;
+  font-family: "Georgia", Georgia, serif;
 }
 #panes
 {
