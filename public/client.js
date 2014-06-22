@@ -170,6 +170,8 @@ window.onload=function()
 	//Game functions
 	function draw()
 	{
+		$("#inputMessage").show();
+		$("#usernameInputs").hide();
 		if(playerShooting)
 		{
 			fireBullet();
@@ -806,6 +808,11 @@ window.onload=function()
 	{
 		draw();
 	}, 10);
+	$loginPage.fadeOut();
+      $chatPage.show();
+      $loginPage.off('click');
+			$("#inputMessage").show();
+			$("#usernameInputs").hide();
 };
 $(function() {
   var FADE_TIME = 150; // ms
@@ -845,16 +852,11 @@ $(function() {
   // Sets the client's username
   function setUsername ()
 	{
-    username = cleanInput($usernameInput.val().trim());
+    username = 'anon';
     // If the username is valid
     if (username)
 		{
-      $loginPage.fadeOut();
-						$chatPage.show();
-						$loginPage.off('click');
 						$currentInput = $inputMessage.focus();
-						$("#inputMessage").show();
-						$("#usernameInputs").hide();
 						// Tell the server your username
 						socket.emit('add user', username);
 						//set the ingame username to same
