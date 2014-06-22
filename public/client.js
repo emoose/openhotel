@@ -262,7 +262,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playermonsterimg,player.x+4,player.y+7,18,14);
+							ctx.drawImage(playermonsterimg,player.x-4,player.y-4,18,14);
 						}
 					}
 					else
@@ -274,7 +274,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playerimg,player.x+4,player.y+7,18,14);
+							ctx.drawImage(playerimg,player.x-4,player.y-4,18,14);
 						}
 					}
 				}
@@ -287,7 +287,7 @@ window.onload=function()
 					}
 					else
 					{
-						ctx.drawImage(humanimg,player.x+4,player.y+7,18,14);
+						ctx.drawImage(humanimg,player.x-4,player.y-4,18,14);
 					}
 				}
 			if(player.monster && player.id != id)
@@ -299,7 +299,7 @@ window.onload=function()
 				}
 				else
 				{
-					ctx.drawImage(monsterimg,player.x+4,player.y+7,18,14);
+					ctx.drawImage(monsterimg,player.x-4,player.y-4,18,14);
 				}
 			}
 		}
@@ -317,7 +317,7 @@ window.onload=function()
 				}
 				else
 				{
-					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
+					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y-12,8,8);
 				}
 				ctx.closePath();
 			}
