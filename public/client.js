@@ -5,8 +5,8 @@ window.onload=function()
 	var leggfx = 0;
 	var id = "";
 	var sessionID = -1;
-	var gameSizeX = 1280;
-	var gameSizeY = 720;
+	var gameSizeX = 0;
+	var gameSizeY = 0;
 	var x = 0;
 	var y = 0;
 	var newX = 0;
@@ -337,7 +337,10 @@ window.onload=function()
 	{
 		if(bulletCooldown <= 0)
 		{
-			socket.emit("fireBullet", {id: id, x: mouseX, y: mouseY, session: sessionID});
+			socket.emit("fireBullet",
+			{
+				id: id, x: mouseX, y: mouseY, session: sessionID
+			});
 			bulletCooldown = BULLET_FIRE_RATE;
 		}
 		else
@@ -349,7 +352,10 @@ window.onload=function()
 	{
 		if(movementCooldown <= 0)
 		{
-			socket.emit("position", {id: id, x: mouseX, y: mouseY, session: sessionID});
+			socket.emit("position",
+			{
+				id: id, x: mouseX, y: mouseY, session: sessionID
+			});
 			movementCooldown = MOVEMENT_RATE;
 		}
 		else
@@ -388,33 +394,48 @@ window.onload=function()
 	function updateUsername()
 	{
 		var username = $("#username_changer").val();
-		//if(username.length > 256) { alert('s-senpai, your name is too big for me...'); return; }
 		$("#username_changer").val('');
-		socket.emit("username", {id: id, username: name, session: sessionID});
+		socket.emit("username",
+		{
+			id: id, username: name, session: sessionID
+		});
 		if(localStorage !== undefined)
+		{
 			localStorage.username = name;
+		}
 		// Tell the server your username
 		socket.emit('add user', username);
 	}
 	function updateBackground()
 	{
 		var url = $("#bg_changer").val();
-		if(url.length < 5 || (url.substring(0, 5) !== "http:" && url.substring(0, 5) !== "data:")) return;
+		if(url.length < 5 || (url.substring(0, 5) !== "http:" && url.substring(0, 5) !== "data:"))
+		{
+			return;
+		}
 		$("#bg_changer").val('');
 		if(url.indexOf("4chan.org") > -1 || url.indexOf("4cdn.org") > -1)
 		{
 			alert("4chan images won't load for other people because of some hotlink protection bs, thanks moot");
 			return;
 		}
-		socket.emit("updateImage", {id: id, src: url, session: sessionID});
+		socket.emit("updateImage",
+		{
+			id: id, src: url, session: sessionID
+		});
 	}
 	function getPlayerName(playerid)
 	{
 		for(p=0;p<players.length;p++)
 		{
-			if(players[p].id!==playerid) continue;
+			if(players[p].id!==playerid)
+			{
+				continue;
+			}
 			if(players[p].username !== undefined && players[p].username !== '')
+			{
 				return '<b>' + makeTextSafe(players[p].username) + '</b>';
+			}
 			return '<b>Player ' + playerid + '</b>';
 		}
 		return '<b>Unknown player</b>';
@@ -424,7 +445,10 @@ window.onload=function()
 		currentRoom = room;
 		players = [];
 		dontLog = true;
-		socket.emit("joinRoom", {room: public});
+		socket.emit("joinRoom",
+		{
+			room: public
+		});
 	}
 	function updateRoundTimer()
 	{
@@ -446,7 +470,9 @@ window.onload=function()
 		console.log('received game state: ', data);
 		id = data.id;
 		if(sessionID === -1)
+		{
 			sessionID = data.session;
+		}
 		gameSizeX = data.x;
 		gameSizeY = data.y;
 		speedPlayer = data.speedPlayer;
@@ -473,7 +499,10 @@ window.onload=function()
 	{
 		for(p=0;p<players.length;p++)
 		{
-			if(players[p].id!==data.id) continue;
+			if(players[p].id!==data.id)
+			{
+				continue;
+			}
 			return;
 		}
 		//console.log('new player: ', data);
@@ -511,7 +540,9 @@ window.onload=function()
 			}
 			player.connected = data.connected;
 			if(player.username !== data.username && data.username !== undefined && data.username !== '')
+			{
 				addToLog(getPlayerName(data.id) + ' changed name to "' + makeTextSafe(data.username) + '"');
+			}
 			player.username = data.username;
 			player.moveRight = data.moveRight;
 			player.moveLeft = data.moveLeft;
@@ -560,16 +591,23 @@ window.onload=function()
 	{
 		// TODO: uncomment this once the game isn't updated as much
 		//refreshGame();
-		setTimeout(function(){ window.location.reload(1); }, 1000);
+		setTimeout(function()
+		{
+			window.location.reload(1);
+		}, 1000);
 	});
 	// update background image
 	socket.on("updateImage", function(data)
 	{
 		img.src = makeTextSafe(data.src);
 		if(data.id !== undefined)
+		{
 			addToLog(getPlayerName(data.id) + ' changed the background to <a href="' + img.src + '">' + img.src + '</a>');
+		}
 		else
+		{
 			addToLog('Background changed to <a href="' + img.src + '">' + img.src + '</a>');
+		}
 		$("#bgimage_src").html('<a href="' + img.src + '">' + img.src + '</a>');
 	});
 	// new round started
@@ -595,22 +633,27 @@ window.onload=function()
 	$("#canvas")[0].setAttribute('tabindex','0');
 	$("#canvas")[0].focus();
 	document.addEventListener(visibilityChange, handleVisibilityChange, false);
-	$("#dc_toggle").click(function() {
+	$("#dc_toggle").click(function()
+	{
 		showDisconnected = $(this).is(":checked");
 	});
-	$("#zombie_toggle").click(function() {
+	$("#zombie_toggle").click(function()
+	{
 		disableZombies = $(this).is(":checked");
 	});
-	$("#theme_toggle").click(function() {
+	$("#theme_toggle").click(function()
+	{
 		setTheme($(this).is(":checked") ? "dark" : "light");
 	});
-	$("#mouse_toggle").click(function() {
+	$("#mouse_toggle").click(function()
+	{
 		swapMouse = $(this).is(":checked");
 		var lsValue = swapMouse ? "1" : "0";
 		if(localStorage !== undefined && localStorage.swapMouse !== lsValue)
 			localStorage.swapMouse = lsValue;
 	});
-	$("#legacy_graphics").click(function() {
+	$("#legacy_graphics").click(function()
+	{
 		legacygfx = $(this).is(":checked");
 		if(leggfx==1)
 		{
@@ -624,7 +667,8 @@ window.onload=function()
 		if(localStorage !== undefined && localStorage.legacyGraphics !== leggfx)
 			localStorage.legacyGraphics = leggfx;
 	});
-	$("#bg_toggle").click(function() {
+	$("#bg_toggle").click(function()
+	{
 		disableBackground = $(this).is(":checked");
 		var lsValue = "0";
 		if(disableBackground)
@@ -678,7 +722,10 @@ window.onload=function()
 	$("#bg_button").click(updateBackground);
 	$("#bg_changer").keypress(function(event)
 	{
-		if(event.which == 13 || event.keyCode == 13) updateBackground();
+		if(event.which == 13 || event.keyCode == 13)
+		{
+			updateBackground();
+		}
 	});
 	$("#canvas").mousedown(function(event)
 	{
@@ -736,7 +783,10 @@ window.onload=function()
 			moveChanged = true;
 		}
 		if(moveChanged)
-			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
+			socket.emit("movement",
+			{
+				id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID
+			});
 	});
 	$("#canvas").keyup(function(event)
 	{
@@ -768,7 +818,12 @@ window.onload=function()
 			moveChanged = true;
 		}
 		if(moveChanged)
-			socket.emit("movement", {id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID});
+		{
+			socket.emit("movement",
+			{
+				id: id, moveRight: keyD, moveLeft: keyA, moveUp: keyW, moveDown: keyS, session: sessionID
+			});
+		}
 	});
 	$("#canvas").mousemove( function(e)
 	{
@@ -795,7 +850,10 @@ window.onload=function()
 	{
 		return false;
 	};
-	socket.emit("joinRoom", {room: 'public'});
+	socket.emit("joinRoom",
+	{
+		room: 'public'
+	});
 	var myVar = setInterval(function()
 	{
 		draw();
@@ -806,7 +864,8 @@ window.onload=function()
 			$("#inputMessage").show();
 			$("#usernameInputs").hide();
 };
-$(function() {
+$(function()
+{
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
   var COLORS = [
@@ -837,7 +896,7 @@ $(function() {
     }
 		else
 		{
-      message += "marco!";
+      message += data.numUsers + " swimmers";
     }
     log(message);
   }
@@ -852,7 +911,10 @@ $(function() {
 						// Tell the server your username
 						socket.emit('add user', username);
 						//set the ingame username to same
-						socket.emit("username", {id: id, username: username, session: sessionID});
+						socket.emit("username",
+						{
+							id: id, username: username, session: sessionID
+						});
 			if(localStorage !== undefined)
 			{
 				localStorage.username = username;
@@ -890,7 +952,8 @@ $(function() {
     // Don't fade the message in if there is an 'X was typing'
     var $typingMessages = getTypingMessages(data);
     options = options || {};
-    if ($typingMessages.length !== 0) {
+    if ($typingMessages.length !== 0)
+		{
       options.fade = false;
       $typingMessages.remove();
     }
@@ -916,7 +979,8 @@ $(function() {
   // Removes the visual chat typing message
   function removeChatTyping (data)
 	{
-    getTypingMessages(data).fadeOut(function () {
+    getTypingMessages(data).fadeOut(function ()
+		{
       $(this).remove();
     });
   }
@@ -929,22 +993,29 @@ $(function() {
 	{
     var $el = $(el);
     // Setup default options
-    if (!options) {
+    if (!options)
+		{
       options = {};
     }
-    if (typeof options.fade === 'undefined') {
+    if (typeof options.fade === 'undefined')
+		{
       options.fade = true;
     }
-    if (typeof options.prepend === 'undefined') {
+    if (typeof options.prepend === 'undefined')
+		{
       options.prepend = false;
     }
     // Apply options
-    if (options.fade) {
+    if (options.fade)
+		{
       $el.hide().fadeIn(FADE_TIME);
     }
-    if (options.prepend) {
+    if (options.prepend)
+		{
       $messages.prepend($el);
-    } else {
+    }
+		else
+		{
       $messages.append($el);
     }
     $messages[0].scrollTop = $messages[0].scrollHeight;
@@ -969,10 +1040,11 @@ $(function() {
 			{
         var typingTimer = (new Date()).getTime();
         var timeDiff = typingTimer - lastTypingTime;
-        if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
+        if (timeDiff >= TYPING_TIMER_LENGTH && typing)
+				{
           socket.emit('stop typing');
           typing = false;
-      }
+				}
       }, TYPING_TIMER_LENGTH);
     }
   }
@@ -989,7 +1061,8 @@ $(function() {
 	{
     // Compute hash code
     var hash = 7;
-    for (var i = 0; i < username.length; i++) {
+    for (var i = 0; i < username.length; i++)
+		{
        hash = username.charCodeAt(i) + (hash << 5) - hash;
     }
     // Calculate color
@@ -1000,16 +1073,21 @@ $(function() {
   $window.keydown(function (event)
 	{
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+    if (!(event.ctrlKey || event.metaKey || event.altKey))
+		{
       $currentInput.focus();
     }
     // When the client hits ENTER on their keyboard
-    if (event.which === 13) {
-      if (username) {
+    if (event.which === 13)
+		{
+      if (username)
+			{
         sendMessage();
         socket.emit('stop typing');
         typing = false;
-      } else {
+      }
+			else
+			{
         setUsername();
       }
     }

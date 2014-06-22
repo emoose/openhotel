@@ -462,7 +462,6 @@ config.io.on('connection', function (socket)
             player.moveLeft = msg.moveLeft;
             player.moveUp = msg.moveUp;
             player.moveDown = msg.moveDown;
-
             players.sendPlayerUpdate(player, config);
             break;
         }
@@ -523,7 +522,6 @@ var numUsers = 0;
     {
       delete usernames[socket.username];
       --numUsers;
-
       // echo globally that this client has left
       socket.broadcast.emit('user left',
       {
