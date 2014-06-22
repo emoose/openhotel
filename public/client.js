@@ -1183,7 +1183,7 @@ $(function()
 				for (var cellJ = 0; cellJ < width; cellJ += cellSize)
 				{
 					var on = Math.random() < 0.50;
-					if (cellI == 0 || cellI >= height-cellSize || cellJ == 0 || cellJ >= width-cellSize)
+					if (cellI === 0 || cellI >= height-cellSize || cellJ === 0 || cellJ >= width-cellSize)
 					{
 							on = true;
 					}
@@ -1224,7 +1224,7 @@ $(function()
 					for (var cellCol = 0; cellCol < width; cellCol += cellSize)
 					{
 							var liveCondition;
-							if (cellRow == 0 || cellRow >= height-cellSize || cellCol == 0 || cellCol >= width-cellSize)
+							if (cellRow === 0 || cellRow >= height-cellSize || cellCol === 0 || cellCol >= width-cellSize)
 							{
 								liveCondition = true;
 							}
@@ -1242,8 +1242,8 @@ $(function()
 								// apply B678/S345678
 								var currentState = cells[cellRow][cellCol];
 								var liveCondition =
-										(currentState == 0 && bornList.indexOf(nbhd) > -1)||
-										(currentState == 1 && surviveList.indexOf(nbhd) > -1);
+										(currentState === 0 && bornList.indexOf(nbhd) > -1)||
+										(currentState === 1 && surviveList.indexOf(nbhd) > -1);
 							}
 							for (var i = 0; i < cellSize; i++)
 							{
@@ -1265,7 +1265,7 @@ $(function()
 	}
 	function animate(cells, width, height, bornList, surviveList, numLeft)
 	{
-		if (numLeft == 0)
+		if (numLeft === 0)
 		{
 				window.animating = false;
 				return;
@@ -1309,7 +1309,7 @@ $(function()
 	function increaseResolution()
 	{
 		window.cellSize = Math.floor(window.cellSize / 2);
-		if (window.cellSize == 0)
+		if (window.cellSize === 0)
 		{
 				window.cellSize = 1;
 		}
@@ -1346,7 +1346,7 @@ $(function()
 				for (var cellJ = 0; cellJ < width; cellJ += cellSize)
 				{
 					var on = Math.random() < 0.50;
-					if (cellI == 0 || cellI >= height-cellSize || cellJ == 0 || cellJ >= width-cellSize)
+					if (cellI === 0 || cellI >= height-cellSize || cellJ === 0 || cellJ >= width-cellSize)
 					{
 							on = true;
 					}
@@ -1386,7 +1386,7 @@ $(function()
 					for (var cellCol = 0; cellCol < width; cellCol += cellSize)
 					{
 							var liveCondition;
-							if (cellRow == 0 || cellRow >= height-cellSize || cellCol == 0 || cellCol >= width-cellSize)
+							if (cellRow === 0 || cellRow >= height-cellSize || cellCol === 0 || cellCol >= width-cellSize)
 							{
 								liveCondition = true;
 							}
@@ -1404,8 +1404,8 @@ $(function()
 								// apply B678/S345678
 								var currentState = cells[cellRow][cellCol];
 								var liveCondition =
-										(currentState == 0 && bornList.indexOf(nbhd) > -1)||
-										(currentState == 1 && surviveList.indexOf(nbhd) > -1);
+										(currentState === 0 && bornList.indexOf(nbhd) > -1)||
+										(currentState === 1 && surviveList.indexOf(nbhd) > -1);
 							}
 							for (var i = 0; i < cellSize; i++)
 							{
@@ -1427,7 +1427,7 @@ $(function()
 	}
 	function animate(cells, width, height, bornList, surviveList, numLeft)
 	{
-		if (numLeft == 0) {
+		if (numLeft === 0) {
 				window.animating = false;
 				return;
 		}
@@ -1470,7 +1470,7 @@ $(function()
 	function increaseResolution()
 	{
 		window.cellSize = Math.floor(window.cellSize / 2);
-		if (window.cellSize == 0)
+		if (window.cellSize === 0)
 		{
 				window.cellSize = 1;
 		}
