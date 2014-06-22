@@ -314,11 +314,11 @@ window.onload=function()
 				if(leggfx==1)
 				{
 					ctx.fillStyle = "#FF8C00";
-					ctx.fillRect(bullets[i].x-3, bullets[i].y-3, 6, 6);
+					ctx.fillRect(bullets[i].x, bullets[i].y, 8, 8);
 				}
 				else
 				{
-					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y-12,8,8);
+					ctx.drawImage(bulletimg,bullets[i].x, bullets[i].y,8,8);
 				}
 				ctx.closePath();
 			}
