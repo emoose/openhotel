@@ -21,6 +21,12 @@
   top:0px;
   z-index:20;
 }
+#bgimage
+{
+  position: absolute;
+  top:1px;
+  z-index:20;
+}
 #box
 {
   position: absolute;
