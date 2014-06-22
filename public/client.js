@@ -17,7 +17,7 @@ window.onload=function()
 	var speedMonster = 0.75;
 	var players = [];
 	var bullets = [];
-	var blockSize=1024/64;
+	var blockSize=gameSizeX/64;
 	var socket = io.connect();
 	var canvas = document.getElementById("canvas");
 	var ctx = $("#canvas")[0].getContext("2d");
@@ -188,7 +188,7 @@ window.onload=function()
 		{
 			return;
 		}
-		ctx.clearRect(0,0,gameSizeX,gameSizeY);//drawCells(cells);
+		ctx.clearRect(0,0,gameSizeX,gameSizeY);
 		for(p=0;p<players.length;p++)
 		{
 			var player = players[p];
