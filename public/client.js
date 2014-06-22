@@ -262,7 +262,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playermonsterimg,player.x-11,player.y-11,32,32);
+							ctx.drawImage(playermonsterimg,player.x+4,player.y-11,12,38);
 						}
 					}
 					else
@@ -274,7 +274,7 @@ window.onload=function()
 						}
 						else
 						{
-							ctx.drawImage(playerimg,player.x-11,player.y-11,32,32);
+							ctx.drawImage(playerimg,player.x+4,player.y-11,12,38);
 						}
 					}
 				}
@@ -287,7 +287,7 @@ window.onload=function()
 					}
 					else
 					{
-						ctx.drawImage(humanimg,player.x-11,player.y-11,32,32);
+						ctx.drawImage(humanimg,player.x+4,player.y-11,12,38);
 					}
 				}
 			if(player.monster && player.id != id)
@@ -299,17 +299,9 @@ window.onload=function()
 				}
 				else
 				{
-					ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
+					ctx.drawImage(monsterimg,player.x+4,player.y-11,12,38);
 				}
 			}
-			var name = player.id;
-			name = name + '. ' + username;
-			ctx.beginPath();
-			ctx.fillStyle = "#000000";
-			ctx.font = "12px Arial";
-			ctx.textAlign = 'center';
-			ctx.fillText(name, player.x+blockSize/2, player.y+blockSize+20);
-			ctx.closePath();
 		}
 		// draw bullets above players
 		if(!disableZombies)
