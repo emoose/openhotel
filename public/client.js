@@ -373,16 +373,12 @@ window.onload=function()
 		if(themeName === "dark")
 		{
 			bgcolor = "#282A2E";
-			fontcolor = "#fff";
+			fontcolor = "#000";
 			logbgcolor = "#282A2E";
 			$("#theme_toggle").prop('checked', true);
 		}
 		$("body").css("background-color", bgcolor);
 		$("body").css("color", fontcolor);
-		$("panes").css("background-color", bgcolor);
-		$("panes").css("color", fontcolor);
-		$("event_log").css("background-color", bgcolor);
-		$("event_log").css("color", fontcolor);
 		if(localStorage !== undefined && localStorage.theme !== themeName)
 		{
 			localStorage.theme = themeName;
