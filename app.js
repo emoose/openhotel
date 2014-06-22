@@ -61,8 +61,8 @@ var config =
     'y7OgpcR',
     'K6FPsql'
 ],
-    gameSizeX: 1280,
-    gameSizeY: 720,
+    gameSizeX: 1024,
+    gameSizeY: 1024,
     nameSizeLimit: 256,
     runningBehindProxy: false,
 // time limits, in seconds

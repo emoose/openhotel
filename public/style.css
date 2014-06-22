@@ -30,8 +30,8 @@
 #box
 {
   position: absolute;
-  top:720px;
-  width:1282px
+  top:1024px;
+  width:1026px
 }
 #event_log
 {
@@ -121,6 +121,9 @@ canvas, #canvas_wrapper, #bgimage
     user-select: none;
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+    position: absolute;
+
+    top: 0px;
 }
 /* root element for tabs  */
 ul.tabs
