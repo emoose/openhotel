@@ -1,4 +1,5 @@
-window.onload=function(){
+window.onload=function()
+{
 	//game variables
 	var username="anon";
 	var leggfx = 0;
@@ -24,7 +25,7 @@ window.onload=function(){
 	var disableZombies = false;
 	var swapMouse = false;
 	var disableBackground = true;
-	var img = new Image;
+	var img = new Image();
 	var currentRoom = 'public';
 	var roundEndTime = 0;
 	var roundTimer = 0;
@@ -50,23 +51,23 @@ window.onload=function(){
 	//Utility functions
 	if (typeof document.hidden !== "undefined")
 	{ // Opera 12.10 and Firefox 18 and later support
-	  hidden = "hidden";
-	  visibilityChange = "visibilitychange";
+		hidden = "hidden";
+		visibilityChange = "visibilitychange";
 	}
 	else if (typeof document.mozHidden !== "undefined")
 	{
-	  hidden = "mozHidden";
-	  visibilityChange = "mozvisibilitychange";
+		hidden = "mozHidden";
+		visibilityChange = "mozvisibilitychange";
 	}
 	else if (typeof document.msHidden !== "undefined")
 	{
-	  hidden = "msHidden";
-	  visibilityChange = "msvisibilitychange";
+		hidden = "msHidden";
+		visibilityChange = "msvisibilitychange";
 	}
 	else if (typeof document.webkitHidden !== "undefined")
 	{
-	  hidden = "webkitHidden";
-	  visibilityChange = "webkitvisibilitychange";
+		hidden = "webkitHidden";
+		visibilityChange = "webkitvisibilitychange";
 	}
 	function loadImage()
 	{
@@ -113,7 +114,7 @@ window.onload=function(){
 		}
 		else
 		{
-		   fScaleOnWidth = !fLetterBox;
+			fScaleOnWidth = !fLetterBox;
 		}
 		if (fScaleOnWidth)
 		{
@@ -198,31 +199,55 @@ window.onload=function(){
 				if(player.x<player.newX || (player.moveRight && !player.bulletHit))
 				{
 					player.x+=speed;
-					if(player.moveRight && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
+					if(player.moveRight && !player.bulletHit)
+					{
+						player.newX = player.x; player.newY = player.y;
+					}
 					if(player.x > player.newX) player.x = player.newX;
 				}
 				if(player.x>player.newX || (player.moveLeft && !player.bulletHit))
 				{
 					player.x-=speed;
-					if(player.moveLeft && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
+					if(player.moveLeft && !player.bulletHit)
+					{
+						player.newX = player.x; player.newY = player.y;
+					}
 					if(player.x < player.newX) player.x = player.newX;
 				}
 				if(player.y<player.newY || (player.moveDown && !player.bulletHit))
 				{
 					player.y+=speed;
-					if(player.moveDown && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
+					if(player.moveDown && !player.bulletHit)
+					{
+						player.newX = player.x; player.newY = player.y;
+					}
 					if(player.y > player.newY) player.y = player.newY;
 				}
 				if(player.y>player.newY || (player.moveUp && !player.bulletHit))
 				{
 					player.y-=speed;
-					if(player.moveUp && !player.bulletHit) { player.newX = player.x; player.newY = player.y }
+					if(player.moveUp && !player.bulletHit)
+					{
+						player.newX = player.x; player.newY = player.y;
+					}
 					if(player.y < player.newY) player.y = player.newY;
 				}
-				if(player.x < 0) player.x = 0;
-				if(player.y < 0) player.y = 0;
-				if(player.x >= (gameSizeX - 10)) player.x = gameSizeX - 10;
-				if(player.y >= (gameSizeY - 10)) player.y = gameSizeY - 10;
+				if(player.x < 0)
+				{
+					player.x = 0;
+				}
+				if(player.y < 0)
+				{
+					player.y = 0;
+				}
+				if(player.x >= (gameSizeX - 10))
+				{
+					player.x = gameSizeX - 10;
+				}
+				if(player.y >= (gameSizeY - 10))
+				{
+					player.y = gameSizeY - 10;
+				}
 			}
 			if(player.id == id) // change border to red if its us
 				{
@@ -274,7 +299,7 @@ window.onload=function(){
 				{
 					ctx.drawImage(monsterimg,player.x-11,player.y-11,32,32);
 				}
-			};
+			}
 			var name = player.id;
 			name = name + '. ' + username;
 			ctx.beginPath();
@@ -593,7 +618,14 @@ window.onload=function(){
 	});
 	$("#legacy_graphics").click(function() {
 		legacygfx = $(this).is(":checked");
-		if(leggfx==1){leggfx = 0}else{leggfx = 1};
+		if(leggfx==1)
+		{
+			leggfx = 0;
+		}
+		else
+		{
+			leggfx = 1;
+		}
 		var lsValue = swapMouse ? "1" : "0";
 		if(localStorage !== undefined && localStorage.legacyGraphics !== leggfx)
 			localStorage.legacyGraphics = leggfx;
@@ -659,18 +691,26 @@ window.onload=function(){
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
 		var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
 		if(event.which == moveWhich)
+		{
 			playerMoving = true;
-		else if (event.which == fireWhich)
+		}
+		else if(event.which == fireWhich)
+		{
 			playerShooting = true;
+		}
 	});
 	$("#canvas").mouseup(function(event)
 	{
 		var moveWhich = swapMouse ? 1 : 3; // default = left click to Move
 		var fireWhich = swapMouse ? 3 : 1; // default = right click to Shoot
 		if(event.which == moveWhich)
+		{
 			playerMoving = false;
+		}
 		else if(event.which == fireWhich)
+		{
 			playerShooting = false;
+		}
 	});
 	$("#canvas").keydown(function(event)
 	{
@@ -741,7 +781,7 @@ window.onload=function(){
 		var x,y;
 		for(x=e.pageX-8;x>=0;x--)
 		{
-			if(x%blockSize==0)
+			if(x%blockSize===0)
 			{
 				mouseX = x;
 				break;
@@ -749,7 +789,7 @@ window.onload=function(){
 		}
 		for(y=e.pageY-8;y>=0;y--)
 		{
-			if(y%blockSize==0)
+			if(y%blockSize===0)
 			{
 				mouseY = y;
 				break;
@@ -760,13 +800,13 @@ window.onload=function(){
 	canvas.oncontextmenu = function()
 	{
 		return false;
-	}
+	};
 	socket.emit("joinRoom", {room: 'public'});
 	var myVar = setInterval(function()
 	{
-		draw()
+		draw();
 	}, 10);
-}
+};
 $(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
@@ -794,11 +834,11 @@ $(function() {
     var message = '';
     if (data.numUsers === 1)
 		{
-      message += "there's 1 participant";
+      message += "don't swim on a lonely stomach";
     }
 		else
 		{
-      message += "there're " + data.numUsers + " participants";
+      message += data.numUsers + " swimmers";
     }
     log(message);
   }
@@ -810,15 +850,15 @@ $(function() {
     if (username)
 		{
       $loginPage.fadeOut();
-      $chatPage.show();
-      $loginPage.off('click');
-      $currentInput = $inputMessage.focus();
-			$("#inputMessage").show();
-			$("#usernameInputs").hide();
-      // Tell the server your username
-      socket.emit('add user', username);
-			//set the ingame username to same
-			socket.emit("username", {id: id, username: username, session: sessionID});
+						$chatPage.show();
+						$loginPage.off('click');
+						$currentInput = $inputMessage.focus();
+						$("#inputMessage").show();
+						$("#usernameInputs").hide();
+						// Tell the server your username
+						socket.emit('add user', username);
+						//set the ingame username to same
+						socket.emit("username", {id: id, username: username, session: sessionID});
 			if(localStorage !== undefined)
 			{
 				localStorage.username = username;
@@ -923,19 +963,22 @@ $(function() {
   // Updates the typing event
   function updateTyping ()
 	{
-    if (connected) {
-      if (!typing) {
+    if (connected)
+		{
+      if (!typing)
+			{
         typing = true;
         socket.emit('typing');
       }
       lastTypingTime = (new Date()).getTime();
-      setTimeout(function () {
+      setTimeout(function ()
+			{
         var typingTimer = (new Date()).getTime();
         var timeDiff = typingTimer - lastTypingTime;
         if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
           socket.emit('stop typing');
           typing = false;
-        }
+      }
       }, TYPING_TIMER_LENGTH);
     }
   }
