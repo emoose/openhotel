@@ -478,7 +478,10 @@ window.onload=function(){
 		//console.log('player update: ', data);
 		for(p=0;p<players.length;p++)
 		{
-			if(players[p].id!==data.id) continue;
+			if(players[p].id!==data.id)
+			{
+				continue;
+			}
 			var player = players[p];
 			player.newX = data.x;
 			player.newY = data.y;
@@ -516,10 +519,15 @@ window.onload=function(){
 		// Works, but is pretty inefficent, ideas?
 		for(i = 0; i < bullets.length; i++)
 		{
-			if(bullets[i].id !== data.id) continue;
+			if(bullets[i].id !== data.id)
+			{
+				continue;
+			}
 			var bullet = bullets[i];
 			if(!data.alive)
+			{
 				bullets.splice(i, 1);
+			}
 			else
 			{
 				bullet.x = data.x;
@@ -556,7 +564,9 @@ window.onload=function(){
 	{
 		var text = "The humans managed to survive for five minutes!";
 		if(data.id > 0)
+		{
 			text = "The last survivor was " + getPlayerName(data.victimid) + " until " + getPlayerName(data.id) + " bit them.";
+		}
 		addToLog("<b>Round ended!</b> " + text);
 	});
 	//Startup code, run when the page is loaded
