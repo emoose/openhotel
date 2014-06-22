@@ -140,10 +140,10 @@ ul.tabs li
     width: calc(25% - 2px);
     border: 1px solid #000;
     float:left;
-
+    padding-left:4px;
     margin:0 !important;
     list-style-image:none !important;
-    width: calc(25% - 2px);
+    width: calc(25% - 6px);
 }
 /* link inside the tab. uses a background image */
 ul.tabs a
@@ -152,7 +152,7 @@ ul.tabs a
     display:block;
     height: 26px;
     line-height:26px;
-    width: calc(25% - 2px);
+    width: calc(25% - 6px);
     text-decoration:none;
     color:#333;
     position:relative;
