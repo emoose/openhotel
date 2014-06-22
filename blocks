@@ -5,6 +5,7 @@
   block
   block
   block
+  block
   bedrock
 }
 
@@ -13,17 +14,26 @@ block
   air
   tree
   sand(wet to make soil, tends to flow downhill)
-  soil(grows trees)
+  soil(wet sand - grows trees)
   stone(cannot be dug through without pick)
   water(wets sand, flows downhill)
   ore(slow to mine, can be smelted into metal)
-  metal(very slow to mine through)
-  seed(grows tree up to 2 blocks above if surrounded with soil, after 2 blocks grow seed on top if space)
+  metal(very slow to mine through, cannot be mined without pick)
+  treeseed(grows tree up to 2 blocks above if surrounded with soil, after 2 blocks grow seed on top if space)
+  foodseed(grows food up to 1 block above if surrounded with soil, after 1 block grow seed on top if space)
   furnace(smelts ore + tree into metal)
-  workbench(makes items)
+  workbench(makes larger items, made from 4 wood)
   bedrock(can never be dug out)
   axe(cuts trees faster metal,stone,wood)
   pick(digs through stone metal,stone,wood)
   bucket(transports 1 block of water)
-  mob(up to 2 blocks high - player or monster)
+  player(eats food, drinks water)
+  zombie(eats humans, drinks water)
+  human(eats food, drinks water)
+  pig(eats food, drinks water, kill to make into food))
+  beacon(player will try to walk to it)
+  food(raw or cooked)
+  bow(fires arrows)
+  arrow(stick+metal)
+  box(stores 8 blocks)
 }
