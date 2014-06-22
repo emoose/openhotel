@@ -837,7 +837,7 @@ $(function() {
     }
 		else
 		{
-      message += data.numUsers + " swimmers";
+      message += "marco!";
     }
     log(message);
   }
