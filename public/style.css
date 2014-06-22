@@ -7,10 +7,18 @@
   position:absolute;
   z-index:1;
 }
+#mainbody
+{
+  width: 1300px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 #canvas
 {
   border: 1px solid #000;
-  position:relative;
+  position: absolute;
+  top:0px;
   z-index:20;
 }
 #remaining
@@ -19,6 +27,8 @@
 }
 #box
 {
+  position: absolute;
+  top:722px;
   width:1280px
 }
 #event_log
@@ -31,7 +41,7 @@
 }
 #remaining
 {
-  position:absolute;
+  position: relative;
   font-size:28px;
   left:4px;
 }
@@ -64,6 +74,10 @@
 }
 #copyrights
 {
+  position: absolute;
+  top:0px;
+  left:0px;
+  padding:0px;
   font-size:10px;
 }
 #chat_container
