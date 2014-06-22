@@ -259,23 +259,23 @@ window.onload=function()
 						if(leggfx==1)
 						{
 							ctx.fillStyle = "#8B0000";
-							ctx.fillRect(player.x + 1,player.y + 1,8,8);
+							ctx.fillRect(player.x-1,player.y-1,16,16);
 						}
 						else
 						{
-							ctx.drawImage(playermonsterimg,player.x,player.y,16,16);
+							ctx.drawImage(playermonsterimg,player.x-1,player.y-1,16,16);
 						}
 					}
 					else
 					{
 						if(leggfx==1)
 						{
-							ctx.fillStyle = "#000";
-							ctx.fillRect(player.x + 1,player.y + 1,8,8);
+							ctx.fillStyle = "#025e02";
+							ctx.fillRect(player.x-1,player.y-1,16,16);
 						}
 						else
 						{
-							ctx.drawImage(playerimg,player.x,player.y,16,16);
+							ctx.drawImage(playerimg,player.x-1,player.y-1,16,16);
 						}
 					}
 				}
@@ -284,11 +284,11 @@ window.onload=function()
 					if(leggfx==1)
 					{
 						ctx.fillStyle = "#A9A9A9";
-						ctx.fillRect(player.x + 1,player.y + 1,8,8);
+						ctx.fillRect(player.x-1,player.y-1,16,16);
 					}
 					else
 					{
-						ctx.drawImage(humanimg,player.x,player.y,16,16);
+						ctx.drawImage(humanimg,player.x-1,player.y-1,16,16);
 					}
 				}
 			if(player.monster && player.id != id)
@@ -296,11 +296,11 @@ window.onload=function()
 				if(leggfx==1)
 				{
 					ctx.fillStyle = "#FF8C00";
-					ctx.fillRect(player.x + 1,player.y + 1,8,8);
+					ctx.fillRect(player.x-1,player.y-1,16,16);
 				}
 				else
 				{
-					ctx.drawImage(monsterimg,player.x,player.y,16,16);
+					ctx.drawImage(monsterimg,player.x-1,player.y-1,16,16);
 				}
 			}
 		}
