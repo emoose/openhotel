@@ -12,17 +12,18 @@ block
 {
   air
   tree
-  sand(wet to make soil)
+  sand(wet to make soil, tends to flow downhill)
   soil(grows trees)
-  stone(cannot be dig through without pick)
+  stone(cannot be dug through without pick)
   water(wets sand, flows downhill)
   ore(slow to mine, can be smelted into metal)
   metal(very slow to mine through)
-  seed(grows tree on block above if surrounded with soil)
+  seed(grows tree up to 2 blocks above if surrounded with soil, after 2 blocks grow seed on top if space)
   furnace(smelts ore + tree into metal)
   workbench(makes items)
   bedrock(can never be dug out)
-  axe(cuts trees faster)
-  pick(digs through stone)
+  axe(cuts trees faster metal,stone,wood)
+  pick(digs through stone metal,stone,wood)
   bucket(transports 1 block of water)
+  mob(up to 2 blocks high - player or monster)
 }
